@@ -246,8 +246,8 @@ onMounted(async () => {
 <style scoped>
 .notes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: var(--space-m);
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-l);
   margin-bottom: var(--space-l);
 }
 
@@ -257,18 +257,22 @@ onMounted(async () => {
   gap: var(--space-xs);
   padding: var(--space-l);
   background: var(--color-surface-card);
-  border-radius: var(--radius-m);
-  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-l);
+  border: 1px solid var(--color-border-default);
+  box-shadow: var(--shadow-card);
   cursor: pointer;
-  transition: border-color var(--duration-fast) var(--easing-standard);
+  transition:
+    border-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard);
 }
 
 .note-card:hover {
-  border-color: var(--color-border-default);
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-4);
 }
 
 .note-card--pinned {
-  border-left: 3px solid var(--color-brand-primary);
+  border-left: 2px solid var(--color-brand-primary);
 }
 
 .note-card__header {
@@ -281,7 +285,7 @@ onMounted(async () => {
 .note-card__title {
   font: var(--text-body-2);
   color: var(--color-fg-primary);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

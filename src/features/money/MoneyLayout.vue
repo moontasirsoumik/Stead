@@ -28,7 +28,11 @@ const activeTab = computed(() => route.name as string)
       </RouterLink>
     </nav>
     <div class="money-content">
-      <router-view />
+      <router-view v-slot="{ Component, route }">
+        <Transition name="route" mode="out-in">
+          <component :is="Component" :key="route.path" />
+        </Transition>
+      </router-view>
     </div>
   </div>
 </template>

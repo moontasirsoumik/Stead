@@ -333,9 +333,10 @@ onMounted(async () => {
 .expense-list {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-m);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-l);
   background: var(--color-surface-card);
+  box-shadow: var(--shadow-card);
 }
 
 .expense-row {
@@ -355,7 +356,7 @@ onMounted(async () => {
 }
 
 .expense-row:hover {
-  background: var(--color-bg-secondary);
+  background: var(--color-bg-tertiary);
 }
 
 .expense-row__left {
@@ -366,8 +367,9 @@ onMounted(async () => {
 }
 
 .expense-row__desc {
-  font: var(--text-body-1);
+  font: var(--text-body-2);
   color: var(--color-fg-primary);
+  font-weight: var(--font-weight-medium);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -387,12 +389,12 @@ onMounted(async () => {
 }
 
 .expense-row__amount {
-  font: var(--text-body-1);
-  font-weight: var(--font-weight-semibold);
+  font: var(--text-body-2);
+  font-weight: var(--font-weight-medium);
   font-family: var(--font-mono);
   color: var(--color-fg-primary);
   white-space: nowrap;
-  min-width: 64px;
+  min-width: 56px;
   text-align: right;
 }
 

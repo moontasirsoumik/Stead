@@ -1,14 +1,15 @@
 /* ============================================================
    Stead — Shadow Tokens
-   Progressive elevation for layered depth hierarchy
+   Navy-tinted shadows for layered depth
    ============================================================ */
 
 :root {
-  --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.06);
-  --shadow-4: 0 2px 4px rgba(0, 0, 0, 0.08);
-  --shadow-8: 0 4px 8px rgba(0, 0, 0, 0.10);
-  --shadow-16: 0 8px 16px rgba(0, 0, 0, 0.12);
-  --shadow-28: 0 14px 28px rgba(0, 0, 0, 0.14);
-  --shadow-inset: inset 0 1px 0 rgba(0, 0, 0, 0.04);
-  --shadow-brand: 0 2px 4px rgba(15, 108, 189, 0.3);
+  --shadow-2: 0 1px 2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.04);
+  --shadow-4: 0 2px 4px rgba(15, 23, 42, 0.06), 0 4px 6px rgba(15, 23, 42, 0.03);
+  --shadow-8: 0 4px 8px rgba(15, 23, 42, 0.07), 0 8px 16px rgba(15, 23, 42, 0.04);
+  --shadow-16: 0 8px 24px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15, 23, 42, 0.04);
+  --shadow-28: 0 16px 48px rgba(15, 23, 42, 0.14), 0 4px 12px rgba(15, 23, 42, 0.06);
+  --shadow-inset: inset 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-brand: 0 2px 8px rgba(37, 99, 235, 0.25), 0 1px 2px rgba(37, 99, 235, 0.15);
+  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.04), 0 0 0 1px rgba(15, 23, 42, 0.03);
 }

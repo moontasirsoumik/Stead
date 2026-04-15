@@ -251,10 +251,11 @@ onMounted(async () => {
 .stats-row {
   display: flex;
   align-items: stretch;
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-m);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-l);
   background: var(--color-surface-card);
-  margin-bottom: var(--space-m);
+  box-shadow: var(--shadow-card);
+  margin-bottom: var(--space-l);
   overflow: hidden;
 }
 
@@ -271,24 +272,24 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: var(--space-m);
-  min-height: 36px;
+  min-height: var(--height-row-min);
   padding: var(--space-xs) var(--space-l);
   cursor: pointer;
   transition: background var(--duration-fast) var(--easing-standard);
 }
 
 .reminder-row:hover {
-  background: var(--color-bg-secondary);
+  background: var(--color-bg-tertiary);
 }
 
 .reminder-row--overdue {
-  border-left: 3px solid var(--color-error);
+  border-left: 2px solid var(--color-error);
 }
 
 .reminder-row__title {
   font: var(--text-body-2);
   color: var(--color-fg-primary);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

@@ -23,7 +23,7 @@ defineProps<{
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-l);
-  margin-bottom: var(--space-xl);
+  margin-bottom: var(--space-l);
 }
 
 .pageheader__text {
@@ -33,13 +33,13 @@ defineProps<{
 }
 
 .pageheader__title {
-  font: var(--text-title-2);
+  font: var(--text-title-1);
   color: var(--color-fg-primary);
   letter-spacing: var(--tracking-tight);
 }
 
 .pageheader__subtitle {
-  font: var(--text-body-1);
+  font: var(--text-body-2);
   color: var(--color-fg-secondary);
 }
 

@@ -76,6 +76,7 @@ withDefaults(
 .sselect__label {
   font: var(--text-body-2);
   color: var(--color-fg-secondary);
+  font-weight: var(--font-weight-medium);
 }
 
 .sselect__required {
@@ -111,15 +112,15 @@ withDefaults(
 
 .sselect__field:focus {
   outline: none;
-  border-color: transparent;
-  box-shadow: inset 0 -2px 0 0 var(--color-brand-primary);
+  border-color: var(--color-brand-primary);
+  box-shadow: 0 0 0 1px var(--color-brand-primary);
 }
 
 .sselect__chevron {
   position: absolute;
   right: var(--space-m);
   pointer-events: none;
-  color: var(--color-fg-secondary);
+  color: var(--color-fg-tertiary);
   display: flex;
 }
 
@@ -133,7 +134,7 @@ withDefaults(
 }
 
 .sselect__message {
-  font: var(--text-body-2);
+  font: var(--text-caption);
 }
 
 .sselect__message--hint { color: var(--color-fg-secondary); }

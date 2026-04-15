@@ -25,12 +25,15 @@ defineProps<{
 }
 
 .formsection__header {
-  margin-bottom: var(--space-m);
+  margin-bottom: var(--space-l);
 }
 
 .formsection__title {
-  font: var(--text-title-3);
-  color: var(--color-fg-primary);
+  font: var(--text-body-2);
+  color: var(--color-fg-secondary);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
 }
 
 .formsection__desc {

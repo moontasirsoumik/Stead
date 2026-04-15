@@ -20,10 +20,12 @@ withDefaults(
 <style scoped>
 .contentcard {
   background: var(--color-surface-card);
-  border: 1px solid var(--color-border-subtle);
+  border: 1px solid var(--color-border-default);
   border-radius: var(--radius-l);
+  box-shadow: var(--shadow-card);
   transition:
     box-shadow var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard),
     transform var(--duration-fast) var(--easing-standard);
 }
 
@@ -33,7 +35,7 @@ withDefaults(
 .contentcard--pad-lg { padding: var(--space-xl); }
 
 .contentcard--hoverable:hover {
-  box-shadow: var(--shadow-2);
-  transform: translateY(-1px);
+  box-shadow: var(--shadow-4);
+  border-color: var(--color-border-strong);
 }
 </style>

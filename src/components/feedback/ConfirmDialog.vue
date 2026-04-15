@@ -78,8 +78,8 @@ async function handleConfirm() {
   background: var(--color-surface-dialog);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-28);
-  padding: var(--space-xl);
-  max-width: 400px;
+  padding: var(--space-2xl);
+  max-width: 380px;
   width: 100%;
 }
 
@@ -101,7 +101,6 @@ async function handleConfirm() {
   gap: var(--space-s);
 }
 
-/* Transition */
 .dialog-enter-active {
   transition: opacity var(--duration-normal) var(--easing-decelerate);
 }
@@ -121,7 +120,7 @@ async function handleConfirm() {
 
 .dialog-enter-from .dialog {
   opacity: 0;
-  transform: scale(0.95) translateY(8px);
+  transform: scale(0.96) translateY(6px);
 }
 
 .dialog-leave-to {

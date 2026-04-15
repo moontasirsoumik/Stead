@@ -218,8 +218,8 @@ onMounted(async () => {
 <style scoped>
 .budgets-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: var(--space-m);
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-l);
 }
 
 .budget-card {
@@ -237,7 +237,7 @@ onMounted(async () => {
 
 .budget-card__category {
   font: var(--text-body-1);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   color: var(--color-fg-primary);
 }
 
@@ -259,7 +259,7 @@ onMounted(async () => {
 }
 
 .budget-card__bar {
-  height: 4px;
+  height: 3px;
   background: var(--color-bg-tertiary);
   border-radius: 2px;
   overflow: hidden;

@@ -30,12 +30,12 @@ defineProps<{
   align-items: center;
   gap: var(--space-m);
   flex-wrap: wrap;
-  margin-bottom: var(--space-m);
+  margin-bottom: var(--space-l);
 }
 
 .filterbar__search {
-  min-width: 200px;
-  max-width: 280px;
+  min-width: 180px;
+  max-width: 240px;
 }
 
 .filterbar__filters {

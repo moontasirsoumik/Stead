@@ -23,7 +23,11 @@ provide('toggleNav', toggleNav)
       />
 
       <main class="shell__content">
-        <RouterView />
+        <RouterView v-slot="{ Component, route }">
+          <Transition name="route" mode="out-in">
+            <component :is="Component" :key="route.matched[1]?.path ?? route.path" />
+          </Transition>
+        </RouterView>
       </main>
     </div>
 
@@ -59,6 +63,7 @@ provide('toggleNav', toggleNav)
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
+  scrollbar-gutter: stable;
   padding: var(--space-xl);
 }
 
@@ -67,7 +72,6 @@ provide('toggleNav', toggleNav)
   flex-shrink: 0;
 }
 
-/* ── hide nav on mobile, show bottom bar ── */
 @media (max-width: 640px) {
   .shell__nav {
     display: none;

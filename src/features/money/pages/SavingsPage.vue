@@ -382,8 +382,8 @@ onMounted(async () => {
 <style scoped>
 .goals-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--space-m);
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-l);
 }
 
 .goal-card {
@@ -401,7 +401,7 @@ onMounted(async () => {
 
 .goal-card__name {
   font: var(--text-body-1);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   color: var(--color-fg-primary);
 }
 
@@ -429,7 +429,7 @@ onMounted(async () => {
 }
 
 .goal-card__bar {
-  height: 4px;
+  height: 3px;
   background: var(--color-bg-tertiary);
   border-radius: 2px;
   overflow: hidden;
@@ -437,8 +437,8 @@ onMounted(async () => {
 
 .goal-card__fill {
   height: 100%;
-  border-radius: 2px;
   background: var(--color-brand-primary);
+  border-radius: 2px;
   transition: width var(--duration-normal) var(--easing-standard);
 }
 
@@ -455,38 +455,28 @@ onMounted(async () => {
 
 .goal-card__percent {
   font: var(--text-caption);
-  color: var(--color-fg-tertiary);
+  color: var(--color-fg-secondary);
+  font-weight: var(--font-weight-medium);
 }
 
 .goal-card__actions {
   display: flex;
   gap: var(--space-xs);
-  flex-wrap: wrap;
-  border-top: 1px solid var(--color-border-subtle);
   padding-top: var(--space-s);
+  border-top: 1px solid var(--color-border-subtle);
 }
 
 .goal-card__contributions {
-  border-top: 1px solid var(--color-border-subtle);
   padding-top: var(--space-s);
-  display: flex;
-  flex-direction: column;
-}
-
-.goal-card__no-contribs {
-  font: var(--text-body-2);
-  color: var(--color-fg-tertiary);
-  text-align: center;
-  padding: var(--space-m) 0;
+  border-top: 1px solid var(--color-border-subtle);
 }
 
 .contrib-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: var(--space-xs) 0;
   gap: var(--space-m);
-  min-height: var(--height-row-min);
-  padding: 0 var(--space-xs);
   border-bottom: 1px solid var(--color-border-subtle);
 }
 
@@ -502,13 +492,12 @@ onMounted(async () => {
 
 .contrib-row__details {
   display: flex;
-  align-items: center;
-  gap: var(--space-m);
+  flex-direction: column;
 }
 
 .contrib-row__amount {
   font: var(--text-body-2);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   color: var(--color-fg-primary);
 }
 
@@ -520,5 +509,17 @@ onMounted(async () => {
 .contrib-row__note {
   font: var(--text-caption);
   color: var(--color-fg-secondary);
+  text-align: right;
+  flex-shrink: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.goal-card__no-contribs {
+  font: var(--text-caption);
+  color: var(--color-fg-tertiary);
+  text-align: center;
+  padding: var(--space-l) 0;
 }
 </style>

@@ -40,7 +40,8 @@ defineEmits<{
   padding: var(--space-s) var(--space-l);
   background: var(--color-error-bg);
   border-radius: var(--radius-m);
-  border-left: 3px solid var(--color-error);
+  border-left: 2px solid var(--color-error);
+  margin-bottom: var(--space-l);
 }
 
 .errorbanner__icon {
@@ -51,12 +52,13 @@ defineEmits<{
 
 .errorbanner__message {
   flex: 1;
-  font: var(--text-body-1);
+  font: var(--text-body-2);
   color: var(--color-error-fg);
 }
 
 .errorbanner__retry {
-  font: var(--text-body-1-strong);
+  font: var(--text-body-2);
+  font-weight: var(--font-weight-medium);
   color: var(--color-error);
   background: transparent;
   border: none;
@@ -68,6 +70,6 @@ defineEmits<{
 }
 
 .errorbanner__retry:hover {
-  background: rgba(196, 49, 75, 0.08);
+  background: rgba(220, 38, 38, 0.08);
 }
 </style>

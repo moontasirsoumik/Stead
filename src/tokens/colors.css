@@ -1,61 +1,70 @@
 /* ============================================================
    Stead — Color Tokens
-   Fluent 2-inspired palette with warm, refined character
+   Nordic Workspace palette — slate neutrals, vivid accents
    ============================================================ */
 
 :root {
   /* ── Brand ── */
-  --color-brand-primary: #0F6CBD;
-  --color-brand-hover: #115EA3;
-  --color-brand-pressed: #0F548C;
-  --color-brand-selected: #EBF3FC;
-  --color-brand-subtle: #CFE4FA;
+  --color-brand-primary: #2563EB;
+  --color-brand-hover: #1D4ED8;
+  --color-brand-pressed: #1E40AF;
+  --color-brand-selected: #EFF6FF;
+  --color-brand-subtle: #DBEAFE;
 
   /* ── Neutral Backgrounds ── */
   --color-bg-primary: #FFFFFF;
-  --color-bg-secondary: #FAFAFA;
-  --color-bg-tertiary: #F5F5F5;
+  --color-bg-secondary: #F8FAFC;
+  --color-bg-tertiary: #F1F5F9;
   --color-bg-elevated: #FFFFFF;
-  --color-bg-overlay: rgba(0, 0, 0, 0.4);
-  --color-bg-wash: #FAFBFC;
+  --color-bg-overlay: rgba(15, 23, 42, 0.5);
+  --color-bg-wash: #F8FAFC;
 
   /* ── Neutral Foregrounds ── */
-  --color-fg-primary: #242424;
-  --color-fg-secondary: #616161;
-  --color-fg-tertiary: #9E9E9E;
-  --color-fg-disabled: #BDBDBD;
+  --color-fg-primary: #0F172A;
+  --color-fg-secondary: #475569;
+  --color-fg-tertiary: #94A3B8;
+  --color-fg-disabled: #CBD5E1;
   --color-fg-on-brand: #FFFFFF;
-  --color-fg-muted: #A0A0A0;
+  --color-fg-muted: #94A3B8;
 
   /* ── Semantic ── */
-  --color-success: #107C10;
-  --color-success-bg: #DFF6DD;
-  --color-success-fg: #0E6A0E;
-  --color-warning: #F7630C;
-  --color-warning-bg: #FFF1CC;
-  --color-warning-fg: #8A6200;
-  --color-error: #BC2F32;
-  --color-error-bg: #FDE7E9;
-  --color-error-fg: #A4262C;
-  --color-info: #0078D4;
-  --color-info-bg: #E1F5FE;
+  --color-success: #059669;
+  --color-success-bg: #ECFDF5;
+  --color-success-fg: #065F46;
+  --color-warning: #D97706;
+  --color-warning-bg: #FFFBEB;
+  --color-warning-fg: #92400E;
+  --color-error: #DC2626;
+  --color-error-bg: #FEF2F2;
+  --color-error-fg: #991B1B;
+  --color-info: #2563EB;
+  --color-info-bg: #EFF6FF;
 
   /* ── Borders ── */
-  --color-border-default: #E0E0E0;
-  --color-border-strong: #D1D1D1;
-  --color-border-subtle: #F0F0F0;
-  --color-border-brand: #0F6CBD;
-  --color-border-input: #D1D1D1;
-  --color-border-input-hover: #B0B0B0;
+  --color-border-default: #E2E8F0;
+  --color-border-strong: #CBD5E1;
+  --color-border-subtle: #F1F5F9;
+  --color-border-brand: #2563EB;
+  --color-border-input: #CBD5E1;
+  --color-border-input-hover: #94A3B8;
 
   /* ── Surfaces ── */
   --color-surface-card: #FFFFFF;
-  --color-surface-card-hover: #FAFAFA;
+  --color-surface-card-hover: #F8FAFC;
   --color-surface-dialog: #FFFFFF;
-  --color-surface-nav: #FAFAFA;
+  --color-surface-nav: #0F172A;
+  --color-surface-nav-hover: rgba(255, 255, 255, 0.06);
+  --color-surface-nav-active: rgba(255, 255, 255, 0.10);
   --color-surface-input: #FFFFFF;
-  --color-surface-input-hover: #FAFAFA;
+  --color-surface-input-hover: #F8FAFC;
+
+  /* ── Nav-specific ── */
+  --color-nav-fg: #94A3B8;
+  --color-nav-fg-active: #E2E8F0;
+  --color-nav-fg-hover: #CBD5E1;
+  --color-nav-border: rgba(255, 255, 255, 0.06);
+  --color-nav-brand-indicator: #2563EB;
 
   /* ── Overlay ── */
-  --color-bg-smoke: rgba(0, 0, 0, 0.3);
+  --color-bg-smoke: rgba(15, 23, 42, 0.4);
 }

@@ -66,12 +66,11 @@ defineEmits<{
     border-color var(--duration-fast) var(--easing-standard);
 }
 
-/* ── Sizes ── */
 .sbutton--sm {
   height: 24px;
   padding: 0 var(--space-m);
   font: var(--text-body-2);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   border-radius: var(--radius-s);
 }
 
@@ -81,7 +80,7 @@ defineEmits<{
 }
 
 .sbutton--lg {
-  height: 36px;
+  height: 34px;
   padding: 0 var(--space-xl);
 }
 
@@ -89,7 +88,6 @@ defineEmits<{
   width: 100%;
 }
 
-/* ── Primary ── */
 .sbutton--primary {
   background-color: var(--color-brand-primary);
   color: var(--color-fg-on-brand);
@@ -103,11 +101,10 @@ defineEmits<{
 
 .sbutton--primary:active:not(:disabled) {
   background-color: var(--color-brand-pressed);
-  box-shadow: var(--shadow-2);
+  box-shadow: none;
   transform: scale(0.98);
 }
 
-/* ── Secondary ── */
 .sbutton--secondary {
   background-color: var(--color-bg-primary);
   color: var(--color-fg-primary);
@@ -125,14 +122,14 @@ defineEmits<{
   transform: scale(0.98);
 }
 
-/* ── Subtle ── */
 .sbutton--subtle {
   background-color: transparent;
-  color: var(--color-fg-primary);
+  color: var(--color-fg-secondary);
 }
 
 .sbutton--subtle:hover:not(:disabled) {
   background-color: var(--color-bg-tertiary);
+  color: var(--color-fg-primary);
 }
 
 .sbutton--subtle:active:not(:disabled) {
@@ -140,7 +137,6 @@ defineEmits<{
   transform: scale(0.98);
 }
 
-/* ── Danger ── */
 .sbutton--danger {
   background-color: var(--color-error);
   color: var(--color-fg-on-brand);
@@ -154,23 +150,20 @@ defineEmits<{
 
 .sbutton--danger:active:not(:disabled) {
   transform: scale(0.98);
-  box-shadow: var(--shadow-2);
+  box-shadow: none;
 }
 
-/* ── Disabled ── */
 .sbutton:disabled {
   opacity: 0.4;
   cursor: not-allowed;
   box-shadow: none;
 }
 
-/* ── Focus ── */
 .sbutton:focus-visible {
   outline: 2px solid var(--color-brand-primary);
-  outline-offset: 2px;
+  outline-offset: 1px;
 }
 
-/* ── Loading ── */
 .sbutton__content {
   display: inline-flex;
   align-items: center;

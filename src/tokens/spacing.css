@@ -1,16 +1,16 @@
 /* ============================================================
    Stead — Spacing Tokens
-   Geometric scale for consistent spatial rhythm
+   Compressed scale for information density
    ============================================================ */
 
 :root {
-  --space-2xs: 2px;
-  --space-xs: 4px;
-  --space-s: 6px;
-  --space-m: 8px;
-  --space-l: 12px;
-  --space-xl: 16px;
-  --space-2xl: 24px;
-  --space-3xl: 32px;
-  --space-4xl: 48px;
+  --space-2xs: 1px;
+  --space-xs: 2px;
+  --space-s: 4px;
+  --space-m: 6px;
+  --space-l: 10px;
+  --space-xl: 14px;
+  --space-2xl: 20px;
+  --space-3xl: 28px;
+  --space-4xl: 40px;
 }

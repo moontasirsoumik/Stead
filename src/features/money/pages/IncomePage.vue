@@ -261,9 +261,10 @@ onMounted(async () => {
 .income-list {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-m);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-l);
   background: var(--color-surface-card);
+  box-shadow: var(--shadow-card);
 }
 
 .income-row {
@@ -283,7 +284,7 @@ onMounted(async () => {
 }
 
 .income-row:hover {
-  background: var(--color-bg-secondary);
+  background: var(--color-bg-tertiary);
 }
 
 .income-row__left {
@@ -294,8 +295,9 @@ onMounted(async () => {
 }
 
 .income-row__source {
-  font: var(--text-body-1);
+  font: var(--text-body-2);
   color: var(--color-fg-primary);
+  font-weight: var(--font-weight-medium);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -315,12 +317,12 @@ onMounted(async () => {
 }
 
 .income-row__amount {
-  font: var(--text-body-1);
-  font-weight: var(--font-weight-semibold);
+  font: var(--text-body-2);
+  font-weight: var(--font-weight-medium);
   font-family: var(--font-mono);
   color: var(--color-success);
   white-space: nowrap;
-  min-width: 64px;
+  min-width: 56px;
   text-align: right;
 }
 

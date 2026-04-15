@@ -1,22 +1,22 @@
 /* ============================================================
    Stead — Layout Tokens
-   Breakpoints, widths, and structural values
+   Compact structural values
    ============================================================ */
 
 :root {
-  /* ── Breakpoints (used in media queries as raw values) ── */
+  /* ── Breakpoints ── */
   --bp-mobile: 640px;
   --bp-tablet: 1024px;
   --bp-desktop: 1280px;
   --bp-wide: 1440px;
 
   /* ── Structural Widths ── */
-  --width-nav-collapsed: 48px;
-  --width-nav-expanded: 200px;
-  --width-content-max: 960px;
+  --width-nav-collapsed: 54px;
+  --width-nav-expanded: 220px;
+  --width-content-max: 1080px;
   --width-drawer: 400px;
-  --height-header: 44px;
-  --height-input: 32px;
-  --height-row-min: 36px;
-  --height-mobile-nav: 52px;
+  --height-header: 56px;
+  --height-input: 40px;
+  --height-row-min: 46px;
+  --height-mobile-nav: 64px;
 }

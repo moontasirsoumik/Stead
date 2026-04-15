@@ -26,27 +26,25 @@ withDefaults(
   align-items: center;
   gap: var(--space-xs);
   white-space: nowrap;
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   border-radius: var(--radius-m);
 }
 
-/* Sizes */
 .sbadge--sm {
-  padding: 0 var(--space-xs);
+  padding: 0 var(--space-s);
   height: 18px;
   font: var(--text-caption);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
 }
 
 .sbadge--md {
-  padding: 0 var(--space-s);
+  padding: 0 var(--space-m);
   height: 20px;
   font-size: 11px;
   line-height: 20px;
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
 }
 
-/* Variants */
 .sbadge--default {
   background: var(--color-bg-tertiary);
   color: var(--color-fg-secondary);

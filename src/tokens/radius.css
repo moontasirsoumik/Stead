@@ -1,12 +1,12 @@
 /* ============================================================
    Stead — Border Radius Tokens
-   Scale matched to element size for visual harmony
+   Soft, modern radii for premium feel
    ============================================================ */
 
 :root {
-  --radius-s: 2px;
-  --radius-m: 4px;
-  --radius-l: 6px;
-  --radius-xl: 8px;
+  --radius-s: 3px;
+  --radius-m: 5px;
+  --radius-l: 8px;
+  --radius-xl: 12px;
   --radius-circle: 50%;
 }

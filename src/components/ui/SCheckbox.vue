@@ -48,7 +48,7 @@ withDefaults(
 .scheckbox {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2xs);
+  gap: var(--space-s);
   cursor: pointer;
   user-select: none;
 }
@@ -64,20 +64,18 @@ withDefaults(
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   border: 1.5px solid var(--color-border-strong);
   border-radius: var(--radius-s);
   background: var(--color-surface-input);
   transition:
     background-color var(--duration-fast) var(--easing-standard),
-    border-color var(--duration-fast) var(--easing-standard),
-    box-shadow var(--duration-fast) var(--easing-standard);
+    border-color var(--duration-fast) var(--easing-standard);
 }
 
 .scheckbox:hover .scheckbox__box {
   border-color: var(--color-brand-primary);
-  box-shadow: var(--shadow-2);
 }
 
 .scheckbox__input:checked + .scheckbox__box {
@@ -87,7 +85,7 @@ withDefaults(
 
 .scheckbox__input:focus-visible + .scheckbox__box {
   outline: 2px solid var(--color-brand-primary);
-  outline-offset: 2px;
+  outline-offset: 1px;
 }
 
 .scheckbox__check {

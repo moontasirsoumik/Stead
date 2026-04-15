@@ -19,11 +19,13 @@ defineProps<{
 
 .formfield--row {
   flex-direction: row;
-  align-items: center;
+  flex-wrap: wrap;
+  align-items: flex-start;
   gap: var(--space-m);
 }
 
-.formfield--row > :deep(*:first-child) {
-  flex: 1;
+.formfield--row > :deep(*) {
+  flex: 1 1 140px;
+  min-width: 0;
 }
 </style>

@@ -327,10 +327,11 @@ onMounted(async () => {
 .stats-row {
   display: flex;
   align-items: stretch;
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-m);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-l);
   background: var(--color-surface-card);
-  margin-bottom: var(--space-m);
+  box-shadow: var(--shadow-card);
+  margin-bottom: var(--space-l);
   overflow: hidden;
 }
 
@@ -347,20 +348,20 @@ onMounted(async () => {
   display: flex;
   gap: var(--space-xs);
   align-items: flex-end;
-  margin-bottom: var(--space-m);
+  margin-bottom: var(--space-l);
 }
 
 .shop-row {
   display: flex;
   align-items: center;
   gap: var(--space-m);
-  min-height: 36px;
+  min-height: var(--height-row-min);
   padding: var(--space-xs) var(--space-l);
   transition: background var(--duration-fast) var(--easing-standard);
 }
 
 .shop-row:hover {
-  background: var(--color-bg-secondary);
+  background: var(--color-bg-tertiary);
 }
 
 .shop-row__status-btn {
@@ -374,7 +375,7 @@ onMounted(async () => {
 .shop-row__name {
   font: var(--text-body-2);
   color: var(--color-fg-primary);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

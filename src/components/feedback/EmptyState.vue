@@ -72,6 +72,7 @@ defineEmits<{
 .emptystate__icon {
   color: var(--color-fg-tertiary);
   margin-bottom: var(--space-xs);
+  opacity: 0.5;
 }
 
 .emptystate__title {
@@ -80,14 +81,14 @@ defineEmits<{
 }
 
 .emptystate__subtitle {
-  font: var(--text-body-1);
+  font: var(--text-body-2);
   color: var(--color-fg-secondary);
-  max-width: 360px;
+  max-width: 320px;
 }
 
 .emptystate__action {
-  margin-top: var(--space-xs);
-  padding: var(--space-xs) var(--space-l);
+  margin-top: var(--space-s);
+  padding: var(--space-s) var(--space-l);
   background: var(--color-brand-primary);
   color: var(--color-fg-on-brand);
   font: var(--text-body-1-strong);
@@ -102,7 +103,7 @@ defineEmits<{
 
 .emptystate__action:hover {
   background: var(--color-brand-hover);
-  box-shadow: var(--shadow-4);
+  box-shadow: var(--shadow-brand);
 }
 
 .emptystate__action:active {

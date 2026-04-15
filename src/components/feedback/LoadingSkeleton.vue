@@ -43,7 +43,7 @@ withDefaults(
 .skeleton {
   display: flex;
   flex-direction: column;
-  gap: var(--space-s);
+  gap: var(--space-m);
 }
 
 .skeleton__bone {

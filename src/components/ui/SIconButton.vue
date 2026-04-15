@@ -39,19 +39,17 @@ defineEmits<{
   border: none;
   border-radius: var(--radius-m);
   cursor: pointer;
-  color: var(--color-fg-secondary);
+  color: var(--color-fg-tertiary);
   transition:
     background-color var(--duration-fast) var(--easing-standard),
     color var(--duration-fast) var(--easing-standard),
     transform var(--duration-ultra-fast) var(--easing-standard);
 }
 
-/* Sizes */
-.siconbutton--sm { width: 24px; height: 24px; border-radius: var(--radius-s); }
+.siconbutton--sm { width: 28px; height: 28px; border-radius: var(--radius-s); }
 .siconbutton--md { width: var(--height-input); height: var(--height-input); }
-.siconbutton--lg { width: 44px; height: 44px; }
+.siconbutton--lg { width: 42px; height: 42px; }
 
-/* Subtle */
 .siconbutton--subtle {
   background: transparent;
 }
@@ -61,7 +59,6 @@ defineEmits<{
   color: var(--color-fg-primary);
 }
 
-/* Secondary */
 .siconbutton--secondary {
   background: var(--color-bg-primary);
   border: 1px solid var(--color-border-default);
@@ -74,7 +71,7 @@ defineEmits<{
 }
 
 .siconbutton:active:not(:disabled) {
-  transform: scale(0.93);
+  transform: scale(0.92);
 }
 
 .siconbutton:disabled {
@@ -84,6 +81,6 @@ defineEmits<{
 
 .siconbutton:focus-visible {
   outline: 2px solid var(--color-brand-primary);
-  outline-offset: 2px;
+  outline-offset: 1px;
 }
 </style>

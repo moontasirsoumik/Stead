@@ -75,19 +75,19 @@ defineEmits<{
   max-width: 100vw;
   height: 100%;
   background: var(--color-surface-dialog);
-  box-shadow: var(--shadow-16);
+  box-shadow: var(--shadow-28);
 }
 
 .drawer--wide {
-  width: 640px;
+  width: 580px;
 }
 
 .drawer__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-l);
-  border-bottom: 1px solid var(--color-border-subtle);
+  padding: var(--space-l) var(--space-xl);
+  border-bottom: 1px solid var(--color-border-default);
   flex-shrink: 0;
 }
 
@@ -99,19 +99,20 @@ defineEmits<{
 .drawer__body {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-l);
+  overflow-x: hidden;
+  padding: var(--space-xl);
+  min-width: 0;
 }
 
 .drawer__footer {
   display: flex;
   justify-content: flex-end;
   gap: var(--space-s);
-  padding: var(--space-l);
-  border-top: 1px solid var(--color-border-subtle);
+  padding: var(--space-l) var(--space-xl);
+  border-top: 1px solid var(--color-border-default);
   flex-shrink: 0;
 }
 
-/* Transition */
 .drawer-enter-active {
   transition: opacity var(--duration-normal) var(--easing-decelerate);
 }

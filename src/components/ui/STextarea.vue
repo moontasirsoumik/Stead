@@ -62,6 +62,7 @@ withDefaults(
 .stextarea__label {
   font: var(--text-body-2);
   color: var(--color-fg-secondary);
+  font-weight: var(--font-weight-medium);
 }
 
 .stextarea__required {
@@ -78,7 +79,7 @@ withDefaults(
   font: var(--text-body-1);
   color: var(--color-fg-primary);
   resize: vertical;
-  min-height: 64px;
+  min-height: 56px;
   transition:
     border-color var(--duration-fast) var(--easing-standard),
     box-shadow var(--duration-fast) var(--easing-standard);
@@ -94,8 +95,21 @@ withDefaults(
 
 .stextarea__field:focus {
   outline: none;
-  border-color: transparent;
-  box-shadow: inset 0 -2px 0 0 var(--color-brand-primary);
+  border-color: var(--color-brand-primary);
+  box-shadow: 0 0 0 1px var(--color-brand-primary);
+}
+
+.stextarea--error .stextarea__field {
+  border-color: var(--color-error);
+}
+
+.stextarea--error .stextarea__field:focus {
+  box-shadow: 0 0 0 1px var(--color-error);
+}
+
+.stextarea--disabled {
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 .stextarea__footer {
@@ -105,7 +119,7 @@ withDefaults(
 }
 
 .stextarea__message {
-  font: var(--text-body-2);
+  font: var(--text-caption);
 }
 
 .stextarea__message--hint { color: var(--color-fg-secondary); }
@@ -115,14 +129,5 @@ withDefaults(
   font: var(--text-caption);
   color: var(--color-fg-tertiary);
   margin-left: auto;
-}
-
-.stextarea--error .stextarea__field {
-  border-color: var(--color-error);
-}
-
-.stextarea--disabled {
-  opacity: 0.4;
-  pointer-events: none;
 }
 </style>

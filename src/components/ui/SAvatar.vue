@@ -60,13 +60,13 @@ function hashColor(name: string): string {
   overflow: hidden;
   flex-shrink: 0;
   color: var(--color-fg-on-brand);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   background: var(--color-bg-tertiary);
 }
 
-.savatar--sm { width: 24px; height: 24px; font-size: 10px; }
-.savatar--md { width: 28px; height: 28px; font-size: 11px; }
-.savatar--lg { width: 32px; height: 32px; font-size: 12px; }
+.savatar--sm { width: 22px; height: 22px; font-size: 9px; }
+.savatar--md { width: 26px; height: 26px; font-size: 10px; }
+.savatar--lg { width: 30px; height: 30px; font-size: 11px; }
 
 .savatar__img {
   width: 100%;

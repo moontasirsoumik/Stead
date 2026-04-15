@@ -359,10 +359,11 @@ onMounted(async () => {
 .stats-row {
   display: flex;
   align-items: stretch;
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-m);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-l);
   background: var(--color-surface-card);
-  margin-bottom: var(--space-m);
+  box-shadow: var(--shadow-card);
+  margin-bottom: var(--space-l);
   overflow: hidden;
 }
 
@@ -379,20 +380,20 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: var(--space-m);
-  min-height: 36px;
+  min-height: var(--height-row-min);
   padding: var(--space-xs) var(--space-l);
   cursor: pointer;
   transition: background var(--duration-fast) var(--easing-standard);
 }
 
 .task-row:hover {
-  background: var(--color-bg-secondary);
+  background: var(--color-bg-tertiary);
 }
 
 .task-row__title {
   font: var(--text-body-2);
   color: var(--color-fg-primary);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -455,9 +456,9 @@ onMounted(async () => {
 .task-expanded__label {
   font: var(--text-caption);
   color: var(--color-fg-tertiary);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--tracking-caps);
   margin-bottom: var(--space-xs);
 }
 
@@ -469,7 +470,7 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 28px;
+  min-height: 26px;
   padding: 0;
 }
 

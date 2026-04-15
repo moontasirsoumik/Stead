@@ -11,7 +11,7 @@ defineEmits<{
   <header class="header">
     <div class="header__left">
       <SIconButton label="Toggle navigation" class="header__menu-btn" @click="$emit('toggle-nav')">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <svg width="24" height="24" viewBox="0 0 20 20" fill="none">
           <path d="M3 5H17M3 10H17M3 15H17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
         </svg>
       </SIconButton>
@@ -24,7 +24,7 @@ defineEmits<{
 
     <div class="header__right">
       <SIconButton label="Notifications">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <svg width="24" height="24" viewBox="0 0 20 20" fill="none">
           <path d="M10 2C7.24 2 5 4.24 5 7V11L3 13V14H17V13L15 11V7C15 4.24 12.76 2 10 2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
           <path d="M8 14C8 15.1 8.9 16 10 16C11.1 16 12 15.1 12 14" stroke="currentColor" stroke-width="1.5" />
         </svg>
@@ -44,10 +44,10 @@ defineEmits<{
   justify-content: space-between;
   height: var(--height-header);
   padding: 0 var(--space-l);
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--color-border-subtle);
+  background: rgba(255, 255, 255, 0.80);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border-default);
 }
 
 .header__left {
@@ -76,12 +76,12 @@ defineEmits<{
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   background: var(--color-brand-primary);
   color: var(--color-fg-on-brand);
-  font-weight: var(--font-weight-semibold);
-  font-size: 12px;
+  font-weight: 700;
+  font-size: 13px;
   border-radius: var(--radius-m);
 }
 

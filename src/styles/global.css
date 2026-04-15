@@ -1,6 +1,6 @@
 /* ============================================================
    Stead — Global Styles
-   Base application styles applied to root elements
+   Base application styles
    ============================================================ */
 
 body {
@@ -30,7 +30,7 @@ html {
 @keyframes fadeSlideUp {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(3px);
   }
 }
 
@@ -42,7 +42,7 @@ html {
 
 .page-enter {
   animation: fadeSlideUp var(--duration-normal) var(--easing-decelerate) backwards;
-  animation-delay: calc(var(--stagger, 0) * 50ms);
+  animation-delay: calc(var(--stagger, 0) * 30ms);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -53,8 +53,7 @@ html {
 
 /* ── Route transition ── */
 .route-enter-active {
-  transition: opacity var(--duration-page) var(--easing-decelerate),
-    transform var(--duration-page) var(--easing-decelerate);
+  transition: opacity var(--duration-page) var(--easing-decelerate);
 }
 
 .route-leave-active {
@@ -63,7 +62,6 @@ html {
 
 .route-enter-from {
   opacity: 0;
-  transform: translateY(4px);
 }
 
 .route-leave-to {

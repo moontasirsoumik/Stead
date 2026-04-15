@@ -21,17 +21,19 @@ defineProps<{
   align-items: center;
   gap: var(--space-s);
   padding-bottom: var(--space-s);
-  border-bottom: 1px solid var(--color-border-subtle);
   margin-bottom: var(--space-m);
 }
 
 .sectionheader__title {
-  font: var(--text-title-3);
-  color: var(--color-fg-primary);
+  font: var(--text-body-2);
+  color: var(--color-fg-secondary);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
 }
 
 .sectionheader__count {
-  font: var(--text-body-2);
+  font: var(--text-caption);
   color: var(--color-fg-tertiary);
   background: var(--color-bg-tertiary);
   padding: var(--space-2xs) var(--space-s);

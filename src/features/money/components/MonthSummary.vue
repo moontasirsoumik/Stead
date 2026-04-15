@@ -29,16 +29,17 @@ defineProps<{
 <style scoped>
 .month-summary {
   display: flex;
-  align-items: center;
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-m);
+  align-items: stretch;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-l);
   background: var(--color-surface-card);
-  margin-bottom: var(--space-m);
+  box-shadow: var(--shadow-card);
+  margin-bottom: var(--space-l);
+  overflow: hidden;
 }
 
 .month-summary__stat {
   flex: 1;
-  padding: var(--space-m) var(--space-l);
   border-right: 1px solid var(--color-border-subtle);
 }
 

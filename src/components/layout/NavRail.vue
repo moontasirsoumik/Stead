@@ -47,7 +47,7 @@ const navItems = [
   flex-direction: column;
   width: var(--width-nav-collapsed);
   background: var(--color-surface-nav);
-  border-right: 1px solid var(--color-border-subtle);
+  border-right: 1px solid var(--color-nav-border);
   padding: var(--space-s) 0;
   overflow: hidden;
   transition: width var(--duration-normal) var(--easing-decelerate);

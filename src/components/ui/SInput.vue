@@ -77,6 +77,7 @@ defineEmits<{
 .sinput__label {
   font: var(--text-body-2);
   color: var(--color-fg-secondary);
+  font-weight: var(--font-weight-medium);
 }
 
 .sinput__required {
@@ -100,12 +101,11 @@ defineEmits<{
 
 .sinput__wrapper:hover:not(.sinput--disabled .sinput__wrapper) {
   border-color: var(--color-border-input-hover);
-  background: var(--color-surface-input-hover);
 }
 
 .sinput__wrapper:focus-within {
-  border-color: transparent;
-  box-shadow: inset 0 -2px 0 0 var(--color-brand-primary);
+  border-color: var(--color-brand-primary);
+  box-shadow: 0 0 0 1px var(--color-brand-primary);
 }
 
 .sinput__field {
@@ -144,24 +144,21 @@ defineEmits<{
   padding-left: 0;
 }
 
-/* Error state */
 .sinput--error .sinput__wrapper {
   border-color: var(--color-error);
 }
 
 .sinput--error .sinput__wrapper:focus-within {
-  box-shadow: inset 0 -2px 0 0 var(--color-error);
+  box-shadow: 0 0 0 1px var(--color-error);
 }
 
-/* Disabled */
 .sinput--disabled {
   opacity: 0.4;
   pointer-events: none;
 }
 
-/* Messages */
 .sinput__message {
-  font: var(--text-body-2);
+  font: var(--text-caption);
 }
 
 .sinput__message--hint {

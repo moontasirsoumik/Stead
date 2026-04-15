@@ -27,13 +27,13 @@ withDefaults(
   gap: var(--space-xs);
   padding: var(--space-2xs) var(--space-s);
   border-radius: var(--radius-s);
-  font: var(--text-body-2);
-  font-weight: var(--font-weight-semibold);
+  font: var(--text-caption);
+  font-weight: var(--font-weight-medium);
 }
 
 .statusbadge__dot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: var(--radius-circle);
   flex-shrink: 0;
 }
