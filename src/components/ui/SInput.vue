@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { useId } from 'vue'
+
+const inputId = useId()
 const model = defineModel<string>({ default: '' })
 
 withDefaults(
@@ -26,7 +29,7 @@ defineEmits<{
 
 <template>
   <div :class="['sinput', { 'sinput--error': error, 'sinput--disabled': disabled }]">
-    <label v-if="label" class="sinput__label">
+    <label v-if="label" class="sinput__label" :for="inputId">
       {{ label }}
       <span v-if="required" class="sinput__required" aria-hidden="true">*</span>
     </label>
@@ -37,13 +40,14 @@ defineEmits<{
       </span>
 
       <input
+        :id="inputId"
         v-model="model"
         :type="type"
         :placeholder="placeholder"
         :disabled="disabled"
         :required="required"
         :aria-invalid="!!error"
-        :aria-describedby="error ? 'error' : hint ? 'hint' : undefined"
+        :aria-describedby="error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined"
         class="sinput__field"
         @blur="$emit('blur', $event)"
         @focus="$emit('focus', $event)"
@@ -54,10 +58,10 @@ defineEmits<{
       </span>
     </div>
 
-    <p v-if="error" id="error" class="sinput__message sinput__message--error" role="alert">
+    <p v-if="error" :id="`${inputId}-error`" class="sinput__message sinput__message--error" role="alert">
       {{ error }}
     </p>
-    <p v-else-if="hint" id="hint" class="sinput__message sinput__message--hint">
+    <p v-else-if="hint" :id="`${inputId}-hint`" class="sinput__message sinput__message--hint">
       {{ hint }}
     </p>
   </div>

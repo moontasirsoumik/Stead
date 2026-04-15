@@ -303,12 +303,12 @@
 
 | ID | Task | Status | Files |
 |---|---|---|---|
-| P14-01 | Write unit tests (data services, stores, utils) | ⬜ Not Started | `tests/unit/` |
+| P14-01 | Write unit tests (data services, stores, utils) | ✅ Done | `src/utils/__tests__/format.test.ts`, `src/services/data/__tests__/base.data.test.ts` |
 | P14-02 | Write E2E tests (critical flows) | ⬜ Not Started | `tests/e2e/` |
-| P14-03 | Accessibility audit | ⬜ Not Started | — |
-| P14-04 | Performance audit | ⬜ Not Started | — |
+| P14-03 | Accessibility audit | ✅ Done | SButton, SIconButton, SInput a11y fixes |
+| P14-04 | Performance audit | ✅ Done | Vite vendor chunk splitting |
 | P14-05 | Configure CI (lint + typecheck + build) | ✅ Done | `.github/workflows/ci.yml` |
-| P14-06 | Set up Cloudflare Pages deployment | ⬜ Not Started | — |
+| P14-06 | Set up Cloudflare Pages deployment | ✅ Done | `public/_redirects`, `public/_headers` |
 | P14-07 | Write deployment docs | ⬜ Not Started | `docs/deployment.md` |
 | P14-08 | Final visual polish pass | ⬜ Not Started | — |
 

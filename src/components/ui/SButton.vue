@@ -35,6 +35,7 @@ defineEmits<{
       { 'sbutton--full': fullWidth, 'sbutton--loading': loading },
     ]"
     :disabled="disabled || loading"
+    :aria-disabled="disabled || loading || undefined"
     :type="type"
     @click="$emit('click', $event)"
   >

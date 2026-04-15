@@ -21,6 +21,7 @@ defineEmits<{
 <template>
   <button
     :class="['siconbutton', `siconbutton--${size}`, `siconbutton--${variant}`]"
+    type="button"
     :disabled="disabled"
     :aria-label="label"
     :title="label"

@@ -13,6 +13,10 @@ const pinia = createPinia()
 app.use(pinia)
 app.use(router)
 
+app.config.errorHandler = (err, instance, info) => {
+  console.error('Uncaught error:', err, info)
+}
+
 // Initialize auth before first navigation
 const auth = useAuthStore(pinia)
 setupAuthGuard(router)
