@@ -286,74 +286,80 @@ async function deactivateMember(member: Member) {
 
 <style scoped>
 .settings-card {
-  margin-bottom: var(--space-l);
+  margin-bottom: var(--space-m);
 }
 
 .section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--space-l);
+  margin-bottom: var(--space-m);
 }
 
 .section-title {
-  font: var(--text-title-3);
+  font: var(--text-body-1);
   color: var(--color-fg-primary);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 12px;
 }
 
 /* ── Household Name ── */
 .household-name-row {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: var(--space-m);
 }
 
 .household-name-actions {
   display: flex;
-  gap: var(--space-s);
+  gap: var(--space-xs);
 }
 
 .household-name-display {
   display: flex;
   align-items: center;
-  gap: var(--space-m);
+  gap: var(--space-s);
 }
 
 .household-name-text {
-  font: var(--text-body-1-strong);
+  font: var(--text-body-1);
   color: var(--color-fg-primary);
+  font-weight: var(--font-weight-semibold);
 }
 
 .household-placeholder {
-  padding: var(--space-l) 0;
+  padding: var(--space-m) 0;
 }
 
 .text-secondary {
   color: var(--color-fg-secondary);
-  font: var(--text-body-1);
+  font: var(--text-body-2);
 }
 
 /* ── Members ── */
 .members-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2xs);
 }
 
 .member-row {
   display: flex;
   align-items: center;
   gap: var(--space-m);
-  padding: var(--space-m);
-  border-radius: var(--radius-m);
-  transition:
-    background-color var(--duration-fast) var(--easing-standard),
-    box-shadow var(--duration-fast) var(--easing-standard);
+  min-height: 40px;
+  padding: var(--space-xs) var(--space-s);
+  border-bottom: 1px solid var(--color-border-subtle);
+  transition: background var(--duration-fast) var(--easing-standard);
+}
+
+.member-row:last-child {
+  border-bottom: none;
 }
 
 .member-row:hover {
-  background: var(--color-bg-tertiary);
-  box-shadow: var(--shadow-2);
+  background: var(--color-bg-secondary);
 }
 
 .member-row--inactive {
@@ -363,21 +369,22 @@ async function deactivateMember(member: Member) {
 .member-identity {
   display: flex;
   align-items: center;
-  gap: var(--space-m);
+  gap: var(--space-s);
   flex: 1;
   min-width: 0;
 }
 
 .member-info {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-2xs);
+  align-items: center;
+  gap: var(--space-s);
   min-width: 0;
 }
 
 .member-name {
-  font: var(--text-body-1-strong);
+  font: var(--text-body-2);
   color: var(--color-fg-primary);
+  font-weight: var(--font-weight-semibold);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -386,7 +393,7 @@ async function deactivateMember(member: Member) {
 .member-meta {
   display: flex;
   align-items: center;
-  gap: var(--space-s);
+  gap: var(--space-xs);
 }
 
 .member-inactive-label {
@@ -396,11 +403,10 @@ async function deactivateMember(member: Member) {
 }
 
 .member-color-dot {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   border-radius: var(--radius-circle);
   flex-shrink: 0;
-  box-shadow: var(--shadow-2);
 }
 
 .member-actions {
@@ -408,46 +414,54 @@ async function deactivateMember(member: Member) {
   align-items: center;
   gap: var(--space-2xs);
   flex-shrink: 0;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--easing-standard);
+}
+
+.member-row:hover .member-actions {
+  opacity: 1;
 }
 
 /* ── Color Picker ── */
 .color-label {
-  font: var(--text-body-1-strong);
+  font: var(--text-body-2);
   color: var(--color-fg-primary);
+  font-weight: var(--font-weight-semibold);
 }
 
 .color-swatches {
   display: flex;
-  gap: var(--space-s);
+  gap: var(--space-xs);
   flex-wrap: wrap;
   margin-top: var(--space-xs);
 }
 
 .color-swatch {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   border-radius: var(--radius-circle);
   border: 2px solid transparent;
   cursor: pointer;
   transition:
     transform var(--duration-ultra-fast) var(--easing-standard),
-    border-color var(--duration-fast) var(--easing-standard),
-    box-shadow var(--duration-fast) var(--easing-standard);
+    border-color var(--duration-fast) var(--easing-standard);
 }
 
 .color-swatch:hover {
   transform: scale(1.15);
-  box-shadow: var(--shadow-4);
 }
 
 .color-swatch--selected {
   border-color: var(--color-fg-primary);
-  box-shadow: var(--shadow-4);
   transform: scale(1.1);
 }
 
 .color-swatch:focus-visible {
   outline: 2px solid var(--color-brand-primary);
   outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .member-actions { opacity: 1; }
 }
 </style>

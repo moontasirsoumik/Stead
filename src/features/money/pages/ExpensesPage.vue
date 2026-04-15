@@ -231,35 +231,25 @@ onMounted(async () => {
         <SectionHeader :title="formatDate(String(date))" :count="expenses.length" />
 
         <div class="expense-list">
-          <ContentCard
+          <div
             v-for="expense in expenses"
             :key="expense.id"
-            padding="sm"
-            hoverable
             class="expense-row"
             @click="openEdit(expense)"
           >
-            <div class="expense-row__content">
-              <div class="expense-row__left">
-                <SBadge variant="brand" size="sm">
-                  {{ expense.category }}
-                </SBadge>
-                <div class="expense-row__details">
-                  <span class="expense-row__desc">{{ expense.description }}</span>
-                  <span v-if="expense.subcategory" class="expense-row__sub">
-                    {{ expense.subcategory }}
-                  </span>
-                </div>
-              </div>
-              <div class="expense-row__right">
-                <span class="expense-row__amount">{{ formatCents(expense.amount) }}</span>
-                <div class="expense-row__meta">
-                  <SAvatar :name="getMemberName(expense.paid_by)" :color="getMemberColor(expense.paid_by)" size="sm" />
-                  <SBadge v-if="expense.shared" variant="info" size="sm">Shared</SBadge>
-                </div>
-              </div>
+            <div class="expense-row__left">
+              <SBadge variant="brand" size="sm">
+                {{ expense.category }}
+              </SBadge>
+              <span class="expense-row__desc">{{ expense.description }}</span>
+              <span v-if="expense.subcategory" class="expense-row__sub">{{ expense.subcategory }}</span>
             </div>
-          </ContentCard>
+            <div class="expense-row__right">
+              <SAvatar :name="getMemberName(expense.paid_by)" :color="getMemberColor(expense.paid_by)" size="sm" />
+              <SBadge v-if="expense.shared" variant="info" size="sm">Shared</SBadge>
+              <span class="expense-row__amount">{{ formatCents(expense.amount) }}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -337,37 +327,41 @@ onMounted(async () => {
 .expense-groups {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xl);
+  gap: var(--space-l);
 }
 
 .expense-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-s);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-m);
+  background: var(--color-surface-card);
 }
 
 .expense-row {
-  cursor: pointer;
-}
-
-.expense-row__content {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  min-height: var(--height-row-min);
+  padding: 0 var(--space-l);
   gap: var(--space-m);
+  border-bottom: 1px solid var(--color-border-subtle);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--easing-standard);
+}
+
+.expense-row:last-child {
+  border-bottom: none;
+}
+
+.expense-row:hover {
+  background: var(--color-bg-secondary);
 }
 
 .expense-row__left {
   display: flex;
   align-items: center;
   gap: var(--space-m);
-  min-width: 0;
-}
-
-.expense-row__details {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2xs);
   min-width: 0;
 }
 
@@ -382,6 +376,7 @@ onMounted(async () => {
 .expense-row__sub {
   font: var(--text-caption);
   color: var(--color-fg-tertiary);
+  white-space: nowrap;
 }
 
 .expense-row__right {
@@ -394,25 +389,22 @@ onMounted(async () => {
 .expense-row__amount {
   font: var(--text-body-1);
   font-weight: var(--font-weight-semibold);
+  font-family: var(--font-mono);
   color: var(--color-fg-primary);
   white-space: nowrap;
-}
-
-.expense-row__meta {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
+  min-width: 64px;
+  text-align: right;
 }
 
 @media (max-width: 640px) {
-  .expense-row__content {
-    flex-direction: column;
-    align-items: flex-start;
+  .expense-row {
+    flex-wrap: wrap;
+    padding: var(--space-xs) var(--space-l);
   }
 
   .expense-row__right {
     width: 100%;
-    justify-content: space-between;
+    justify-content: flex-end;
   }
 }
 </style>

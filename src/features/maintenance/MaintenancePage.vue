@@ -230,15 +230,9 @@ onMounted(async () => {
     </PageHeader>
 
     <div class="stats-row page-enter" :style="{ '--stagger': 1 }">
-      <ContentCard>
-        <InlineStat label="Total" :value="maintenanceStore.items.length" />
-      </ContentCard>
-      <ContentCard>
-        <InlineStat label="Overdue" :value="maintenanceStore.overdueItems.length" :trend="maintenanceStore.overdueItems.length > 0 ? 'down' : 'neutral'" />
-      </ContentCard>
-      <ContentCard>
-        <InlineStat label="Upcoming" :value="maintenanceStore.upcomingItems.length" />
-      </ContentCard>
+      <InlineStat label="Total" :value="maintenanceStore.items.length" />
+      <InlineStat label="Overdue" :value="maintenanceStore.overdueItems.length" :trend="maintenanceStore.overdueItems.length > 0 ? 'down' : 'neutral'" />
+      <InlineStat label="Upcoming" :value="maintenanceStore.upcomingItems.length" />
     </div>
 
     <ErrorBanner v-if="maintenanceStore.error" :message="maintenanceStore.error" @retry="authStore.householdId && maintenanceStore.fetchItems(authStore.householdId)" />
@@ -263,17 +257,15 @@ onMounted(async () => {
         <ContentCard>
           <DataList dividers>
             <div v-for="item in group.items" :key="item.id" class="maint-row" role="listitem">
-              <div class="maint-row__main">
-                <span class="maint-row__title">{{ item.item }}</span>
-                <div class="maint-row__meta">
-                  <SBadge v-if="item.type" variant="info" size="sm">{{ item.type }}</SBadge>
-                  <SBadge :variant="statusVariant(item.status)" size="sm">{{ statusLabels[item.status] }}</SBadge>
-                  <span v-if="item.next_due_date" class="maint-row__due">{{ formatRelativeDate(item.next_due_date) }}</span>
-                  <span v-if="item.estimated_cost != null" class="maint-row__cost">{{ formatCents(item.estimated_cost) }}</span>
-                </div>
+              <span class="maint-row__title">{{ item.item }}</span>
+              <div class="maint-row__meta">
+                <SBadge v-if="item.type" variant="info" size="sm">{{ item.type }}</SBadge>
+                <SBadge :variant="statusVariant(item.status)" size="sm">{{ statusLabels[item.status] }}</SBadge>
+                <span v-if="item.next_due_date" class="maint-row__due">{{ formatRelativeDate(item.next_due_date) }}</span>
+                <span v-if="item.estimated_cost != null" class="maint-row__cost">{{ formatCents(item.estimated_cost) }}</span>
               </div>
               <div class="maint-row__end">
-                <div v-if="item.vendor" class="maint-row__vendor">{{ item.vendor }}</div>
+                <span v-if="item.vendor" class="maint-row__vendor">{{ item.vendor }}</span>
                 <SAvatar v-if="getMemberName(item.assigned_to)" :name="getMemberName(item.assigned_to)!" size="sm" />
                 <div class="maint-row__actions">
                   <SButton v-if="item.status !== 'done'" variant="subtle" size="sm" @click="maintenanceStore.markDone(item.id)">Done</SButton>
@@ -308,76 +300,98 @@ onMounted(async () => {
 
 <style scoped>
 .stats-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-m);
-  margin-bottom: var(--space-l);
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-m);
+  background: var(--color-surface-card);
+  margin-bottom: var(--space-m);
+  overflow: hidden;
+}
+
+.stats-row > * {
+  flex: 1;
+  border-right: 1px solid var(--color-border-subtle);
+}
+
+.stats-row > *:last-child {
+  border-right: none;
 }
 
 .maint-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-m);
-  padding: var(--space-m) var(--space-l);
-  transition: background-color var(--duration-fast) var(--easing-standard);
+  min-height: 36px;
+  padding: var(--space-xs) var(--space-l);
+  transition: background var(--duration-fast) var(--easing-standard);
 }
 
 .maint-row:hover {
   background: var(--color-bg-secondary);
 }
 
-.maint-row__main {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  min-width: 0;
-}
-
 .maint-row__title {
-  font: var(--text-body-1);
+  font: var(--text-body-2);
   color: var(--color-fg-primary);
   font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .maint-row__meta {
   display: flex;
   align-items: center;
-  gap: var(--space-s);
-  flex-wrap: wrap;
+  gap: var(--space-xs);
+  flex-shrink: 0;
 }
 
 .maint-row__due {
   font: var(--text-caption);
   color: var(--color-fg-tertiary);
+  white-space: nowrap;
 }
 
 .maint-row__cost {
   font: var(--text-caption);
   color: var(--color-fg-secondary);
   font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
 }
 
 .maint-row__end {
   display: flex;
   align-items: center;
-  gap: var(--space-m);
+  gap: var(--space-s);
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .maint-row__vendor {
   font: var(--text-caption);
   color: var(--color-fg-tertiary);
+  white-space: nowrap;
 }
 
 .maint-row__actions {
   display: flex;
-  gap: var(--space-xs);
+  gap: var(--space-2xs);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--easing-standard);
+}
+
+.maint-row:hover .maint-row__actions {
+  opacity: 1;
 }
 
 @media (max-width: 640px) {
-  .stats-row { grid-template-columns: 1fr; }
-  .maint-row { flex-direction: column; align-items: flex-start; }
-  .maint-row__end { width: 100%; justify-content: space-between; flex-wrap: wrap; }
+  .stats-row { flex-direction: column; }
+  .stats-row > * { border-right: none; border-bottom: 1px solid var(--color-border-subtle); }
+  .stats-row > *:last-child { border-bottom: none; }
+  .maint-row { flex-wrap: wrap; }
+  .maint-row__actions { opacity: 1; }
 }
 </style>

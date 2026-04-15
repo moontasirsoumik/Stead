@@ -11,14 +11,15 @@
   --font-mono: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
 
   /* ── Type Scale (font shorthand: weight size/line-height family) ── */
-  --text-display: 600 28px/36px var(--font-family);
-  --text-title-1: 600 24px/32px var(--font-family);
-  --text-title-2: 600 20px/28px var(--font-family);
-  --text-title-3: 600 16px/22px var(--font-family);
+  --text-display: 600 24px/32px var(--font-family);
+  --text-title-1: 600 20px/28px var(--font-family);
+  --text-title-2: 600 16px/22px var(--font-family);
+  --text-title-3: 600 14px/20px var(--font-family);
+  --text-subtitle-1: 400 16px/22px var(--font-family);
   --text-body-1: 400 14px/20px var(--font-family);
   --text-body-1-strong: 600 14px/20px var(--font-family);
   --text-body-2: 400 12px/16px var(--font-family);
-  --text-caption: 400 11px/14px var(--font-family);
+  --text-caption: 400 10px/14px var(--font-family);
 
   /* ── Individual Weights ── */
   --font-weight-regular: 400;

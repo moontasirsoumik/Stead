@@ -65,7 +65,8 @@ function select(value: string) {
   display: inline-flex;
   align-items: center;
   gap: var(--space-xs);
-  padding: var(--space-xs) var(--space-m);
+  height: var(--height-input);
+  padding: 0 var(--space-m);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-m);
   background: var(--color-bg-primary);
@@ -100,9 +101,9 @@ function select(value: string) {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: var(--space-s) var(--space-m);
+  padding: var(--space-xs) var(--space-m);
   border-radius: var(--radius-s);
-  font: var(--text-body-1);
+  font: var(--text-body-2);
   color: var(--color-fg-primary);
   background: transparent;
   border: none;

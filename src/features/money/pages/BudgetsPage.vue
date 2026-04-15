@@ -218,15 +218,15 @@ onMounted(async () => {
 <style scoped>
 .budgets-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--space-l);
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-m);
 }
 
 .budget-card {
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  gap: var(--space-m);
+  gap: var(--space-s);
 }
 
 .budget-card__header {
@@ -236,7 +236,8 @@ onMounted(async () => {
 }
 
 .budget-card__category {
-  font: var(--text-subtitle-1);
+  font: var(--text-body-1);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-fg-primary);
 }
 
@@ -247,26 +248,26 @@ onMounted(async () => {
 }
 
 .budget-card__spent {
-  font: var(--text-title-3);
+  font: var(--text-title-2);
   color: var(--color-fg-primary);
   letter-spacing: var(--tracking-tight);
 }
 
 .budget-card__of {
-  font: var(--text-body-2);
+  font: var(--text-caption);
   color: var(--color-fg-tertiary);
 }
 
 .budget-card__bar {
-  height: 6px;
+  height: 4px;
   background: var(--color-bg-tertiary);
-  border-radius: 3px;
+  border-radius: 2px;
   overflow: hidden;
 }
 
 .budget-card__fill {
   height: 100%;
-  border-radius: 3px;
+  border-radius: 2px;
   transition: width var(--duration-normal) var(--easing-standard);
 }
 
@@ -289,7 +290,7 @@ onMounted(async () => {
 }
 
 .budget-card__remaining {
-  font: var(--text-body-2);
+  font: var(--text-caption);
   color: var(--color-fg-secondary);
 }
 

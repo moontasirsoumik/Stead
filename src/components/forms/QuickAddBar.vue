@@ -54,7 +54,8 @@ function handleSubmit() {
   display: flex;
   align-items: center;
   gap: var(--space-s);
-  padding: var(--space-s) var(--space-m);
+  height: var(--height-input);
+  padding: 0 var(--space-m);
   background: var(--color-surface-card);
   border: 1px dashed var(--color-border-default);
   border-radius: var(--radius-m);

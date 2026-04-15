@@ -246,28 +246,25 @@ onMounted(async () => {
 <style scoped>
 .notes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: var(--space-m);
-  margin-bottom: var(--space-xl);
+  margin-bottom: var(--space-l);
 }
 
 .note-card {
   display: flex;
   flex-direction: column;
-  gap: var(--space-s);
+  gap: var(--space-xs);
   padding: var(--space-l);
   background: var(--color-surface-card);
-  border-radius: var(--radius-l);
-  box-shadow: var(--shadow-2);
+  border-radius: var(--radius-m);
+  border: 1px solid var(--color-border-subtle);
   cursor: pointer;
-  transition:
-    box-shadow var(--duration-fast) var(--easing-standard),
-    transform var(--duration-fast) var(--easing-standard);
+  transition: border-color var(--duration-fast) var(--easing-standard);
 }
 
 .note-card:hover {
-  box-shadow: var(--shadow-4);
-  transform: translateY(-2px);
+  border-color: var(--color-border-default);
 }
 
 .note-card--pinned {
@@ -276,15 +273,19 @@ onMounted(async () => {
 
 .note-card__header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: var(--space-s);
+  gap: var(--space-xs);
 }
 
 .note-card__title {
-  font: var(--text-subtitle-1);
+  font: var(--text-body-2);
   color: var(--color-fg-primary);
   font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .note-card__pin {
@@ -296,6 +297,7 @@ onMounted(async () => {
   border-radius: var(--radius-s);
   transition: color var(--duration-fast) var(--easing-standard);
   flex-shrink: 0;
+  line-height: 0;
 }
 
 .note-card__pin:hover {
@@ -307,13 +309,14 @@ onMounted(async () => {
 }
 
 .note-card__preview {
-  font: var(--text-body-2);
+  font: var(--text-caption);
   color: var(--color-fg-secondary);
   white-space: pre-line;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  line-height: 1.4;
 }
 
 .note-card__date {
@@ -324,11 +327,20 @@ onMounted(async () => {
 .note-card__actions {
   display: flex;
   justify-content: flex-end;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--easing-standard);
+}
+
+.note-card:hover .note-card__actions {
+  opacity: 1;
 }
 
 @media (max-width: 640px) {
   .notes-grid {
     grid-template-columns: 1fr;
+  }
+  .note-card__actions {
+    opacity: 1;
   }
 }
 </style>

@@ -79,7 +79,7 @@ async function handleConfirm() {
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-28);
   padding: var(--space-xl);
-  max-width: 420px;
+  max-width: 400px;
   width: 100%;
 }
 

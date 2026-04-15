@@ -91,12 +91,14 @@ function isActive(): boolean {
   display: flex;
   align-items: center;
   gap: var(--space-m);
-  padding: var(--space-s) var(--space-m);
+  padding: 0 var(--space-l);
+  height: 32px;
   border-radius: var(--radius-m);
   color: var(--color-fg-secondary);
   text-decoration: none;
   white-space: nowrap;
   overflow: hidden;
+  position: relative;
   transition:
     background-color var(--duration-fast) var(--easing-standard),
     color var(--duration-fast) var(--easing-standard);
@@ -104,7 +106,7 @@ function isActive(): boolean {
 
 .navitem--collapsed {
   justify-content: center;
-  padding: var(--space-s);
+  padding: 0;
 }
 
 .navitem:hover {
@@ -117,6 +119,17 @@ function isActive(): boolean {
   color: var(--color-brand-primary);
 }
 
+.navitem--active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  background: var(--color-brand-primary);
+  border-radius: 0 2px 2px 0;
+}
+
 .navitem--active:hover {
   background: var(--color-brand-subtle);
 }
@@ -125,9 +138,14 @@ function isActive(): boolean {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   flex-shrink: 0;
+}
+
+.navitem__icon > svg {
+  width: 16px;
+  height: 16px;
 }
 
 .navitem__label {

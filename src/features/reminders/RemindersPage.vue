@@ -190,15 +190,9 @@ onMounted(async () => {
     </PageHeader>
 
     <div class="stats-row page-enter" :style="{ '--stagger': 1 }">
-      <ContentCard>
-        <InlineStat label="Active" :value="remindersStore.activeReminders.length" />
-      </ContentCard>
-      <ContentCard>
-        <InlineStat label="Overdue" :value="remindersStore.overdueReminders.length" :trend="remindersStore.overdueReminders.length > 0 ? 'down' : 'neutral'" />
-      </ContentCard>
-      <ContentCard>
-        <InlineStat label="This Week" :value="remindersStore.upcomingReminders.length" />
-      </ContentCard>
+      <InlineStat label="Active" :value="remindersStore.activeReminders.length" />
+      <InlineStat label="Overdue" :value="remindersStore.overdueReminders.length" :trend="remindersStore.overdueReminders.length > 0 ? 'down' : 'neutral'" />
+      <InlineStat label="This Week" :value="remindersStore.upcomingReminders.length" />
     </div>
 
     <ErrorBanner v-if="remindersStore.error" :message="remindersStore.error" @retry="authStore.householdId && remindersStore.fetchReminders(authStore.householdId)" />
@@ -219,14 +213,12 @@ onMounted(async () => {
     <ContentCard v-else class="page-enter" :style="{ '--stagger': 3 }">
       <DataList dividers>
         <div v-for="reminder in sortedItems" :key="reminder.id" :class="['reminder-row', { 'reminder-row--overdue': isOverdue(reminder) }]" role="listitem" @click="openEditDrawer(reminder)">
-          <div class="reminder-row__main">
-            <span class="reminder-row__title">{{ reminder.title }}</span>
-            <div class="reminder-row__meta">
-              <StatusBadge :variant="statusVariant(reminder)">{{ statusLabel(reminder) }}</StatusBadge>
-              <SBadge v-if="reminder.type" size="sm">{{ reminder.type }}</SBadge>
-              <span v-if="reminder.due_date" class="reminder-row__due">{{ formatRelativeDate(reminder.due_date) }}</span>
-            </div>
+          <span class="reminder-row__title">{{ reminder.title }}</span>
+          <div class="reminder-row__meta">
+            <StatusBadge :variant="statusVariant(reminder)">{{ statusLabel(reminder) }}</StatusBadge>
+            <SBadge v-if="reminder.type" size="sm">{{ reminder.type }}</SBadge>
           </div>
+          <span v-if="reminder.due_date" class="reminder-row__due">{{ formatRelativeDate(reminder.due_date) }}</span>
           <div class="reminder-row__end">
             <SAvatar v-if="getMemberName(reminder.assigned_to)" :name="getMemberName(reminder.assigned_to)!" size="sm" />
             <div class="reminder-row__actions" @click.stop>
@@ -257,20 +249,32 @@ onMounted(async () => {
 
 <style scoped>
 .stats-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-m);
-  margin-bottom: var(--space-l);
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-m);
+  background: var(--color-surface-card);
+  margin-bottom: var(--space-m);
+  overflow: hidden;
+}
+
+.stats-row > * {
+  flex: 1;
+  border-right: 1px solid var(--color-border-subtle);
+}
+
+.stats-row > *:last-child {
+  border-right: none;
 }
 
 .reminder-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-m);
-  padding: var(--space-m) var(--space-l);
+  min-height: 36px;
+  padding: var(--space-xs) var(--space-l);
   cursor: pointer;
-  transition: background-color var(--duration-fast) var(--easing-standard);
+  transition: background var(--duration-fast) var(--easing-standard);
 }
 
 .reminder-row:hover {
@@ -281,47 +285,55 @@ onMounted(async () => {
   border-left: 3px solid var(--color-error);
 }
 
-.reminder-row__main {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  min-width: 0;
-}
-
 .reminder-row__title {
-  font: var(--text-body-1);
+  font: var(--text-body-2);
   color: var(--color-fg-primary);
   font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .reminder-row__meta {
   display: flex;
   align-items: center;
-  gap: var(--space-s);
-  flex-wrap: wrap;
+  gap: var(--space-xs);
+  flex-shrink: 0;
 }
 
 .reminder-row__due {
   font: var(--text-caption);
   color: var(--color-fg-tertiary);
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .reminder-row__end {
   display: flex;
   align-items: center;
-  gap: var(--space-m);
+  gap: var(--space-s);
   flex-shrink: 0;
 }
 
 .reminder-row__actions {
   display: flex;
-  gap: var(--space-xs);
+  gap: var(--space-2xs);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--easing-standard);
+}
+
+.reminder-row:hover .reminder-row__actions {
+  opacity: 1;
 }
 
 @media (max-width: 640px) {
-  .stats-row { grid-template-columns: 1fr; }
-  .reminder-row { flex-direction: column; align-items: flex-start; }
-  .reminder-row__end { width: 100%; justify-content: flex-end; }
-  .reminder-row__actions { flex-wrap: wrap; }
+  .stats-row { flex-direction: column; }
+  .stats-row > * { border-right: none; border-bottom: 1px solid var(--color-border-subtle); }
+  .stats-row > *:last-child { border-bottom: none; }
+  .reminder-row { flex-wrap: wrap; }
+  .reminder-row__actions { opacity: 1; flex-wrap: wrap; }
 }
 </style>

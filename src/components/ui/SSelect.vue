@@ -74,8 +74,8 @@ withDefaults(
 }
 
 .sselect__label {
-  font: var(--text-body-1-strong);
-  color: var(--color-fg-primary);
+  font: var(--text-body-2);
+  color: var(--color-fg-secondary);
 }
 
 .sselect__required {
@@ -96,7 +96,6 @@ withDefaults(
   background: var(--color-surface-input);
   border: 1px solid var(--color-border-input);
   border-radius: var(--radius-m);
-  box-shadow: var(--shadow-inset);
   font: var(--text-body-1);
   color: var(--color-fg-primary);
   appearance: none;
@@ -112,8 +111,8 @@ withDefaults(
 
 .sselect__field:focus {
   outline: none;
-  border-color: var(--color-brand-primary);
-  box-shadow: 0 0 0 1px var(--color-brand-primary);
+  border-color: transparent;
+  box-shadow: inset 0 -2px 0 0 var(--color-brand-primary);
 }
 
 .sselect__chevron {

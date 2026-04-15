@@ -4,10 +4,11 @@
    ============================================================ */
 
 :root {
-  --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.08), 0 0 1px rgba(0, 0, 0, 0.04);
-  --shadow-4: 0 2px 4px rgba(0, 0, 0, 0.10), 0 0 2px rgba(0, 0, 0, 0.04);
-  --shadow-8: 0 4px 8px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.04);
-  --shadow-16: 0 8px 16px rgba(0, 0, 0, 0.14), 0 4px 8px rgba(0, 0, 0, 0.04);
-  --shadow-28: 0 14px 28px rgba(0, 0, 0, 0.16), 0 8px 16px rgba(0, 0, 0, 0.06);
-  --shadow-inset: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-4: 0 2px 4px rgba(0, 0, 0, 0.08);
+  --shadow-8: 0 4px 8px rgba(0, 0, 0, 0.10);
+  --shadow-16: 0 8px 16px rgba(0, 0, 0, 0.12);
+  --shadow-28: 0 14px 28px rgba(0, 0, 0, 0.14);
+  --shadow-inset: inset 0 1px 0 rgba(0, 0, 0, 0.04);
+  --shadow-brand: 0 2px 4px rgba(15, 108, 189, 0.3);
 }

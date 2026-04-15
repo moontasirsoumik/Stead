@@ -65,13 +65,13 @@ defineEmits<{
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: var(--space-4xl) var(--space-xl);
-  gap: var(--space-m);
+  padding: var(--space-3xl) var(--space-xl);
+  gap: var(--space-s);
 }
 
 .emptystate__icon {
   color: var(--color-fg-tertiary);
-  margin-bottom: var(--space-s);
+  margin-bottom: var(--space-xs);
 }
 
 .emptystate__title {
@@ -86,15 +86,14 @@ defineEmits<{
 }
 
 .emptystate__action {
-  margin-top: var(--space-s);
-  padding: var(--space-s) var(--space-xl);
+  margin-top: var(--space-xs);
+  padding: var(--space-xs) var(--space-l);
   background: var(--color-brand-primary);
   color: var(--color-fg-on-brand);
   font: var(--text-body-1-strong);
   border-radius: var(--radius-m);
   border: none;
   cursor: pointer;
-  box-shadow: var(--shadow-2);
   transition:
     background-color var(--duration-fast) var(--easing-standard),
     box-shadow var(--duration-fast) var(--easing-standard),

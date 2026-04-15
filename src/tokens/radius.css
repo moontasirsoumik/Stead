@@ -4,9 +4,9 @@
    ============================================================ */
 
 :root {
-  --radius-s: 4px;
-  --radius-m: 8px;
-  --radius-l: 12px;
-  --radius-xl: 16px;
+  --radius-s: 2px;
+  --radius-m: 4px;
+  --radius-l: 6px;
+  --radius-xl: 8px;
   --radius-circle: 50%;
 }

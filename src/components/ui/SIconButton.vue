@@ -47,7 +47,7 @@ defineEmits<{
 }
 
 /* Sizes */
-.siconbutton--sm { width: 28px; height: 28px; border-radius: var(--radius-s); }
+.siconbutton--sm { width: 24px; height: 24px; border-radius: var(--radius-s); }
 .siconbutton--md { width: var(--height-input); height: var(--height-input); }
 .siconbutton--lg { width: 44px; height: 44px; }
 

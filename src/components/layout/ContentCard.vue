@@ -20,8 +20,8 @@ withDefaults(
 <style scoped>
 .contentcard {
   background: var(--color-surface-card);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-l);
-  box-shadow: var(--shadow-2);
   transition:
     box-shadow var(--duration-fast) var(--easing-standard),
     transform var(--duration-fast) var(--easing-standard);
@@ -33,7 +33,7 @@ withDefaults(
 .contentcard--pad-lg { padding: var(--space-xl); }
 
 .contentcard--hoverable:hover {
-  box-shadow: var(--shadow-4);
+  box-shadow: var(--shadow-2);
   transform: translateY(-1px);
 }
 </style>

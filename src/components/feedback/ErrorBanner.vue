@@ -36,8 +36,8 @@ defineEmits<{
 .errorbanner {
   display: flex;
   align-items: center;
-  gap: var(--space-m);
-  padding: var(--space-m) var(--space-l);
+  gap: var(--space-s);
+  padding: var(--space-s) var(--space-l);
   background: var(--color-error-bg);
   border-radius: var(--radius-m);
   border-left: 3px solid var(--color-error);

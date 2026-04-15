@@ -49,9 +49,9 @@ withDefaults(
 .stoggle__track {
   position: relative;
   width: 40px;
-  height: 22px;
+  height: 20px;
   background: var(--color-border-strong);
-  border-radius: 11px;
+  border-radius: 10px;
   transition:
     background-color var(--duration-fast) var(--easing-standard);
   flex-shrink: 0;
@@ -63,8 +63,8 @@ withDefaults(
 
 .stoggle__thumb {
   position: absolute;
-  top: 3px;
-  left: 3px;
+  top: 2px;
+  left: 2px;
   width: 16px;
   height: 16px;
   background: var(--color-fg-on-brand);
@@ -75,7 +75,7 @@ withDefaults(
 }
 
 .stoggle__track--on .stoggle__thumb {
-  transform: translateX(18px);
+  transform: translateX(20px);
 }
 
 .stoggle__input:focus-visible + .stoggle__track {

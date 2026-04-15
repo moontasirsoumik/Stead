@@ -175,24 +175,32 @@ onMounted(() => {
     />
 
     <!-- Top stats bar -->
-    <ContentCard padding="md" class="stats-bar page-enter" :style="{ '--stagger': 1 }">
-      <InlineStat
-        label="Monthly spending"
-        :value="formatCents(expenses.currentMonthTotal)"
-      />
-      <InlineStat
-        label="Monthly income"
-        :value="formatCents(income.currentMonthTotal)"
-      />
-      <InlineStat
-        label="Upcoming bills"
-        :value="String(bills.upcomingBills.length)"
-      />
-      <InlineStat
-        label="Tasks due"
-        :value="String(tasks.overdueTasks.length + tasks.dueToday.length)"
-      />
-    </ContentCard>
+    <div class="stats-bar page-enter" :style="{ '--stagger': 1 }">
+      <div class="stat">
+        <InlineStat
+          label="Monthly spending"
+          :value="formatCents(expenses.currentMonthTotal)"
+        />
+      </div>
+      <div class="stat">
+        <InlineStat
+          label="Monthly income"
+          :value="formatCents(income.currentMonthTotal)"
+        />
+      </div>
+      <div class="stat">
+        <InlineStat
+          label="Upcoming bills"
+          :value="String(bills.upcomingBills.length)"
+        />
+      </div>
+      <div class="stat">
+        <InlineStat
+          label="Tasks due"
+          :value="String(tasks.overdueTasks.length + tasks.dueToday.length)"
+        />
+      </div>
+    </div>
 
     <!-- Widget grid -->
     <div class="dashboard-grid">
@@ -215,8 +223,7 @@ onMounted(() => {
           </ul>
         </template>
         <div v-else class="widget__empty">
-          <span class="widget__empty-icon">✓</span>
-          <p class="widget__empty-text">All caught up!</p>
+          <p class="widget__empty-text">All caught up</p>
         </div>
       </ContentCard>
 
@@ -242,7 +249,6 @@ onMounted(() => {
           </ul>
         </template>
         <div v-else class="widget__empty">
-          <span class="widget__empty-icon">📋</span>
           <p class="widget__empty-text">No upcoming bills</p>
         </div>
       </ContentCard>
@@ -269,8 +275,7 @@ onMounted(() => {
           </ul>
         </template>
         <div v-else class="widget__empty">
-          <span class="widget__empty-icon">💰</span>
-          <p class="widget__empty-text">No expenses recorded yet</p>
+          <p class="widget__empty-text">No expenses yet</p>
         </div>
       </ContentCard>
 
@@ -299,8 +304,7 @@ onMounted(() => {
           </ul>
         </template>
         <div v-else class="widget__empty">
-          <span class="widget__empty-icon">🎯</span>
-          <p class="widget__empty-text">No savings goals yet</p>
+          <p class="widget__empty-text">No savings goals</p>
         </div>
       </ContentCard>
 
@@ -322,8 +326,7 @@ onMounted(() => {
           </ul>
         </template>
         <div v-else class="widget__empty">
-          <span class="widget__empty-icon">📦</span>
-          <p class="widget__empty-text">Everything is stocked up</p>
+          <p class="widget__empty-text">Everything stocked</p>
         </div>
       </ContentCard>
 
@@ -346,8 +349,7 @@ onMounted(() => {
           </ul>
         </template>
         <div v-else class="widget__empty">
-          <span class="widget__empty-icon">🛒</span>
-          <p class="widget__empty-text">Shopping list is empty</p>
+          <p class="widget__empty-text">Shopping list empty</p>
         </div>
       </ContentCard>
 
@@ -375,8 +377,7 @@ onMounted(() => {
           </ul>
         </template>
         <div v-else class="widget__empty">
-          <span class="widget__empty-icon">🔔</span>
-          <p class="widget__empty-text">No reminders right now</p>
+          <p class="widget__empty-text">No reminders</p>
         </div>
       </ContentCard>
 
@@ -396,7 +397,6 @@ onMounted(() => {
           </ul>
         </template>
         <div v-else class="widget__empty">
-          <span class="widget__empty-icon">📌</span>
           <p class="widget__empty-text">Pin a note to see it here</p>
         </div>
       </ContentCard>
@@ -420,8 +420,7 @@ onMounted(() => {
           </ul>
         </template>
         <div v-else class="widget__empty">
-          <span class="widget__empty-icon">🔧</span>
-          <p class="widget__empty-text">No maintenance tasks due</p>
+          <p class="widget__empty-text">No maintenance due</p>
         </div>
       </ContentCard>
     </div>
@@ -429,24 +428,55 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* Stats bar */
+/* Stats bar — tight horizontal row with dividers */
 .stats-bar {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-xl);
-  margin-bottom: var(--space-xl);
+  align-items: center;
+  margin-bottom: var(--space-l);
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-m);
 }
 
-/* Widget grid */
+.stat {
+  flex: 1;
+  padding: var(--space-m) var(--space-l);
+  border-right: 1px solid var(--color-border-subtle);
+}
+
+.stat:last-child {
+  border-right: none;
+}
+
+/* Widget grid — 3 cols desktop, 2 tablet, 1 mobile */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-l);
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-m);
+}
+
+@media (max-width: 1200px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 768px) {
   .stats-bar {
-    gap: var(--space-l);
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    flex-basis: 50%;
+    border-bottom: 1px solid var(--color-border-subtle);
+  }
+
+  .stat:nth-child(2) {
+    border-right: none;
+  }
+
+  .stat:nth-last-child(-n+2) {
+    border-bottom: none;
   }
 
   .dashboard-grid {
@@ -459,18 +489,19 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--space-m);
-  padding-bottom: var(--space-s);
-  border-bottom: 1px solid var(--color-border-subtle);
+  margin-bottom: var(--space-s);
 }
 
 .widget__title {
-  font: var(--text-subtitle-1);
-  color: var(--color-fg-primary);
+  font: var(--text-body-2);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-fg-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .widget__link {
-  font: var(--text-body-2);
+  font: var(--text-caption);
   color: var(--color-brand-primary);
   text-decoration: none;
   transition: color var(--duration-fast) var(--easing-standard);
@@ -484,14 +515,14 @@ onMounted(() => {
 .widget__count {
   font: var(--text-body-2);
   color: var(--color-fg-secondary);
-  margin-bottom: var(--space-s);
+  margin-bottom: var(--space-xs);
 }
 
-/* List styles */
+/* List styles — border-bottom rows, no bg */
 .widget__list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-s);
+  gap: 0;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -501,14 +532,19 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: var(--space-2xs);
-  padding: var(--space-s);
-  border-radius: var(--radius-m);
-  background: var(--color-bg-secondary);
+  padding: var(--space-xs) 0;
+  border-bottom: 1px solid var(--color-border-subtle);
   transition: background var(--duration-fast) var(--easing-standard);
+  min-height: var(--height-row-min);
+  justify-content: center;
+}
+
+.widget__item:last-child {
+  border-bottom: none;
 }
 
 .widget__item:hover {
-  background: var(--color-bg-tertiary);
+  background: var(--color-bg-secondary);
 }
 
 .widget__item-main {
@@ -519,7 +555,7 @@ onMounted(() => {
 }
 
 .widget__item-title {
-  font: var(--text-body-1);
+  font: var(--text-body-2);
   color: var(--color-fg-primary);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -528,9 +564,10 @@ onMounted(() => {
 }
 
 .widget__item-amount {
-  font: var(--text-body-1);
+  font: var(--text-body-2);
   color: var(--color-fg-primary);
   font-weight: var(--font-weight-semibold);
+  font-family: var(--font-mono);
   flex-shrink: 0;
 }
 
@@ -547,18 +584,32 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
-/* Goals / progress bar */
+/* Empty state — compact */
+.widget__empty {
+  padding: var(--space-l) 0;
+  text-align: center;
+}
+
+.widget__empty-text {
+  font: var(--text-body-2);
+  color: var(--color-fg-tertiary);
+}
+
+/* Goals / progress bar — 4px */
 .widget__goal {
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
-  padding: var(--space-s);
-  border-radius: var(--radius-m);
-  background: var(--color-bg-secondary);
+  padding: var(--space-xs) 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.widget__goal:last-child {
+  border-bottom: none;
 }
 
 .progress-bar {
-  height: 6px;
+  height: 4px;
   width: 100%;
   background: var(--color-bg-tertiary);
   border-radius: var(--radius-s);
@@ -572,20 +623,23 @@ onMounted(() => {
   transition: width var(--duration-normal) var(--easing-standard);
 }
 
-/* Notes */
+/* Notes — border-bottom rows */
 .widget__note {
-  padding: var(--space-s);
-  border-radius: var(--radius-m);
-  background: var(--color-bg-secondary);
+  padding: var(--space-xs) 0;
+  border-bottom: 1px solid var(--color-border-subtle);
   transition: background var(--duration-fast) var(--easing-standard);
 }
 
+.widget__note:last-child {
+  border-bottom: none;
+}
+
 .widget__note:hover {
-  background: var(--color-bg-tertiary);
+  background: var(--color-bg-secondary);
 }
 
 .widget__note-title {
-  font: var(--text-body-1);
+  font: var(--text-body-2);
   font-weight: var(--font-weight-semibold);
   color: var(--color-fg-primary);
   display: block;
@@ -593,28 +647,8 @@ onMounted(() => {
 }
 
 .widget__note-preview {
-  font: var(--text-body-2);
+  font: var(--text-caption);
   color: var(--color-fg-secondary);
-  line-height: 1.5;
-}
-
-/* Empty state for widgets */
-.widget__empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-xl) var(--space-m);
-  gap: var(--space-xs);
-}
-
-.widget__empty-icon {
-  font-size: 1.75rem;
-  opacity: 0.6;
-}
-
-.widget__empty-text {
-  font: var(--text-body-2);
-  color: var(--color-fg-tertiary);
+  line-height: 1.4;
 }
 </style>

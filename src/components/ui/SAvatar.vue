@@ -65,8 +65,8 @@ function hashColor(name: string): string {
 }
 
 .savatar--sm { width: 24px; height: 24px; font-size: 10px; }
-.savatar--md { width: 32px; height: 32px; font-size: 12px; }
-.savatar--lg { width: 40px; height: 40px; font-size: 14px; }
+.savatar--md { width: 28px; height: 28px; font-size: 11px; }
+.savatar--lg { width: 32px; height: 32px; font-size: 12px; }
 
 .savatar__img {
   width: 100%;

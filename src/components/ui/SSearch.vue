@@ -61,7 +61,6 @@ function handleClear() {
   background: var(--color-surface-input);
   border: 1px solid var(--color-border-input);
   border-radius: var(--radius-m);
-  box-shadow: var(--shadow-inset);
   padding: 0 var(--space-m);
   gap: var(--space-s);
   transition:
@@ -74,8 +73,8 @@ function handleClear() {
 }
 
 .ssearch:focus-within {
-  border-color: var(--color-brand-primary);
-  box-shadow: 0 0 0 1px var(--color-brand-primary);
+  border-color: transparent;
+  box-shadow: inset 0 -2px 0 0 var(--color-brand-primary);
 }
 
 .ssearch__icon {

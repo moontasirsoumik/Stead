@@ -86,27 +86,27 @@ defineEmits<{
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-l) var(--space-xl);
+  padding: var(--space-l);
   border-bottom: 1px solid var(--color-border-subtle);
   flex-shrink: 0;
 }
 
 .drawer__title {
-  font: var(--text-title-2);
+  font: var(--text-title-3);
   color: var(--color-fg-primary);
 }
 
 .drawer__body {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-xl);
+  padding: var(--space-l);
 }
 
 .drawer__footer {
   display: flex;
   justify-content: flex-end;
   gap: var(--space-s);
-  padding: var(--space-l) var(--space-xl);
+  padding: var(--space-l);
   border-top: 1px solid var(--color-border-subtle);
   flex-shrink: 0;
 }

@@ -30,7 +30,7 @@ defineProps<{
   align-items: center;
   gap: var(--space-m);
   flex-wrap: wrap;
-  margin-bottom: var(--space-l);
+  margin-bottom: var(--space-m);
 }
 
 .filterbar__search {

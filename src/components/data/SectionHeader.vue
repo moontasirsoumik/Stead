@@ -20,9 +20,9 @@ defineProps<{
   display: flex;
   align-items: center;
   gap: var(--space-s);
-  padding-bottom: var(--space-m);
+  padding-bottom: var(--space-s);
   border-bottom: 1px solid var(--color-border-subtle);
-  margin-bottom: var(--space-l);
+  margin-bottom: var(--space-m);
 }
 
 .sectionheader__title {

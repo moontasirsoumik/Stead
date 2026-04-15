@@ -83,6 +83,7 @@ function isActive(to: string): boolean {
   color: var(--color-fg-tertiary);
   text-decoration: none;
   border-radius: var(--radius-m);
+  position: relative;
   transition: color var(--duration-fast) var(--easing-standard);
 }
 
@@ -90,8 +91,25 @@ function isActive(to: string): boolean {
   color: var(--color-brand-primary);
 }
 
+.mobilenav__item--active::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 3px;
+  background: var(--color-brand-primary);
+  border-radius: 2px;
+}
+
 .mobilenav__icon {
   display: flex;
+}
+
+.mobilenav__icon > svg {
+  width: 18px;
+  height: 18px;
 }
 
 .mobilenav__label {

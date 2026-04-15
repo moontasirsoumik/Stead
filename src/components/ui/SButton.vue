@@ -68,7 +68,7 @@ defineEmits<{
 
 /* ── Sizes ── */
 .sbutton--sm {
-  height: 28px;
+  height: 24px;
   padding: 0 var(--space-m);
   font: var(--text-body-2);
   font-weight: var(--font-weight-semibold);
@@ -81,7 +81,7 @@ defineEmits<{
 }
 
 .sbutton--lg {
-  height: 44px;
+  height: 36px;
   padding: 0 var(--space-xl);
 }
 
@@ -98,7 +98,7 @@ defineEmits<{
 
 .sbutton--primary:hover:not(:disabled) {
   background-color: var(--color-brand-hover);
-  box-shadow: var(--shadow-4);
+  box-shadow: var(--shadow-brand);
 }
 
 .sbutton--primary:active:not(:disabled) {
@@ -183,8 +183,8 @@ defineEmits<{
 
 .sbutton__spinner {
   position: absolute;
-  width: 16px;
-  height: 16px;
+  width: 12px;
+  height: 12px;
   border: 2px solid currentColor;
   border-right-color: transparent;
   border-radius: var(--radius-circle);

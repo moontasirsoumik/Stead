@@ -48,7 +48,7 @@ withDefaults(
 .scheckbox {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-s);
+  gap: var(--space-2xs);
   cursor: pointer;
   user-select: none;
 }
@@ -64,8 +64,8 @@ withDefaults(
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   border: 1.5px solid var(--color-border-strong);
   border-radius: var(--radius-s);
   background: var(--color-surface-input);

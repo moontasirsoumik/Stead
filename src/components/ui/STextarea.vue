@@ -60,8 +60,8 @@ withDefaults(
 }
 
 .stextarea__label {
-  font: var(--text-body-1-strong);
-  color: var(--color-fg-primary);
+  font: var(--text-body-2);
+  color: var(--color-fg-secondary);
 }
 
 .stextarea__required {
@@ -75,11 +75,10 @@ withDefaults(
   background: var(--color-surface-input);
   border: 1px solid var(--color-border-input);
   border-radius: var(--radius-m);
-  box-shadow: var(--shadow-inset);
   font: var(--text-body-1);
   color: var(--color-fg-primary);
   resize: vertical;
-  min-height: 80px;
+  min-height: 64px;
   transition:
     border-color var(--duration-fast) var(--easing-standard),
     box-shadow var(--duration-fast) var(--easing-standard);
@@ -95,8 +94,8 @@ withDefaults(
 
 .stextarea__field:focus {
   outline: none;
-  border-color: var(--color-brand-primary);
-  box-shadow: 0 0 0 1px var(--color-brand-primary);
+  border-color: transparent;
+  box-shadow: inset 0 -2px 0 0 var(--color-brand-primary);
 }
 
 .stextarea__footer {

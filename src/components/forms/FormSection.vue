@@ -25,7 +25,7 @@ defineProps<{
 }
 
 .formsection__header {
-  margin-bottom: var(--space-l);
+  margin-bottom: var(--space-m);
 }
 
 .formsection__title {

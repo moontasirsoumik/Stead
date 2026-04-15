@@ -11,12 +11,12 @@
   --bp-wide: 1440px;
 
   /* ── Structural Widths ── */
-  --width-nav-collapsed: 64px;
-  --width-nav-expanded: 240px;
-  --width-content-max: 1200px;
-  --width-drawer: 480px;
-  --height-header: 48px;
-  --height-input: 36px;
-  --height-row-min: 48px;
-  --height-mobile-nav: 56px;
+  --width-nav-collapsed: 48px;
+  --width-nav-expanded: 200px;
+  --width-content-max: 960px;
+  --width-drawer: 400px;
+  --height-header: 44px;
+  --height-input: 32px;
+  --height-row-min: 36px;
+  --height-mobile-nav: 52px;
 }

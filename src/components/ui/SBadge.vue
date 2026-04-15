@@ -27,19 +27,22 @@ withDefaults(
   gap: var(--space-xs);
   white-space: nowrap;
   font-weight: var(--font-weight-semibold);
-  border-radius: var(--radius-s);
+  border-radius: var(--radius-m);
 }
 
 /* Sizes */
 .sbadge--sm {
-  padding: var(--space-2xs) var(--space-xs);
+  padding: 0 var(--space-xs);
+  height: 18px;
   font: var(--text-caption);
   font-weight: var(--font-weight-semibold);
 }
 
 .sbadge--md {
-  padding: var(--space-2xs) var(--space-s);
-  font: var(--text-body-2);
+  padding: 0 var(--space-s);
+  height: 20px;
+  font-size: 11px;
+  line-height: 20px;
   font-weight: var(--font-weight-semibold);
 }
 

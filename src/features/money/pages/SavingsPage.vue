@@ -382,14 +382,14 @@ onMounted(async () => {
 <style scoped>
 .goals-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: var(--space-l);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-m);
 }
 
 .goal-card {
   display: flex;
   flex-direction: column;
-  gap: var(--space-m);
+  gap: var(--space-s);
 }
 
 .goal-card__header {
@@ -400,7 +400,8 @@ onMounted(async () => {
 }
 
 .goal-card__name {
-  font: var(--text-subtitle-1);
+  font: var(--text-body-1);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-fg-primary);
 }
 
@@ -417,26 +418,26 @@ onMounted(async () => {
 }
 
 .goal-card__current {
-  font: var(--text-title-3);
+  font: var(--text-title-2);
   color: var(--color-fg-primary);
   letter-spacing: var(--tracking-tight);
 }
 
 .goal-card__target {
-  font: var(--text-body-2);
+  font: var(--text-caption);
   color: var(--color-fg-tertiary);
 }
 
 .goal-card__bar {
-  height: 6px;
+  height: 4px;
   background: var(--color-bg-tertiary);
-  border-radius: 3px;
+  border-radius: 2px;
   overflow: hidden;
 }
 
 .goal-card__fill {
   height: 100%;
-  border-radius: 3px;
+  border-radius: 2px;
   background: var(--color-brand-primary);
   transition: width var(--duration-normal) var(--easing-standard);
 }
@@ -462,15 +463,14 @@ onMounted(async () => {
   gap: var(--space-xs);
   flex-wrap: wrap;
   border-top: 1px solid var(--color-border-subtle);
-  padding-top: var(--space-m);
+  padding-top: var(--space-s);
 }
 
 .goal-card__contributions {
   border-top: 1px solid var(--color-border-subtle);
-  padding-top: var(--space-m);
+  padding-top: var(--space-s);
   display: flex;
   flex-direction: column;
-  gap: var(--space-s);
 }
 
 .goal-card__no-contribs {
@@ -485,6 +485,13 @@ onMounted(async () => {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-m);
+  min-height: var(--height-row-min);
+  padding: 0 var(--space-xs);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.contrib-row:last-child {
+  border-bottom: none;
 }
 
 .contrib-row__left {
@@ -495,8 +502,8 @@ onMounted(async () => {
 
 .contrib-row__details {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-2xs);
+  align-items: center;
+  gap: var(--space-m);
 }
 
 .contrib-row__amount {

@@ -266,15 +266,9 @@ onMounted(async () => {
     </PageHeader>
 
     <div class="stats-row page-enter" :style="{ '--stagger': 1 }">
-      <ContentCard>
-        <InlineStat label="Total" :value="tasksStore.items.length" />
-      </ContentCard>
-      <ContentCard>
-        <InlineStat label="Due Today" :value="tasksStore.dueToday.length" />
-      </ContentCard>
-      <ContentCard>
-        <InlineStat label="Overdue" :value="tasksStore.overdueTasks.length" :trend="tasksStore.overdueTasks.length > 0 ? 'down' : 'neutral'" />
-      </ContentCard>
+      <InlineStat label="Total" :value="tasksStore.items.length" />
+      <InlineStat label="Due Today" :value="tasksStore.dueToday.length" />
+      <InlineStat label="Overdue" :value="tasksStore.overdueTasks.length" :trend="tasksStore.overdueTasks.length > 0 ? 'down' : 'neutral'" />
     </div>
 
     <ErrorBanner v-if="tasksStore.error" :message="tasksStore.error" @retry="authStore.householdId && tasksStore.fetchTasks(authStore.householdId)" />
@@ -301,14 +295,12 @@ onMounted(async () => {
           <DataList dividers>
             <div v-for="task in group.tasks" :key="task.id" class="task-row-wrapper" role="listitem">
               <div class="task-row" @click="toggleExpand(task.id)">
-                <div class="task-row__main">
-                  <span class="task-row__title">{{ task.title }}</span>
-                  <div class="task-row__meta">
-                    <SBadge :variant="priorityVariant(task.priority)" size="sm">{{ task.priority }}</SBadge>
-                    <StatusBadge :variant="statusVariant(task.status)">{{ task.status.replace('_', ' ') }}</StatusBadge>
-                    <span v-if="task.due_date" class="task-row__due">{{ formatRelativeDate(task.due_date) }}</span>
-                    <span v-if="subtaskProgress(task.id)" class="task-row__subtasks">{{ subtaskProgress(task.id) }}</span>
-                  </div>
+                <span class="task-row__title">{{ task.title }}</span>
+                <div class="task-row__meta">
+                  <SBadge :variant="priorityVariant(task.priority)" size="sm">{{ task.priority }}</SBadge>
+                  <StatusBadge :variant="statusVariant(task.status)">{{ task.status.replace('_', ' ') }}</StatusBadge>
+                  <span v-if="task.due_date" class="task-row__due">{{ formatRelativeDate(task.due_date) }}</span>
+                  <span v-if="subtaskProgress(task.id)" class="task-row__subtasks">{{ subtaskProgress(task.id) }}</span>
                 </div>
                 <div class="task-row__end">
                   <SAvatar v-if="getMemberName(task.assignee)" :name="getMemberName(task.assignee)!" size="sm" />
@@ -365,118 +357,141 @@ onMounted(async () => {
 
 <style scoped>
 .stats-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-m);
-  margin-bottom: var(--space-l);
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-m);
+  background: var(--color-surface-card);
+  margin-bottom: var(--space-m);
+  overflow: hidden;
+}
+
+.stats-row > * {
+  flex: 1;
+  border-right: 1px solid var(--color-border-subtle);
+}
+
+.stats-row > *:last-child {
+  border-right: none;
 }
 
 .task-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-m);
-  padding: var(--space-m) var(--space-l);
+  min-height: 36px;
+  padding: var(--space-xs) var(--space-l);
   cursor: pointer;
-  transition: background-color var(--duration-fast) var(--easing-standard);
+  transition: background var(--duration-fast) var(--easing-standard);
 }
 
 .task-row:hover {
   background: var(--color-bg-secondary);
 }
 
-.task-row__main {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  min-width: 0;
-}
-
 .task-row__title {
-  font: var(--text-body-1);
+  font: var(--text-body-2);
   color: var(--color-fg-primary);
   font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .task-row__meta {
   display: flex;
   align-items: center;
-  gap: var(--space-s);
-  flex-wrap: wrap;
+  gap: var(--space-xs);
+  flex-shrink: 0;
 }
 
 .task-row__due {
   font: var(--text-caption);
   color: var(--color-fg-tertiary);
+  white-space: nowrap;
 }
 
 .task-row__subtasks {
   font: var(--text-caption);
   color: var(--color-fg-tertiary);
   background: var(--color-bg-tertiary);
-  padding: var(--space-2xs) var(--space-xs);
+  padding: 0 var(--space-xs);
   border-radius: var(--radius-s);
 }
 
 .task-row__end {
   display: flex;
   align-items: center;
-  gap: var(--space-m);
+  gap: var(--space-s);
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .task-row__actions {
   display: flex;
-  gap: var(--space-xs);
+  gap: var(--space-2xs);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--easing-standard);
+}
+
+.task-row:hover .task-row__actions {
+  opacity: 1;
 }
 
 .task-expanded {
-  padding: var(--space-m) var(--space-l) var(--space-l);
+  padding: var(--space-s) var(--space-l) var(--space-m);
   background: var(--color-bg-secondary);
   border-top: 1px solid var(--color-border-subtle);
 }
 
 .task-expanded__desc {
-  font: var(--text-body-2);
+  font: var(--text-caption);
   color: var(--color-fg-secondary);
-  margin-bottom: var(--space-m);
-}
-
-.task-expanded__label {
-  font: var(--text-body-2);
-  color: var(--color-fg-secondary);
-  font-weight: var(--font-weight-semibold);
   margin-bottom: var(--space-s);
 }
 
+.task-expanded__label {
+  font: var(--text-caption);
+  color: var(--color-fg-tertiary);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-xs);
+}
+
 .task-expanded__subtasks {
-  margin-bottom: var(--space-m);
+  margin-bottom: var(--space-s);
 }
 
 .subtask-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-xs) 0;
+  min-height: 28px;
+  padding: 0;
 }
 
 .subtask-add {
   display: flex;
-  gap: var(--space-s);
+  gap: var(--space-xs);
   align-items: flex-end;
-  margin-top: var(--space-s);
+  margin-top: var(--space-xs);
 }
 
 .task-expanded__footer {
   display: flex;
-  gap: var(--space-s);
-  padding-top: var(--space-m);
+  gap: var(--space-xs);
+  padding-top: var(--space-s);
   border-top: 1px solid var(--color-border-subtle);
 }
 
 @media (max-width: 640px) {
-  .stats-row { grid-template-columns: 1fr; }
-  .task-row { flex-direction: column; align-items: flex-start; }
-  .task-row__end { width: 100%; justify-content: space-between; }
+  .stats-row { flex-direction: column; }
+  .stats-row > * { border-right: none; border-bottom: 1px solid var(--color-border-subtle); }
+  .stats-row > *:last-child { border-bottom: none; }
+  .task-row { flex-wrap: wrap; }
+  .task-row__actions { opacity: 1; }
 }
 </style>

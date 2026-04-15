@@ -25,14 +25,14 @@ defineProps<{
 }
 
 .inlinestat__label {
-  font: var(--text-body-2);
+  font: var(--text-caption);
   color: var(--color-fg-secondary);
   text-transform: uppercase;
   letter-spacing: var(--tracking-wide);
 }
 
 .inlinestat__value {
-  font: var(--text-title-1);
+  font: var(--text-title-2);
   color: var(--color-fg-primary);
   letter-spacing: var(--tracking-tight);
 }

@@ -37,12 +37,12 @@ const activeTab = computed(() => route.name as string)
 .money-layout {
   display: flex;
   flex-direction: column;
-  gap: var(--space-l);
+  gap: var(--space-m);
 }
 
 .money-tabs {
   display: flex;
-  gap: var(--space-2xs);
+  gap: 0;
   border-bottom: 1px solid var(--color-border-subtle);
   overflow-x: auto;
   scrollbar-width: none;
@@ -54,13 +54,15 @@ const activeTab = computed(() => route.name as string)
 
 .money-tab {
   position: relative;
-  padding: var(--space-s) var(--space-m);
+  padding: var(--space-s) var(--space-l);
   font: var(--text-body-1);
   font-weight: var(--font-weight-semibold);
   color: var(--color-fg-secondary);
   text-decoration: none;
   white-space: nowrap;
-  border-radius: var(--radius-m) var(--radius-m) 0 0;
+  height: var(--height-input);
+  display: inline-flex;
+  align-items: center;
   transition:
     color var(--duration-fast) var(--easing-standard),
     background-color var(--duration-fast) var(--easing-standard);
@@ -68,22 +70,22 @@ const activeTab = computed(() => route.name as string)
 
 .money-tab:hover {
   color: var(--color-fg-primary);
-  background: var(--color-bg-tertiary);
+  background: var(--color-bg-secondary);
 }
 
 .money-tab--active {
   color: var(--color-brand-primary);
+  background: color-mix(in srgb, var(--color-brand-primary) 8%, transparent);
 }
 
 .money-tab--active::after {
   content: '';
   position: absolute;
   bottom: -1px;
-  left: var(--space-s);
-  right: var(--space-s);
+  left: 0;
+  right: 0;
   height: 2px;
   background: var(--color-brand-primary);
-  border-radius: 1px 1px 0 0;
 }
 
 .money-content {

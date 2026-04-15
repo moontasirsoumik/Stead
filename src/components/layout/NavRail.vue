@@ -61,7 +61,7 @@ const navItems = [
   display: flex;
   flex-direction: column;
   gap: var(--space-2xs);
-  padding: 0 var(--space-s);
+  padding: 0 var(--space-xs);
 }
 
 @media (max-width: 640px) {

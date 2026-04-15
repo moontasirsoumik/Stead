@@ -201,53 +201,45 @@ onMounted(async () => {
     </div>
 
     <div v-else-if="billsStore.items.length" class="bills-list">
-      <ContentCard
+      <div
         v-for="(bill, idx) in billsStore.items"
         :key="bill.id"
-        padding="sm"
-        hoverable
         class="bill-row page-enter"
         :style="{ '--stagger': 3 + idx }"
         @click="openEdit(bill)"
       >
-        <div class="bill-row__content">
-          <div class="bill-row__left">
-            <StatusBadge :variant="statusVariant(bill.status)">
-              {{ bill.status }}
-            </StatusBadge>
-            <div class="bill-row__details">
-              <span class="bill-row__name">{{ bill.name }}</span>
-              <span class="bill-row__meta-text">
-                Due day {{ bill.due_day }} · {{ bill.frequency }}
-              </span>
-            </div>
-          </div>
-          <div class="bill-row__right">
-            <span class="bill-row__amount">{{ formatCents(bill.amount) }}</span>
-            <div class="bill-row__badges">
-              <SBadge v-if="bill.auto_pay" variant="info" size="sm">Auto-pay</SBadge>
-            </div>
-            <div class="bill-row__actions">
-              <SButton
-                v-if="bill.status === 'upcoming' || bill.status === 'overdue'"
-                variant="subtle"
-                size="sm"
-                @click.stop="markPaid(bill)"
-              >
-                Mark Paid
-              </SButton>
-              <SButton
-                v-if="bill.status === 'upcoming'"
-                variant="subtle"
-                size="sm"
-                @click.stop="skipBill(bill)"
-              >
-                Skip
-              </SButton>
-            </div>
-          </div>
+        <div class="bill-row__left">
+          <StatusBadge :variant="statusVariant(bill.status)">
+            {{ bill.status }}
+          </StatusBadge>
+          <span class="bill-row__name">{{ bill.name }}</span>
+          <span class="bill-row__meta-text">
+            Day {{ bill.due_day }} · {{ bill.frequency }}
+          </span>
+          <SBadge v-if="bill.auto_pay" variant="info" size="sm">Auto-pay</SBadge>
         </div>
-      </ContentCard>
+        <div class="bill-row__right">
+          <div class="bill-row__actions">
+            <SButton
+              v-if="bill.status === 'upcoming' || bill.status === 'overdue'"
+              variant="subtle"
+              size="sm"
+              @click.stop="markPaid(bill)"
+            >
+              Paid
+            </SButton>
+            <SButton
+              v-if="bill.status === 'upcoming'"
+              variant="subtle"
+              size="sm"
+              @click.stop="skipBill(bill)"
+            >
+              Skip
+            </SButton>
+          </div>
+          <span class="bill-row__amount">{{ formatCents(bill.amount) }}</span>
+        </div>
+      </div>
     </div>
 
     <ContentCard v-else class="page-enter" :style="{ '--stagger': 3 }">
@@ -324,18 +316,29 @@ onMounted(async () => {
 .bills-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-s);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-m);
+  background: var(--color-surface-card);
 }
 
 .bill-row {
-  cursor: pointer;
-}
-
-.bill-row__content {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  min-height: var(--height-row-min);
+  padding: var(--space-xs) var(--space-l);
   gap: var(--space-m);
+  border-bottom: 1px solid var(--color-border-subtle);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--easing-standard);
+}
+
+.bill-row:last-child {
+  border-bottom: none;
+}
+
+.bill-row:hover {
+  background: var(--color-bg-secondary);
 }
 
 .bill-row__left {
@@ -345,20 +348,18 @@ onMounted(async () => {
   min-width: 0;
 }
 
-.bill-row__details {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2xs);
-}
-
 .bill-row__name {
   font: var(--text-body-1);
   color: var(--color-fg-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .bill-row__meta-text {
   font: var(--text-caption);
   color: var(--color-fg-tertiary);
+  white-space: nowrap;
 }
 
 .bill-row__right {
@@ -371,13 +372,11 @@ onMounted(async () => {
 .bill-row__amount {
   font: var(--text-body-1);
   font-weight: var(--font-weight-semibold);
+  font-family: var(--font-mono);
   color: var(--color-fg-primary);
   white-space: nowrap;
-}
-
-.bill-row__badges {
-  display: flex;
-  gap: var(--space-xs);
+  min-width: 64px;
+  text-align: right;
 }
 
 .bill-row__actions {
@@ -386,16 +385,13 @@ onMounted(async () => {
 }
 
 @media (max-width: 640px) {
-  .bill-row__content {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-s);
+  .bill-row {
+    flex-wrap: wrap;
   }
 
   .bill-row__right {
     width: 100%;
-    justify-content: space-between;
-    flex-wrap: wrap;
+    justify-content: flex-end;
   }
 }
 </style>

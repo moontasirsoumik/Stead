@@ -33,7 +33,7 @@ defineProps<{
 }
 
 .pageheader__title {
-  font: var(--text-title-1);
+  font: var(--text-title-2);
   color: var(--color-fg-primary);
   letter-spacing: var(--tracking-tight);
 }
@@ -57,7 +57,7 @@ defineProps<{
   }
 
   .pageheader__title {
-    font: var(--text-title-2);
+    font: var(--text-title-3);
   }
 
   .pageheader__actions {

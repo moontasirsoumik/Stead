@@ -44,9 +44,10 @@ defineEmits<{
   justify-content: space-between;
   height: var(--height-header);
   padding: 0 var(--space-l);
-  background: var(--color-bg-primary);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--color-border-subtle);
-  box-shadow: var(--shadow-2);
 }
 
 .header__left {
@@ -75,12 +76,12 @@ defineEmits<{
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   background: var(--color-brand-primary);
   color: var(--color-fg-on-brand);
   font-weight: var(--font-weight-semibold);
-  font-size: 14px;
+  font-size: 12px;
   border-radius: var(--radius-m);
 }
 

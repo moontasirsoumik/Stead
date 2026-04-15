@@ -174,32 +174,24 @@ onMounted(async () => {
     </div>
 
     <div v-else-if="incomeStore.sorted.length" class="income-list">
-      <ContentCard
+      <div
         v-for="(item, idx) in incomeStore.sorted"
         :key="item.id"
-        padding="sm"
-        hoverable
         class="income-row page-enter"
         :style="{ '--stagger': 3 + idx }"
         @click="openEdit(item)"
       >
-        <div class="income-row__content">
-          <div class="income-row__left">
-            <SBadge variant="success" size="sm">{{ item.category }}</SBadge>
-            <div class="income-row__details">
-              <span class="income-row__source">{{ item.source }}</span>
-              <span class="income-row__date">{{ formatDate(item.date) }}</span>
-            </div>
-          </div>
-          <div class="income-row__right">
-            <span class="income-row__amount">{{ formatCents(item.amount) }}</span>
-            <div class="income-row__meta">
-              <SAvatar :name="getMemberName(item.received_by)" :color="getMemberColor(item.received_by)" size="sm" />
-              <SBadge v-if="item.recurring" variant="info" size="sm">Recurring</SBadge>
-            </div>
-          </div>
+        <div class="income-row__left">
+          <SBadge variant="success" size="sm">{{ item.category }}</SBadge>
+          <span class="income-row__source">{{ item.source }}</span>
+          <span class="income-row__date">{{ formatDate(item.date) }}</span>
         </div>
-      </ContentCard>
+        <div class="income-row__right">
+          <SAvatar :name="getMemberName(item.received_by)" :color="getMemberColor(item.received_by)" size="sm" />
+          <SBadge v-if="item.recurring" variant="info" size="sm">Recurring</SBadge>
+          <span class="income-row__amount">{{ formatCents(item.amount) }}</span>
+        </div>
+      </div>
     </div>
 
     <ContentCard v-else class="page-enter" :style="{ '--stagger': 3 }">
@@ -269,18 +261,29 @@ onMounted(async () => {
 .income-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-s);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-m);
+  background: var(--color-surface-card);
 }
 
 .income-row {
-  cursor: pointer;
-}
-
-.income-row__content {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  min-height: var(--height-row-min);
+  padding: 0 var(--space-l);
   gap: var(--space-m);
+  border-bottom: 1px solid var(--color-border-subtle);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--easing-standard);
+}
+
+.income-row:last-child {
+  border-bottom: none;
+}
+
+.income-row:hover {
+  background: var(--color-bg-secondary);
 }
 
 .income-row__left {
@@ -290,20 +293,18 @@ onMounted(async () => {
   min-width: 0;
 }
 
-.income-row__details {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2xs);
-}
-
 .income-row__source {
   font: var(--text-body-1);
   color: var(--color-fg-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .income-row__date {
   font: var(--text-caption);
   color: var(--color-fg-tertiary);
+  white-space: nowrap;
 }
 
 .income-row__right {
@@ -316,25 +317,22 @@ onMounted(async () => {
 .income-row__amount {
   font: var(--text-body-1);
   font-weight: var(--font-weight-semibold);
+  font-family: var(--font-mono);
   color: var(--color-success);
   white-space: nowrap;
-}
-
-.income-row__meta {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
+  min-width: 64px;
+  text-align: right;
 }
 
 @media (max-width: 640px) {
-  .income-row__content {
-    flex-direction: column;
-    align-items: flex-start;
+  .income-row {
+    flex-wrap: wrap;
+    padding: var(--space-xs) var(--space-l);
   }
 
   .income-row__right {
     width: 100%;
-    justify-content: space-between;
+    justify-content: flex-end;
   }
 }
 </style>

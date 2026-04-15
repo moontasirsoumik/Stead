@@ -6,11 +6,11 @@
 :root {
   --space-2xs: 2px;
   --space-xs: 4px;
-  --space-s: 8px;
-  --space-m: 12px;
-  --space-l: 16px;
-  --space-xl: 24px;
-  --space-2xl: 32px;
-  --space-3xl: 48px;
-  --space-4xl: 64px;
+  --space-s: 6px;
+  --space-m: 8px;
+  --space-l: 12px;
+  --space-xl: 16px;
+  --space-2xl: 24px;
+  --space-3xl: 32px;
+  --space-4xl: 48px;
 }

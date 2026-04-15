@@ -243,12 +243,8 @@ onMounted(async () => {
     </PageHeader>
 
     <div class="stats-row page-enter" :style="{ '--stagger': 1 }">
-      <ContentCard>
-        <InlineStat label="Needed" :value="shoppingStore.neededCount" />
-      </ContentCard>
-      <ContentCard>
-        <InlineStat label="In Cart" :value="shoppingStore.inCartCount" />
-      </ContentCard>
+      <InlineStat label="Needed" :value="shoppingStore.neededCount" />
+      <InlineStat label="In Cart" :value="shoppingStore.inCartCount" />
     </div>
 
     <ErrorBanner v-if="shoppingStore.error" :message="shoppingStore.error" @retry="authStore.householdId && shoppingStore.fetchItems(authStore.householdId)" />
@@ -282,18 +278,14 @@ onMounted(async () => {
         <ContentCard>
           <DataList dividers>
             <div v-for="item in items" :key="item.id" class="shop-row" role="listitem">
-              <div class="shop-row__left">
-                <button class="shop-row__status-btn" @click.stop="shoppingStore.toggleStatus(item.id)" :title="'Toggle status'">
-                  <StatusBadge :variant="statusVariant(item.status)">{{ statusLabel(item.status) }}</StatusBadge>
-                </button>
-                <div class="shop-row__info">
-                  <span class="shop-row__name">{{ item.name }}</span>
-                  <span v-if="item.quantity > 1 || item.unit" class="shop-row__qty">
-                    {{ item.quantity }}<template v-if="item.unit"> {{ item.unit }}</template>
-                  </span>
-                </div>
-              </div>
-              <div class="shop-row__right">
+              <button class="shop-row__status-btn" @click.stop="shoppingStore.toggleStatus(item.id)" :title="'Toggle status'">
+                <StatusBadge :variant="statusVariant(item.status)">{{ statusLabel(item.status) }}</StatusBadge>
+              </button>
+              <span class="shop-row__name">{{ item.name }}</span>
+              <span v-if="item.quantity > 1 || item.unit" class="shop-row__qty">
+                {{ item.quantity }}<template v-if="item.unit"> {{ item.unit }}</template>
+              </span>
+              <div class="shop-row__end">
                 <SBadge v-if="item.priority !== 'medium'" :variant="priorityVariant(item.priority)" size="sm">{{ item.priority }}</SBadge>
                 <SAvatar v-if="getMemberName(item.assigned_to)" :name="getMemberName(item.assigned_to)!" size="sm" />
                 <div class="shop-row__actions" @click.stop>
@@ -333,37 +325,42 @@ onMounted(async () => {
 
 <style scoped>
 .stats-row {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-m);
-  margin-bottom: var(--space-l);
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-m);
+  background: var(--color-surface-card);
+  margin-bottom: var(--space-m);
+  overflow: hidden;
+}
+
+.stats-row > * {
+  flex: 1;
+  border-right: 1px solid var(--color-border-subtle);
+}
+
+.stats-row > *:last-child {
+  border-right: none;
 }
 
 .quick-add {
   display: flex;
-  gap: var(--space-s);
+  gap: var(--space-xs);
   align-items: flex-end;
-  margin-bottom: var(--space-l);
+  margin-bottom: var(--space-m);
 }
 
 .shop-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-m);
-  padding: var(--space-m) var(--space-l);
-  transition: background-color var(--duration-fast) var(--easing-standard);
+  min-height: 36px;
+  padding: var(--space-xs) var(--space-l);
+  transition: background var(--duration-fast) var(--easing-standard);
 }
 
 .shop-row:hover {
   background: var(--color-bg-secondary);
-}
-
-.shop-row__left {
-  display: flex;
-  align-items: center;
-  gap: var(--space-m);
-  min-width: 0;
 }
 
 .shop-row__status-btn {
@@ -371,41 +368,51 @@ onMounted(async () => {
   border: none;
   cursor: pointer;
   padding: 0;
-}
-
-.shop-row__info {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-s);
-  min-width: 0;
+  flex-shrink: 0;
 }
 
 .shop-row__name {
-  font: var(--text-body-1);
+  font: var(--text-body-2);
   color: var(--color-fg-primary);
   font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .shop-row__qty {
   font: var(--text-caption);
   color: var(--color-fg-tertiary);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.shop-row__right {
+.shop-row__end {
   display: flex;
   align-items: center;
   gap: var(--space-s);
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .shop-row__actions {
   display: flex;
   gap: var(--space-2xs);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--easing-standard);
+}
+
+.shop-row:hover .shop-row__actions {
+  opacity: 1;
 }
 
 @media (max-width: 640px) {
-  .stats-row { grid-template-columns: 1fr; }
-  .shop-row { flex-direction: column; align-items: flex-start; }
-  .shop-row__right { width: 100%; justify-content: flex-end; }
+  .stats-row { flex-direction: column; }
+  .stats-row > * { border-right: none; border-bottom: 1px solid var(--color-border-subtle); }
+  .stats-row > *:last-child { border-bottom: none; }
+  .shop-row { flex-wrap: wrap; }
+  .shop-row__actions { opacity: 1; }
 }
 </style>
