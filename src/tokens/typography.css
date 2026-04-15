@@ -1,0 +1,31 @@
+/* ============================================================
+   Stead — Typography Tokens
+   Segoe UI Variable for native Windows feel; fallback chain
+   for cross-platform rendering
+   ============================================================ */
+
+:root {
+  /* ── Font Families ── */
+  --font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, -apple-system,
+    BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+
+  /* ── Type Scale (font shorthand: weight size/line-height family) ── */
+  --text-display: 600 28px/36px var(--font-family);
+  --text-title-1: 600 24px/32px var(--font-family);
+  --text-title-2: 600 20px/28px var(--font-family);
+  --text-title-3: 600 16px/22px var(--font-family);
+  --text-body-1: 400 14px/20px var(--font-family);
+  --text-body-1-strong: 600 14px/20px var(--font-family);
+  --text-body-2: 400 12px/16px var(--font-family);
+  --text-caption: 400 11px/14px var(--font-family);
+
+  /* ── Individual Weights ── */
+  --font-weight-regular: 400;
+  --font-weight-semibold: 600;
+
+  /* ── Letter Spacing ── */
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.02em;
+}

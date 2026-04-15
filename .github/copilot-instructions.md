@@ -15,7 +15,19 @@ This is the **Stead** household management app — a production-quality, local-f
 - **Remote**: Supabase Postgres via `@supabase/supabase-js` (PostgREST)
 - **Auth**: Supabase Auth (email/password, JWT)
 - **Security**: Row Level Security (RLS) — every table scoped to household
-- **Design**: Fluent 2-inspired custom token system + Vue components
+- **Design**: Fluent 2-inspired custom token system + Vue components — **refined, premium, non-generic aesthetic**
+
+## Design Quality Standard (ALL AGENTS)
+
+Every UI output must meet the **"Quiet Confidence"** standard:
+- Layered depth (shadows, elevation, translucency) — never flat rectangles
+- Typographic hierarchy (3+ visual weight levels per page)
+- Staggered entry animations on page load and dynamic content
+- Generous whitespace and intentional spatial rhythm
+- Polished interaction states (hover: bg+shadow lift, focus: branded ring, press: subtle scale)
+- Contextual empty states with personality and CTAs — never "No data found"
+- Design tokens for ALL visual values — zero hardcoded colors, spacing, or radii
+- The result must look like a premium product, not AI-generated scaffolding
 
 ## Layer Boundaries (ENFORCED)
 

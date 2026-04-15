@@ -1,0 +1,67 @@
+/* ============================================================
+   Stead — Global Styles
+   Base application styles applied to root elements
+   ============================================================ */
+
+body {
+  font: var(--text-body-1);
+  color: var(--color-fg-primary);
+  background-color: var(--color-bg-secondary);
+  font-family: var(--font-family);
+}
+
+#app {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Selection ── */
+::selection {
+  background-color: var(--color-brand-subtle);
+  color: var(--color-fg-primary);
+}
+
+/* ── Page-level stagger animation ── */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}
+
+.page-enter {
+  animation: fadeSlideUp var(--duration-normal) var(--easing-decelerate) backwards;
+  animation-delay: calc(var(--stagger, 0) * 50ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter {
+    animation-name: fadeIn;
+  }
+}
+
+/* ── Route transition ── */
+.route-enter-active {
+  transition: opacity var(--duration-page) var(--easing-decelerate),
+    transform var(--duration-page) var(--easing-decelerate);
+}
+
+.route-leave-active {
+  transition: opacity var(--duration-fast) var(--easing-accelerate);
+}
+
+.route-enter-from {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.route-leave-to {
+  opacity: 0;
+}

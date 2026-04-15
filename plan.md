@@ -807,6 +807,37 @@ The Supabase free tier allows: 500 MB database, 1 GB file storage, 50k monthly a
 
 ## 10. Design System Specification
 
+### 10.0 Design Philosophy — "Quiet Confidence"
+
+Stead's visual identity is built on the principle of **quiet confidence**: an interface that communicates quality through restraint, craft, and intentional detail — not through flashiness or visual noise.
+
+**Core Aesthetic Direction:**
+- **Warm professionalism** — not sterile corporate (Microsoft Teams), not childish consumer (Notion pastel-land). Think: premium stationery, a well-designed analog clock, a Muji product.
+- **Fluent 2 as foundation, not ceiling** — we use Fluent 2's token architecture and interaction patterns, but elevate with custom personality, spatial craft, and animation polish that Fluent's defaults don't provide.
+- **Depth and layering** — surfaces feel physical. Cards rest on backgrounds with real shadows. Elevated elements (drawers, dropdowns) float convincingly. Translucent overlays create atmospheric depth.
+- **Typography does the heavy lifting** — 80% of visual hierarchy comes from font weight, size, and color contrast. Borders, backgrounds, and icons are supporting actors.
+- **Asymmetric spatial rhythm** — spacing is varied intentionally. Tighter between related elements, generous between sections. Not every card gets the same padding. Breathing room creates calm.
+- **Motion as communication** — every animation means something: an element arriving, confirming an action, drawing attention. Staggered page entry reveals (cascading children with 30-50ms delay increments) are the signature Stead animation pattern.
+- **Sparse brand color** — the brand blue appears rarely and always communicates "interactive" or "selected." Neutrals carry 90% of the UI. This makes brand color appearances feel significant.
+
+**Visual Quality Gates (every page/component must pass):**
+1. Can you identify the most important element within 0.5 seconds?
+2. Are there 3+ distinct levels of typographic hierarchy?
+3. Do interactive elements respond visually to hover, focus, and press?
+4. Does the page load with a staggered entry animation, not an instant flash?
+5. Is there generous whitespace creating calm, not padding creating uniformity?
+6. Does every card/surface have subtle depth (shadow, border, or bg contrast)?
+7. Would a designer mistake this for AI-generated scaffolding? (If yes, iterate.)
+
+**Anti-Patterns to NEVER produce:**
+- Flat rectangles with a color theme and no shadow/depth
+- Uniform padding/margin everywhere (identical spacing signals laziness)
+- "No data found" empty states with no illustration, context, or CTA
+- Linear easing on any transition (always use decelerate or standard curves)
+- Every card looking identical (visual monotony kills perceived quality)
+- Pages that feel like spreadsheets — if it's tabular, add visual breaks
+- Cookie-cutter component grids with zero spatial personality
+
 ### 10.1 Color Tokens (Light Theme)
 
 ```css
@@ -960,17 +991,44 @@ Rules:
 
 ### 10.9 Component Patterns
 
-**Interactive states:** Default → Hover (subtle bg) → Pressed (darker bg) → Focused (2px brand outline). Disabled: 40% opacity, no pointer events.
+**Interactive states:** Default → Hover (bg shift + shadow lift, `duration-fast` + `easing-standard`) → Pressed (shadow reduction, subtle scale 0.98) → Focused (2px brand outline offset 2px, clearly visible). Disabled: 40% opacity, no pointer events, no hover.
 
-**Forms:** Labels above inputs, 36px input height, `--radius-m`, red border + error text on invalid. Sections separated by `--space-2xl`.
+**Depth hierarchy:**
+- Page background: `--color-bg-secondary`
+- Content cards: `--color-surface-card` + `--shadow-2`, hover → `--shadow-4`
+- Elevated surfaces (dropdowns, tooltips): `--shadow-8`
+- Modal drawers: `--shadow-16` + scrim overlay
+- Dialogs: `--shadow-28` + scrim, centered
 
-**Lists:** 44px row min-height, hover `--color-bg-secondary`, 1px subtle dividers. Sticky headers.
+**Page entry animation (signature Stead pattern):**
+```css
+.page-enter {
+  animation: fadeSlideUp var(--duration-normal) var(--easing-decelerate) backwards;
+  animation-delay: calc(var(--stagger-index, 0) * 50ms);
+}
 
-**Empty states:** Centered area + title + subtitle + CTA button.
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(8px); }
+}
 
-**Loading:** Skeleton shimmer matching content shape.
+@media (prefers-reduced-motion: reduce) {
+  .page-enter { animation: fadeOnly var(--duration-normal) backwards; }
+  @keyframes fadeOnly { from { opacity: 0; } }
+}
+```
+Apply `--stagger-index: 0` to PageHeader, `1` to FilterBar, `2` to content, etc.
 
-**Errors:** Inline banner with `--color-error-bg` background, retry action.
+**Forms:** Labels above inputs, 36px input height, `--radius-m`, inner shadow on inputs for inset feel. Red border + error text on invalid. Sections grouped with titles and separated by `--space-2xl`. Submit button in a sticky footer on mobile.
+
+**Lists:** 48px row min-height, hover `--color-bg-secondary` + slight shadow lift, 1px subtle dividers between items. Sticky section headers. List items animate in with staggered translateY on first load.
+
+**Cards:** `--radius-l` + `--shadow-2` + `--color-surface-card`. Hover: shadow increases to `--shadow-4`. Never use border as the only depth indicator — always pair with shadow.
+
+**Empty states:** Centered area with a contextual icon/illustration (not generic), a title explaining the state ("No expenses this month"), a subtitle with guidance ("Add your first expense to start tracking"), and a prominent CTA button. Every empty state should feel designed for its specific context.
+
+**Loading:** Skeleton shimmer that mirrors the actual content layout (e.g., skeleton rows match data row proportions, skeleton cards match card dimensions). Never use a single centered spinner for page-level loading.
+
+**Errors:** Inline banner with `--color-error-bg` background, clear error description, and a retry action button. Never show raw error messages to users.
 
 ---
 

@@ -1,0 +1,29 @@
+/* ============================================================
+   Stead — Motion Tokens
+   Intentional, communicative animation values
+   ============================================================ */
+
+:root {
+  /* ── Durations ── */
+  --duration-ultra-fast: 50ms;
+  --duration-fast: 100ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-page: 250ms;
+
+  /* ── Easing Curves ── */
+  --easing-standard: cubic-bezier(0.33, 0, 0.67, 1);
+  --easing-decelerate: cubic-bezier(0, 0, 0, 1);
+  --easing-accelerate: cubic-bezier(1, 0, 1, 1);
+}
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-ultra-fast: 0ms;
+    --duration-fast: 0ms;
+    --duration-normal: 0ms;
+    --duration-slow: 0ms;
+    --duration-page: 0ms;
+  }
+}

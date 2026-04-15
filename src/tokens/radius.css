@@ -1,0 +1,12 @@
+/* ============================================================
+   Stead — Border Radius Tokens
+   Scale matched to element size for visual harmony
+   ============================================================ */
+
+:root {
+  --radius-s: 4px;
+  --radius-m: 8px;
+  --radius-l: 12px;
+  --radius-xl: 16px;
+  --radius-circle: 50%;
+}
