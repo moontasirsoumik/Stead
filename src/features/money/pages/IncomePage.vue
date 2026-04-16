@@ -20,14 +20,15 @@ import MonthSummary from '@/features/money/components/MonthSummary.vue'
 import MoneyTabs from '@/features/money/components/MoneyTabs.vue'
 import { useIncomeStore } from '@/stores/income.store'
 import { useAuthStore } from '@/stores/auth.store'
+import { useAppStore } from '@/stores/app.store'
 import { useHouseholdStore } from '@/stores/household.store'
 import { formatCents, formatDate } from '@/utils/format'
 import type { Income } from '@/models/income.model'
 
 const incomeStore = useIncomeStore()
 const authStore = useAuthStore()
+const appStore = useAppStore()
 const householdStore = useHouseholdStore()
-
 const drawerOpen = ref(false)
 const editingId = ref<string | null>(null)
 const saving = ref(false)
@@ -66,6 +67,10 @@ function getMemberName(id: string): string {
 function getMemberColor(id: string): string | undefined {
   return householdStore.activeMembers.find((m) => m.id === id)?.color
 }
+
+const scopedSorted = computed(() =>
+  incomeStore.sorted.filter((i) => i.scope === appStore.scope),
+)
 
 const summaryStats = computed(() => [
   {
@@ -121,6 +126,8 @@ async function handleSubmit() {
       recurring_rule: null,
       note: form.value.note || null,
       deleted: false,
+      scope: appStore.scope,
+      owner_id: appStore.scope === 'personal' ? authStore.memberId : null,
     }
     if (editingId.value) {
       await incomeStore.update(editingId.value, payload)
@@ -176,9 +183,9 @@ onMounted(async () => {
       <LoadingSkeleton :lines="5" />
     </div>
 
-    <div v-else-if="incomeStore.sorted.length" class="income-list">
+    <div v-else-if="scopedSorted.length" class="income-list">
       <div
-        v-for="(item, idx) in incomeStore.sorted"
+        v-for="(item, idx) in scopedSorted"
         :key="item.id"
         class="income-row page-enter"
         :style="{ '--stagger': 3 + idx }"
@@ -267,7 +274,7 @@ onMounted(async () => {
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-l);
   background: var(--color-surface-card);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-2), var(--shadow-card);
 }
 
 .income-row {

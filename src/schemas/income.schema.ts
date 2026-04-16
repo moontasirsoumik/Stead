@@ -10,4 +10,6 @@ export const incomeSchema = householdEntitySchema.extend({
   recurring: z.coerce.boolean(),
   recurring_rule: z.string().nullable(),
   note: z.string().nullable(),
+  scope: z.enum(['household', 'personal']),
+  owner_id: z.string().uuid().nullable(),
 })

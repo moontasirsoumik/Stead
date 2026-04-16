@@ -11,4 +11,6 @@ export const expenseSchema = householdEntitySchema.extend({
   shared: z.coerce.boolean(),
   tags: z.array(z.string()).nullable(),
   note: z.string().nullable(),
+  scope: z.enum(['household', 'personal']),
+  owner_id: z.string().uuid().nullable(),
 })

@@ -21,12 +21,13 @@ import FormSection from '@/components/forms/FormSection.vue'
 import ConfirmDialog from '@/components/feedback/ConfirmDialog.vue'
 import { useNotesStore } from '@/stores/notes.store'
 import { useAuthStore } from '@/stores/auth.store'
+import { useAppStore } from '@/stores/app.store'
 import { formatDate } from '@/utils/format'
 import type { Note } from '@/models/note.model'
 
 const notesStore = useNotesStore()
 const authStore = useAuthStore()
-
+const appStore = useAppStore()
 const search = ref('')
 const categoryFilter = ref('')
 
@@ -54,7 +55,7 @@ const categoryOptions = computed(() => {
 })
 
 const filteredItems = computed(() => {
-  let result = notesStore.recentNotes
+  let result = notesStore.recentNotes.filter((n) => n.scope === appStore.scope)
   if (search.value) {
     const q = search.value.toLowerCase()
     result = result.filter((n) =>
@@ -113,6 +114,8 @@ async function handleSubmit() {
         created_by: authStore.memberId ?? null,
         household_id: authStore.householdId!,
         deleted: false,
+        scope: appStore.scope,
+        owner_id: appStore.scope === 'personal' ? authStore.memberId : null,
       })
     }
     drawerOpen.value = false
@@ -259,20 +262,18 @@ onMounted(async () => {
   background: var(--color-surface-card);
   border-radius: var(--radius-l);
   border: 1px solid var(--color-border-default);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-2), var(--shadow-card);
   cursor: pointer;
   transition:
+    background-color var(--duration-fast) var(--easing-standard),
     border-color var(--duration-fast) var(--easing-standard),
     box-shadow var(--duration-fast) var(--easing-standard);
 }
 
 .note-card:hover {
-  border-color: var(--color-border-strong);
-  box-shadow: var(--shadow-4);
-}
-
-.note-card--pinned {
-  border-left: 2px solid var(--color-brand-primary);
+  background: var(--color-surface-card-hover);
+  box-shadow: var(--shadow-8), var(--shadow-card);
+  border-color: var(--color-outline-variant);
 }
 
 .note-card__header {
@@ -320,7 +321,6 @@ onMounted(async () => {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-  line-height: 1.4;
 }
 
 .note-card__date {

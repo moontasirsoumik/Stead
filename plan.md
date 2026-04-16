@@ -1698,3 +1698,537 @@ Add these as **encrypted environment variables** in the Cloudflare Pages dashboa
 5. **SQL power** — proper indexes, constraints, triggers, foreign keys
 6. **Free tier** — 500 MB database, sufficient for years of family data
 7. **Future-proof** — Realtime subscriptions, Edge Functions, Storage available when needed
+
+---
+
+## 25. Restructure: Module Merges & Personal Scope (Post-MVP)
+
+> **Decision date:** 2026-04-16
+> **Status:** Planned — P15, P16, P17
+
+Three architectural changes to reduce navigation clutter, unify related concepts, and add personal/private data support.
+
+### 25.1 P15 — Merge Tasks + Maintenance
+
+**Rationale:** Maintenance items are infrequent tasks with extra metadata (vendor, cost, contact). Merging eliminates a separate module, simplifies navigation, and lets users manage all actionable items in one place. Delegation (e.g. "wife assigns task to husband to call plumber") works naturally via the existing `assignee` field plus a new `created_by` field.
+
+**Unified Task Model:**
+
+```typescript
+interface Task extends HouseholdEntity {
+  title: string                     // was 'item' in maintenance
+  description: string | null
+  task_type: TaskType               // NEW: 'regular' | 'maintenance'
+  assignee: string | null           // was 'assigned_to' in maintenance
+  created_by: string | null         // NEW: who created/delegated
+  room: string | null
+  category: string | null           // was 'type' in maintenance
+  due_date: string | null           // was 'next_due_date' in maintenance
+  recurring_rule: string | null
+  priority: TaskPriority
+  status: TaskStatus
+  completed_at: string | null
+  last_done_date: string | null     // NEW: from maintenance
+  estimated_cost: number | null     // NEW: cents, from maintenance
+  vendor: string | null             // NEW: from maintenance
+  contact: string | null            // NEW: from maintenance
+  note: string | null
+}
+```
+
+**New enum:**
+```typescript
+type TaskType = 'regular' | 'maintenance'
+```
+
+**Status mapping:** `MaintenanceStatus.upcoming` → `TaskStatus.not_started`. All other statuses (`overdue`, `done`, `skipped`) already exist in TaskStatus.
+
+**Migration (006):**
+```sql
+ALTER TABLE tasks ADD COLUMN task_type text NOT NULL DEFAULT 'regular'
+  CHECK (task_type IN ('regular', 'maintenance'));
+ALTER TABLE tasks ADD COLUMN created_by uuid REFERENCES members(id);
+ALTER TABLE tasks ADD COLUMN last_done_date date;
+ALTER TABLE tasks ADD COLUMN estimated_cost integer;
+ALTER TABLE tasks ADD COLUMN vendor text;
+ALTER TABLE tasks ADD COLUMN contact text;
+
+-- Migrate existing maintenance data
+INSERT INTO tasks (household_id, title, description, task_type, assignee,
+  room, category, due_date, recurring_rule, priority, status, completed_at,
+  last_done_date, estimated_cost, vendor, contact, note, deleted,
+  created_at, updated_at, updated_by)
+SELECT household_id, item, NULL, 'maintenance', assigned_to,
+  NULL, type, next_due_date, recurring_rule, 'medium',
+  CASE WHEN status = 'upcoming' THEN 'not_started' ELSE status END,
+  CASE WHEN status = 'done' THEN updated_at ELSE NULL END,
+  last_done_date, estimated_cost, vendor, contact, note, deleted,
+  created_at, updated_at, updated_by
+FROM maintenance;
+```
+
+**UI:** Single TasksPage with a type filter (`All` | `Tasks` | `Maintenance`). Form shows maintenance-specific fields (vendor, contact, estimated cost) only when `task_type = 'maintenance'`.
+
+**Files removed:** `maintenance.model.ts`, `maintenance.schema.ts`, `maintenance.data.ts`, `maintenance.store.ts`, `MaintenancePage.vue`, maintenance nav item, maintenance route.
+
+**Dexie:** Remove `maintenance` table, add new indexed fields to `tasks`.
+
+---
+
+### 25.2 P16 — Merge Shopping + Inventory → Pantry Module
+
+**Rationale:** Shopping and inventory are two sides of the same coin — what you have vs. what you need. Merging into one "Pantry" module with tabs reduces navigation items and enables natural integration (restock from inventory → shopping list).
+
+**Decision:** Keep separate DB tables (`groceries` + `inventory`). Unify under one feature module with a tabbed layout, like the Money module.
+
+**Route changes:**
+```
+/pantry                    → PantryLayout (redirect → /pantry/shopping)
+/pantry/shopping           → ShoppingPage (was /shopping)
+/pantry/inventory          → InventoryPage (was /inventory)
+```
+
+Old routes `/shopping` and `/inventory` removed.
+
+**Integration feature:** Inventory items with low stock (`stock_status` in `out`, `almost_finished`, `low`) or `restock_needed = true` get an "Add to Shopping List" action that creates a grocery item with matching name and category.
+
+**Nav:** Single "Pantry" nav item replaces separate "Shopping" and "Inventory" items.
+
+**New file:** `src/features/pantry/PantryLayout.vue` — tabbed layout component.
+
+**Moved files:**
+- `src/features/shopping/ShoppingPage.vue` → `src/features/pantry/pages/ShoppingPage.vue`
+- `src/features/inventory/InventoryPage.vue` → `src/features/pantry/pages/InventoryPage.vue`
+
+**Stores:** `shopping.store.ts` and `inventory.store.ts` remain separate — no merge needed.
+
+---
+
+### 25.3 P17 — Personal Scope
+
+**Rationale:** Currently all data is household-scoped. Users need personal budgets, personal savings goals, personal notes, and personal tasks that are invisible to other household members.
+
+**Concept:** Add a `scope` discriminator and `owner_id` to tables that support personal content.
+
+**Affected tables:** `expenses`, `income`, `budgets`, `savings_goals`, `goal_contributions`, `notes`, `tasks`
+
+**New columns on each affected table:**
+```sql
+ALTER TABLE {table} ADD COLUMN scope text NOT NULL DEFAULT 'household'
+  CHECK (scope IN ('household', 'personal'));
+ALTER TABLE {table} ADD COLUMN owner_id uuid REFERENCES members(id);
+-- Constraint: personal items MUST have owner_id
+ALTER TABLE {table} ADD CONSTRAINT {table}_personal_owner
+  CHECK (scope = 'household' OR owner_id IS NOT NULL);
+```
+
+**Updated RLS policy pattern:**
+```sql
+CREATE POLICY "Users can view own household or personal items"
+  ON {table} FOR SELECT
+  USING (
+    (scope = 'household' AND is_household_member(household_id))
+    OR (scope = 'personal' AND EXISTS (
+      SELECT 1 FROM members
+      WHERE id = owner_id
+      AND user_id = auth.uid()
+      AND active = true
+    ))
+  );
+```
+
+Same pattern for INSERT, UPDATE, DELETE — personal items require the user to be the owner.
+
+**Model changes:** Add `scope: 'household' | 'personal'` and `owner_id: string | null` to affected TypeScript interfaces.
+
+**New enum:**
+```typescript
+type DataScope = 'household' | 'personal'
+```
+
+**UI pattern:**
+- Affected pages get a scope toggle (pill switch): `Household` | `Personal`
+- Default view: `Household` (existing behavior)
+- Personal view: filters by `owner_id = current member`
+- Create forms include scope selection
+- Dashboard gets a "Personal" section showing personal tasks, budget summary, and goals
+
+**Store changes:** Each affected store adds:
+- `scope` ref to track current view
+- Scope-aware fetch: `.eq('scope', scope).eq('owner_id', memberId)` for personal
+- Personal-only computed getters
+
+**Index additions:**
+```sql
+CREATE INDEX idx_{table}_scope_owner ON {table} (scope, owner_id)
+  WHERE scope = 'personal';
+```
+
+---
+
+### Updated Module List (post-restructure)
+
+1. **Dashboard** — household + personal overview
+2. **Money** — income, expenses, bills, budgets, savings goals (household + personal)
+3. **Tasks** — regular tasks + maintenance tasks (household + personal)
+4. **Pantry** — shopping list + inventory (household only)
+5. **Reminders** — date-based alerts
+6. **Notes** — freeform notes (household + personal)
+7. **Settings** — household + member management
+
+### Updated Route Map (post-restructure)
+
+```
+/login                     → LoginPage (public)
+/signup                    → SignupPage (public)
+/onboarding                → OnboardingPage
+/                          → DashboardPage
+/money                     → MoneyLayout → /money/expenses
+/money/expenses            → ExpensesPage
+/money/income              → IncomePage
+/money/bills               → BillsPage
+/money/budgets             → BudgetsPage
+/money/savings             → SavingsPage
+/tasks                     → TasksPage (includes maintenance)
+/pantry                    → PantryLayout → /pantry/shopping
+/pantry/shopping           → ShoppingPage
+/pantry/inventory          → InventoryPage
+/reminders                 → RemindersPage
+/notes                     → NotesPage
+/settings                  → SettingsPage
+```
+
+### Updated Nav (post-restructure)
+
+```
+Overview:   Dashboard, Money
+Manage:     Tasks, Pantry, Reminders
+Think:      Notes
+```
+
+---
+
+## 26. Global Scope Switcher & New Features
+
+> **Decision date:** 2026-04-16
+> **Motivation:** Per-page scope toggles are ugly, easy to miss, and risk accidental data mixing. Replace with a global navigation-level scope context. Add dedicated personal and household features.
+
+### 26.1 P18 — Global Scope Switcher
+
+**Problem:** SScopeToggle in the middle of each page is visually disruptive and doesn't provide enough separation between household and personal data.
+
+**Solution:** A global scope switcher at the top of the sidebar (like a workspace selector). When switched to "Personal", the entire app context shifts — pages auto-filter, create payloads inherit scope, and a visual indicator ensures the user always knows which mode they're in.
+
+**Implementation:**
+1. Add `scope: DataScope` to `app.store.ts` as global reactive state (persisted to localStorage)
+2. Add `ScopeSelector` component — dropdown/pill at the top of NavRail (above navigation sections)
+3. NavRail shows different nav items per scope:
+   - **Household:** Dashboard, Money, Tasks, Pantry, Reminders, Notes
+   - **Personal:** Dashboard, Money, Tasks, Notes, Wishlist, Journal, Habits, Subscriptions
+4. MobileNav shows scope-appropriate items (5 most important for each scope)
+5. AppShell applies a `data-scope="personal"` attribute for CSS visual distinction
+6. Remove SScopeToggle from all 6 pages (Expenses, Income, Budgets, Savings, Tasks, Notes)
+7. All pages read scope from `appStore.scope` instead of local ref
+8. All create payloads inherit scope + owner_id from global context
+9. Dashboard changes content based on active scope
+
+**Visual distinction (personal mode):**
+- Subtle accent color shift (e.g., teal accent instead of brand primary)
+- Scope label visible in sidebar header
+- Badge/indicator in mobile nav
+
+**Nav layout (personal scope):**
+```
+Overview:   Dashboard, Money
+Manage:     Tasks, Habits
+Think:      Notes, Journal
+My Stuff:   Wishlist, Subscriptions
+```
+
+### 26.2 P19 — Wishlist (Personal)
+
+Personal items the user wants to buy — track price, priority, links, "saved for" progress.
+
+**Table:**
+```sql
+CREATE TABLE wishlists (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  household_id UUID NOT NULL REFERENCES households(id),
+  owner_id UUID NOT NULL REFERENCES members(id),
+  name TEXT NOT NULL,
+  description TEXT DEFAULT '',
+  url TEXT DEFAULT '',
+  price INTEGER DEFAULT 0,
+  priority TEXT NOT NULL DEFAULT 'medium' CHECK (priority IN ('high', 'medium', 'low')),
+  status TEXT NOT NULL DEFAULT 'wanted' CHECK (status IN ('wanted', 'saving', 'bought', 'dropped')),
+  saved_amount INTEGER DEFAULT 0,
+  category TEXT DEFAULT '',
+  note TEXT DEFAULT '',
+  deleted BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+```
+
+**RLS:** `owner_id = current_member_id AND household_id = current_household_id`
+
+**Model:** `WishlistItem` with all columns as snake_case fields
+**Enums:** `WishlistStatus = 'wanted' | 'saving' | 'bought' | 'dropped'`
+**Page:** Card grid with status badges, progress bar for saving items, quick-add
+
+### 26.3 P20 — Subscriptions (Personal)
+
+Personal recurring payments — Netflix, gym, phone plan. Track monthly cost, renewal dates, total spend.
+
+**Table:**
+```sql
+CREATE TABLE subscriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  household_id UUID NOT NULL REFERENCES households(id),
+  owner_id UUID NOT NULL REFERENCES members(id),
+  name TEXT NOT NULL,
+  amount INTEGER NOT NULL DEFAULT 0,
+  frequency TEXT NOT NULL DEFAULT 'monthly' CHECK (frequency IN ('weekly', 'monthly', 'quarterly', 'yearly')),
+  category TEXT DEFAULT '',
+  next_billing_date DATE,
+  auto_renew BOOLEAN DEFAULT TRUE,
+  url TEXT DEFAULT '',
+  note TEXT DEFAULT '',
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'paused', 'cancelled')),
+  deleted BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+```
+
+**RLS:** `owner_id = current_member_id AND household_id = current_household_id`
+
+**Model:** `Subscription` with all columns
+**Enums:** `SubscriptionFrequency = 'weekly' | 'monthly' | 'quarterly' | 'yearly'`, `SubscriptionStatus = 'active' | 'paused' | 'cancelled'`
+**Page:** List view with monthly cost summary, renewal calendar, status badges
+**Computed:** `monthlyTotal` (normalize all frequencies to monthly equivalent)
+
+### 26.4 P21 — Personal Journal (Personal)
+
+Private daily reflections — date-stamped entries, mood tag, simple text content.
+
+**Table:**
+```sql
+CREATE TABLE journal_entries (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  household_id UUID NOT NULL REFERENCES households(id),
+  owner_id UUID NOT NULL REFERENCES members(id),
+  entry_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  content TEXT NOT NULL DEFAULT '',
+  mood TEXT CHECK (mood IN ('great', 'good', 'okay', 'bad', 'terrible')),
+  tags TEXT DEFAULT '',
+  deleted BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+```
+
+**RLS:** `owner_id = current_member_id AND household_id = current_household_id`
+
+**Model:** `JournalEntry` with all columns
+**Enums:** `Mood = 'great' | 'good' | 'okay' | 'bad' | 'terrible'`
+**Page:** Timeline/feed view sorted by date desc, mood emoji indicators, expandable entries, calendar dot view
+**Constraint:** One entry per date per user (can be enforced in app logic or with UNIQUE)
+
+### 26.5 P22 — Habit Tracker (Personal)
+
+Daily habits to build — checkboxes per day, streaks, weekly view.
+
+**Tables:**
+```sql
+CREATE TABLE habits (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  household_id UUID NOT NULL REFERENCES households(id),
+  owner_id UUID NOT NULL REFERENCES members(id),
+  name TEXT NOT NULL,
+  description TEXT DEFAULT '',
+  frequency TEXT NOT NULL DEFAULT 'daily' CHECK (frequency IN ('daily', 'weekdays', 'weekends', 'custom')),
+  target_days TEXT DEFAULT '',
+  color TEXT DEFAULT '',
+  active BOOLEAN DEFAULT TRUE,
+  deleted BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE habit_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  habit_id UUID NOT NULL REFERENCES habits(id) ON DELETE CASCADE,
+  household_id UUID NOT NULL REFERENCES households(id),
+  owner_id UUID NOT NULL REFERENCES members(id),
+  log_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  completed BOOLEAN DEFAULT TRUE,
+  note TEXT DEFAULT '',
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(habit_id, log_date)
+);
+```
+
+**RLS:** `owner_id = current_member_id AND household_id = current_household_id`
+
+**Models:** `Habit`, `HabitLog`
+**Enums:** `HabitFrequency = 'daily' | 'weekdays' | 'weekends' | 'custom'`
+**Page:** Weekly grid view — habits as rows, days as columns, checkboxes at intersections. Streak counter per habit. Summary stats (completion rate, current/best streak).
+**Computed:** `currentStreak`, `bestStreak`, `completionRate` (last 30 days)
+
+### 26.6 P23 — Contacts / Service Providers (Household)
+
+Household service contacts — plumber, electrician, landlord. Linkable to maintenance tasks.
+
+**Table:**
+```sql
+CREATE TABLE contacts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  household_id UUID NOT NULL REFERENCES households(id),
+  name TEXT NOT NULL,
+  role TEXT DEFAULT '',
+  phone TEXT DEFAULT '',
+  email TEXT DEFAULT '',
+  address TEXT DEFAULT '',
+  company TEXT DEFAULT '',
+  note TEXT DEFAULT '',
+  category TEXT DEFAULT '',
+  deleted BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+```
+
+**RLS:** Household-scoped (standard `household_id` match)
+
+**Model:** `Contact` with all columns
+**Page:** Searchable list/card grid, grouped by category, click-to-call/email links
+**Integration:** Task create form gets optional `contact_id` dropdown for maintenance tasks
+
+### 26.7 P24 — Documents / Warranties (Household)
+
+Track important household documents — warranty expiry, insurance policies, lease dates. Metadata only (no file upload).
+
+**Table:**
+```sql
+CREATE TABLE documents (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  household_id UUID NOT NULL REFERENCES households(id),
+  title TEXT NOT NULL,
+  doc_type TEXT NOT NULL DEFAULT 'other' CHECK (doc_type IN ('warranty', 'insurance', 'lease', 'contract', 'receipt', 'manual', 'other')),
+  description TEXT DEFAULT '',
+  issuer TEXT DEFAULT '',
+  issue_date DATE,
+  expiry_date DATE,
+  reference_number TEXT DEFAULT '',
+  note TEXT DEFAULT '',
+  deleted BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+```
+
+**RLS:** Household-scoped
+
+**Model:** `Document` with all columns
+**Enums:** `DocType = 'warranty' | 'insurance' | 'lease' | 'contract' | 'receipt' | 'manual' | 'other'`
+**Page:** List view with type badges, expiry countdown, filter by type, "expiring soon" highlight
+**Computed:** `expiringSoon` (next 30 days), `expired`
+
+### 26.8 P25 — Meal Planning (Household)
+
+Weekly meal plans — assign meals to days, link to shopping list.
+
+**Tables:**
+```sql
+CREATE TABLE meal_plans (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  household_id UUID NOT NULL REFERENCES households(id),
+  week_start DATE NOT NULL,
+  note TEXT DEFAULT '',
+  deleted BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE meals (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  meal_plan_id UUID NOT NULL REFERENCES meal_plans(id) ON DELETE CASCADE,
+  household_id UUID NOT NULL REFERENCES households(id),
+  day_of_week INTEGER NOT NULL CHECK (day_of_week BETWEEN 0 AND 6),
+  meal_type TEXT NOT NULL CHECK (meal_type IN ('breakfast', 'lunch', 'dinner', 'snack')),
+  name TEXT NOT NULL,
+  recipe_notes TEXT DEFAULT '',
+  servings INTEGER DEFAULT 1,
+  deleted BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+```
+
+**RLS:** Household-scoped
+
+**Models:** `MealPlan`, `Meal`
+**Enums:** `MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack'`, `DayOfWeek = 0..6`
+**Page:** Weekly calendar grid — days as columns, meal types as rows. Click cell to add/edit meal. "Add ingredients to shopping list" action per meal.
+**Integration:** "Add to shopping" creates grocery items from meal ingredients
+
+### 26.9 P26 — Chore Rotation (Household Enhancement)
+
+Fair chore distribution — auto-rotation of assignees for recurring household tasks.
+
+**Schema change (alter tasks table):**
+```sql
+ALTER TABLE tasks
+  ADD COLUMN rotation_enabled BOOLEAN DEFAULT FALSE,
+  ADD COLUMN rotation_members TEXT DEFAULT '',
+  ADD COLUMN rotation_index INTEGER DEFAULT 0;
+```
+
+**Implementation:**
+- `rotation_members`: comma-separated member IDs defining the rotation order
+- `rotation_index`: index into the rotation list, tracks whose turn it is
+- When a rotating task is completed, auto-increment `rotation_index` (mod member count) and set `assignee` to the next member
+- Task create/edit form shows rotation toggle + member ordering when enabled
+- Dashboard shows "Your turn" indicator for rotation tasks assigned to current user
+
+**No new module needed** — this enhances TasksPage with rotation UI
+
+### Updated Nav (post-features)
+
+**Household scope:**
+```
+Overview:   Dashboard, Money
+Manage:     Tasks, Pantry, Reminders
+Plan:       Meals
+Think:      Notes
+Reference:  Contacts, Documents
+```
+
+**Personal scope:**
+```
+Overview:   Dashboard, Money
+Manage:     Tasks, Habits
+Think:      Notes, Journal
+My Stuff:   Wishlist, Subscriptions
+```
+
+### Updated Route Map (post-features)
+
+```
+/                          → DashboardPage
+/money/...                 → Money module (5 sub-pages)
+/tasks                     → TasksPage
+/pantry/shopping           → ShoppingPage       (household only)
+/pantry/inventory          → InventoryPage       (household only)
+/reminders                 → RemindersPage       (household only)
+/notes                     → NotesPage
+/meals                     → MealPlanPage         (household only)
+/contacts                  → ContactsPage         (household only)
+/documents                 → DocumentsPage        (household only)
+/wishlist                  → WishlistPage          (personal only)
+/subscriptions             → SubscriptionsPage     (personal only)
+/journal                   → JournalPage           (personal only)
+/habits                    → HabitsPage            (personal only)
+/settings                  → SettingsPage
+```

@@ -62,6 +62,11 @@ const routes: RouteRecordRaw[] = [
             name: 'savings',
             component: () => import('@/features/money/pages/SavingsPage.vue'),
           },
+          {
+            path: 'balances',
+            name: 'balances',
+            component: () => import('@/features/money/pages/BalancesPage.vue'),
+          },
         ],
       },
 
@@ -72,18 +77,23 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/features/tasks/TasksPage.vue'),
       },
 
-      /* Shopping */
+      /* Pantry (Shopping + Inventory) */
       {
-        path: 'shopping',
-        name: 'shopping',
-        component: () => import('@/features/shopping/ShoppingPage.vue'),
-      },
-
-      /* Inventory */
-      {
-        path: 'inventory',
-        name: 'inventory',
-        component: () => import('@/features/inventory/InventoryPage.vue'),
+        path: 'pantry',
+        component: () => import('@/features/pantry/PantryLayout.vue'),
+        redirect: '/pantry/shopping',
+        children: [
+          {
+            path: 'shopping',
+            name: 'shopping',
+            component: () => import('@/features/pantry/pages/ShoppingPage.vue'),
+          },
+          {
+            path: 'inventory',
+            name: 'inventory',
+            component: () => import('@/features/pantry/pages/InventoryPage.vue'),
+          },
+        ],
       },
 
       /* Reminders */
@@ -100,11 +110,53 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/features/notes/NotesPage.vue'),
       },
 
-      /* Maintenance */
+      /* Wishlist (personal) */
       {
-        path: 'maintenance',
-        name: 'maintenance',
-        component: () => import('@/features/maintenance/MaintenancePage.vue'),
+        path: 'wishlist',
+        name: 'wishlist',
+        component: () => import('@/features/wishlist/WishlistPage.vue'),
+      },
+
+      /* Subscriptions (personal) */
+      {
+        path: 'subscriptions',
+        name: 'subscriptions',
+        component: () => import('@/features/subscriptions/SubscriptionsPage.vue'),
+      },
+
+      /* Journal (personal) */
+      {
+        path: 'journal',
+        name: 'journal',
+        component: () => import('@/features/journal/JournalPage.vue'),
+      },
+
+      /* Habits (personal) */
+      {
+        path: 'habits',
+        name: 'habits',
+        component: () => import('@/features/habits/HabitsPage.vue'),
+      },
+
+      /* Contacts (household) */
+      {
+        path: 'contacts',
+        name: 'contacts',
+        component: () => import('@/features/contacts/ContactsPage.vue'),
+      },
+
+      /* Documents (household) */
+      {
+        path: 'documents',
+        name: 'documents',
+        component: () => import('@/features/documents/DocumentsPage.vue'),
+      },
+
+      /* Meals (household) */
+      {
+        path: 'meals',
+        name: 'meals',
+        component: () => import('@/features/meals/MealsPage.vue'),
       },
 
       /* Settings */

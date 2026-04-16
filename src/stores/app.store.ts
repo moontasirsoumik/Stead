@@ -1,10 +1,12 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
+import type { DataScope } from '@/models/enums'
 
 export type ThemePreference = 'system' | 'light' | 'dark'
 
 const SIDEBAR_STORAGE_KEY = 'stead-sidebar-expanded'
 const THEME_STORAGE_KEY = 'stead-theme-preference'
+const SCOPE_STORAGE_KEY = 'stead-scope'
 
 function getSystemTheme(): 'light' | 'dark' {
   if (typeof window === 'undefined') return 'light'
@@ -31,6 +33,7 @@ export const useAppStore = defineStore('app', () => {
   const mobileSidebarOpen = ref(false)
   const themePreference = ref<ThemePreference>('system')
   const isOnline = ref(typeof navigator === 'undefined' ? true : navigator.onLine)
+  const scope = ref<DataScope>('household')
 
   const resolvedTheme = computed<'light' | 'dark'>(() => {
     if (themePreference.value === 'system') return getSystemTheme()
@@ -56,7 +59,13 @@ export const useAppStore = defineStore('app', () => {
       themePreference.value = storedTheme
     }
 
+    const storedScope = window.localStorage.getItem(SCOPE_STORAGE_KEY)
+    if (storedScope === 'household' || storedScope === 'personal') {
+      scope.value = storedScope
+    }
+
     applyThemeToDocument(resolvedTheme.value)
+    document.documentElement.dataset.scope = scope.value
 
     systemThemeQuery?.removeEventListener('change', handleSystemThemeChange)
     systemThemeQuery = window.matchMedia('(prefers-color-scheme: dark)')
@@ -99,6 +108,22 @@ export const useAppStore = defineStore('app', () => {
   function toggleTheme() {
     setThemePreference(resolvedTheme.value === 'dark' ? 'light' : 'dark')
   }
+
+  function setScope(value: DataScope) {
+    scope.value = value
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(SCOPE_STORAGE_KEY, value)
+    }
+    if (typeof document !== 'undefined') {
+      document.documentElement.dataset.scope = value
+    }
+  }
+
+  function toggleScope() {
+    setScope(scope.value === 'household' ? 'personal' : 'household')
+  }
+
+  const isPersonal = computed(() => scope.value === 'personal')
 
   /* ── Directional navigation transitions ── */
   const NAV_ORDER: Record<string, number> = {
@@ -144,6 +169,10 @@ export const useAppStore = defineStore('app', () => {
     closeMobileSidebar,
     setThemePreference,
     toggleTheme,
+    scope,
+    isPersonal,
+    setScope,
+    toggleScope,
     updateNavDirection,
   }
 })

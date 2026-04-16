@@ -12,11 +12,19 @@ import type { GroceryItem } from '@/models/grocery.model'
 import type { InventoryItem } from '@/models/inventory.model'
 import type { Reminder } from '@/models/reminder.model'
 import type { Note } from '@/models/note.model'
-import type { MaintenanceItem } from '@/models/maintenance.model'
+import type { WishlistItem } from '@/models/wishlist.model'
+import type { Subscription } from '@/models/subscription.model'
+import type { JournalEntry } from '@/models/journal.model'
+import type { Habit, HabitLog } from '@/models/habit.model'
+import type { Contact } from '@/models/contact.model'
+import type { HouseholdDocument } from '@/models/document.model'
+import type { MealPlan, Meal } from '@/models/meal.model'
+import type { ExpenseSplit } from '@/models/expense-split.model'
 
 class SteadDatabase extends Dexie {
   members!: Table<Member, string>
   expenses!: Table<Expense, string>
+  expense_splits!: Table<ExpenseSplit, string>
   income!: Table<Income, string>
   bills!: Table<Bill, string>
   budgets!: Table<Budget, string>
@@ -28,7 +36,15 @@ class SteadDatabase extends Dexie {
   inventory!: Table<InventoryItem, string>
   reminders!: Table<Reminder, string>
   notes!: Table<Note, string>
-  maintenance!: Table<MaintenanceItem, string>
+  wishlists!: Table<WishlistItem, string>
+  subscriptions!: Table<Subscription, string>
+  journal_entries!: Table<JournalEntry, string>
+  habits!: Table<Habit, string>
+  habit_logs!: Table<HabitLog, string>
+  contacts!: Table<Contact, string>
+  documents!: Table<HouseholdDocument, string>
+  meal_plans!: Table<MealPlan, string>
+  meals!: Table<Meal, string>
 
   constructor() {
     super('stead-db')
@@ -47,6 +63,33 @@ class SteadDatabase extends Dexie {
       reminders: 'id, household_id, due_date, status',
       notes: 'id, household_id, pinned',
       maintenance: 'id, household_id, status, next_due_date',
+    })
+    this.version(2).stores({
+      tasks: 'id, household_id, status, due_date, assignee, task_type',
+      maintenance: null, // remove maintenance table
+    })
+    this.version(3).stores({
+      expenses: 'id, household_id, date, category, scope, owner_id',
+      income: 'id, household_id, date, scope, owner_id',
+      budgets: 'id, household_id, month, scope, owner_id',
+      savings_goals: 'id, household_id, status, scope, owner_id',
+      goal_contributions: 'id, goal_id, scope, owner_id',
+      tasks: 'id, household_id, status, due_date, assignee, task_type, scope, owner_id',
+      notes: 'id, household_id, pinned, scope, owner_id',
+    })
+    this.version(4).stores({
+      wishlists: 'id, household_id, owner_id, status',
+      subscriptions: 'id, household_id, owner_id, status',
+      journal_entries: 'id, household_id, owner_id, entry_date',
+      habits: 'id, household_id, owner_id',
+      habit_logs: 'id, habit_id, log_date',
+      contacts: 'id, household_id',
+      documents: 'id, household_id, doc_type',
+      meal_plans: 'id, household_id, week_start',
+      meals: 'id, meal_plan_id, household_id',
+    })
+    this.version(5).stores({
+      expense_splits: 'id, expense_id, household_id, member_id, settled',
     })
   }
 }

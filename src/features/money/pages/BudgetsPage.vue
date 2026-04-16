@@ -16,6 +16,7 @@ import MoneyTabs from '@/features/money/components/MoneyTabs.vue'
 import { useBudgetsStore } from '@/stores/budgets.store'
 import { useExpensesStore } from '@/stores/expenses.store'
 import { useAuthStore } from '@/stores/auth.store'
+import { useAppStore } from '@/stores/app.store'
 import { formatCents } from '@/utils/format'
 import { EXPENSE_CATEGORIES } from '@/constants/categories'
 import type { Budget } from '@/models/budget.model'
@@ -23,7 +24,7 @@ import type { Budget } from '@/models/budget.model'
 const budgetsStore = useBudgetsStore()
 const expensesStore = useExpensesStore()
 const authStore = useAuthStore()
-
+const appStore = useAppStore()
 const drawerOpen = ref(false)
 const editingId = ref<string | null>(null)
 const saving = ref(false)
@@ -48,7 +49,9 @@ interface BudgetCard {
 }
 
 const budgetCards = computed<BudgetCard[]>(() =>
-  budgetsStore.currentMonthBudgets.map((b) => {
+  budgetsStore.currentMonthBudgets
+    .filter((b) => b.scope === appStore.scope)
+    .map((b) => {
     const spent = budgetsStore.spentForCategory(b.category)
     const remaining = b.budget_amount - spent
     const percent = b.budget_amount > 0 ? (spent / b.budget_amount) * 100 : 0
@@ -87,6 +90,8 @@ async function handleSubmit() {
       category: form.value.category,
       budget_amount: cents,
       deleted: false,
+      scope: appStore.scope,
+      owner_id: appStore.scope === 'personal' ? authStore.memberId : null,
     }
     if (editingId.value) {
       await budgetsStore.update(editingId.value, payload)
@@ -262,15 +267,15 @@ onMounted(async () => {
 }
 
 .budget-card__bar {
-  height: 3px;
+  height: 4px;
   background: var(--color-bg-tertiary);
-  border-radius: 2px;
+  border-radius: var(--radius-s);
   overflow: hidden;
 }
 
 .budget-card__fill {
   height: 100%;
-  border-radius: 2px;
+  border-radius: var(--radius-s);
   transition: width var(--duration-normal) var(--easing-standard);
 }
 

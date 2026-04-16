@@ -9,4 +9,6 @@ export const savingsGoalSchema = householdEntitySchema.extend({
   priority: z.enum(['high', 'medium', 'low']),
   status: z.enum(['active', 'reached', 'paused', 'cancelled']),
   note: z.string().nullable(),
+  scope: z.enum(['household', 'personal']),
+  owner_id: z.string().uuid().nullable(),
 })

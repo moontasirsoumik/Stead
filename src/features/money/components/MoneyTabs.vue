@@ -15,6 +15,7 @@ const tabs = [
   { name: 'bills', label: 'Bills', path: '/money/bills' },
   { name: 'budgets', label: 'Budgets', path: '/money/budgets' },
   { name: 'savings', label: 'Savings', path: '/money/savings' },
+  { name: 'balances', label: 'Balances', path: '/money/balances' },
 ]
 
 const activeTab = computed(() => route.name as string)

@@ -12,11 +12,13 @@ withDefaults(
     error?: string
     hint?: string
     disabled?: boolean
+    readonly?: boolean
     required?: boolean
   }>(),
   {
     type: 'text',
     disabled: false,
+    readonly: false,
     required: false,
   },
 )
@@ -28,7 +30,7 @@ defineEmits<{
 </script>
 
 <template>
-  <div :class="['sinput', { 'sinput--error': error, 'sinput--disabled': disabled }]">
+  <div :class="['sinput', { 'sinput--error': error, 'sinput--disabled': disabled, 'sinput--readonly': readonly }]">
     <label v-if="label" class="sinput__label" :for="inputId">
       {{ label }}
       <span v-if="required" class="sinput__required" aria-hidden="true">*</span>
@@ -45,6 +47,7 @@ defineEmits<{
         :type="type"
         :placeholder="placeholder"
         :disabled="disabled"
+        :readonly="readonly"
         :required="required"
         :aria-invalid="!!error"
         :aria-describedby="error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined"
@@ -129,6 +132,10 @@ defineEmits<{
   outline: none;
 }
 
+.sinput__field:read-only {
+  cursor: default;
+}
+
 .sinput__affix {
   display: flex;
   align-items: center;
@@ -158,6 +165,10 @@ defineEmits<{
 .sinput--disabled {
   opacity: 0.4;
   pointer-events: none;
+}
+
+.sinput--readonly .sinput__wrapper {
+  background: var(--color-surface-container-low);
 }
 
 .sinput__message {

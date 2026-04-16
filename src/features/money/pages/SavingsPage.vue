@@ -20,6 +20,7 @@ import MonthSummary from '@/features/money/components/MonthSummary.vue'
 import MoneyTabs from '@/features/money/components/MoneyTabs.vue'
 import { useSavingsStore } from '@/stores/savings.store'
 import { useAuthStore } from '@/stores/auth.store'
+import { useAppStore } from '@/stores/app.store'
 import { useHouseholdStore } from '@/stores/household.store'
 import { formatCents, formatDate } from '@/utils/format'
 import type { SavingsGoal } from '@/models/savings-goal.model'
@@ -27,8 +28,8 @@ import type { GoalStatus, TaskPriority } from '@/models/enums'
 
 const savingsStore = useSavingsStore()
 const authStore = useAuthStore()
+const appStore = useAppStore()
 const householdStore = useHouseholdStore()
-
 const goalDrawerOpen = ref(false)
 const contribDrawerOpen = ref(false)
 const editingGoalId = ref<string | null>(null)
@@ -85,6 +86,10 @@ function statusVariant(status: GoalStatus): 'default' | 'success' | 'warning' | 
 function priorityVariant(p: TaskPriority): 'error' | 'warning' | 'default' {
   return p === 'high' ? 'error' : p === 'medium' ? 'warning' : 'default'
 }
+
+const scopedGoals = computed(() =>
+  savingsStore.goals.filter((g) => g.scope === appStore.scope),
+)
 
 const summaryStats = computed(() => [
   {
@@ -157,6 +162,8 @@ async function handleGoalSubmit() {
       status: 'active' as GoalStatus,
       note: goalForm.value.note || null,
       deleted: false,
+      scope: appStore.scope,
+      owner_id: appStore.scope === 'personal' ? authStore.memberId : null,
     }
     if (editingGoalId.value) {
       const { current_amount: _c, status: _s, ...rest } = payload
@@ -183,6 +190,8 @@ async function handleContribSubmit() {
       contributed_by: contribForm.value.contributed_by,
       note: contribForm.value.note || null,
       deleted: false,
+      scope: appStore.scope,
+      owner_id: appStore.scope === 'personal' ? authStore.memberId : null,
     })
     contribDrawerOpen.value = false
   } finally {
@@ -233,9 +242,9 @@ onMounted(async () => {
       <LoadingSkeleton :lines="5" />
     </div>
 
-    <div v-else-if="savingsStore.goals.length" class="goals-grid">
+    <div v-else-if="scopedGoals.length" class="goals-grid">
       <ContentCard
-        v-for="(goal, idx) in savingsStore.goals"
+        v-for="(goal, idx) in scopedGoals"
         :key="goal.id"
         padding="md"
         class="goal-card page-enter"
@@ -432,16 +441,16 @@ onMounted(async () => {
 }
 
 .goal-card__bar {
-  height: 3px;
+  height: 4px;
   background: var(--color-bg-tertiary);
-  border-radius: 2px;
+  border-radius: var(--radius-s);
   overflow: hidden;
 }
 
 .goal-card__fill {
   height: 100%;
   background: var(--color-brand-primary);
-  border-radius: 2px;
+  border-radius: var(--radius-s);
   transition: width var(--duration-normal) var(--easing-standard);
 }
 

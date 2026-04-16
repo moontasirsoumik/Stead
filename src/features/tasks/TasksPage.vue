@@ -25,19 +25,21 @@ import FormSection from '@/components/forms/FormSection.vue'
 import ConfirmDialog from '@/components/feedback/ConfirmDialog.vue'
 import { useTasksStore } from '@/stores/tasks.store'
 import { useAuthStore } from '@/stores/auth.store'
+import { useAppStore } from '@/stores/app.store'
 import { useHouseholdStore } from '@/stores/household.store'
 import { formatRelativeDate } from '@/utils/format'
 import type { Task } from '@/models/task.model'
-import type { TaskStatus, TaskPriority } from '@/models/enums'
+import type { TaskStatus, TaskPriority, TaskType } from '@/models/enums'
 
 const tasksStore = useTasksStore()
 const authStore = useAuthStore()
+const appStore = useAppStore()
 const householdStore = useHouseholdStore()
-
 const search = ref('')
 const statusFilter = ref('')
 const priorityFilter = ref('')
 const assigneeFilter = ref('')
+const typeFilter = ref<TaskType | 'all'>('all')
 
 const drawerOpen = ref(false)
 const drawerLoading = ref(false)
@@ -51,6 +53,10 @@ const formCategory = ref('')
 const formDueDate = ref('')
 const formPriority = ref<TaskPriority>('medium')
 const formNote = ref('')
+const formTaskType = ref<TaskType>('regular')
+const formEstimatedCost = ref('')
+const formVendor = ref('')
+const formContact = ref('')
 
 const expandedTaskId = ref<string | null>(null)
 const newSubtaskTitle = ref('')
@@ -79,6 +85,17 @@ const priorityFormOptions = [
   { value: 'low', label: 'Low' },
 ]
 
+const typeOptions = [
+  { value: 'all', label: 'All types' },
+  { value: 'regular', label: 'Tasks' },
+  { value: 'maintenance', label: 'Maintenance' },
+]
+
+const typeFormOptions = [
+  { value: 'regular', label: 'Regular Task' },
+  { value: 'maintenance', label: 'Maintenance' },
+]
+
 const memberOptions = computed(() => [
   { value: '', label: 'Anyone' },
   ...householdStore.activeMembers.map((m) => ({ value: m.id, label: m.name })),
@@ -95,7 +112,10 @@ function getMemberName(id: string | null): string | null {
 }
 
 const filteredItems = computed(() => {
-  let result = tasksStore.items
+  let result = tasksStore.items.filter((t) => t.scope === appStore.scope)
+  if (typeFilter.value !== 'all') {
+    result = result.filter((t) => t.task_type === typeFilter.value)
+  }
   if (search.value) {
     const q = search.value.toLowerCase()
     result = result.filter((t) => t.title.toLowerCase().includes(q))
@@ -173,6 +193,10 @@ function openCreateDrawer() {
   formDueDate.value = ''
   formPriority.value = 'medium'
   formNote.value = ''
+  formTaskType.value = typeFilter.value !== 'all' ? typeFilter.value : 'regular'
+  formEstimatedCost.value = ''
+  formVendor.value = ''
+  formContact.value = ''
   drawerOpen.value = true
 }
 
@@ -186,6 +210,10 @@ function openEditDrawer(task: Task) {
   formDueDate.value = task.due_date ? task.due_date.slice(0, 10) : ''
   formPriority.value = task.priority
   formNote.value = task.note ?? ''
+  formTaskType.value = task.task_type
+  formEstimatedCost.value = task.estimated_cost != null ? String(task.estimated_cost / 100) : ''
+  formVendor.value = task.vendor ?? ''
+  formContact.value = task.contact ?? ''
   drawerOpen.value = true
 }
 
@@ -196,12 +224,16 @@ async function handleSubmit() {
     const payload = {
       title: formTitle.value.trim(),
       description: formDescription.value.trim() || null,
+      task_type: formTaskType.value,
       assignee: formAssignee.value || null,
       room: formRoom.value.trim() || null,
       category: formCategory.value.trim() || null,
       due_date: formDueDate.value || null,
       priority: formPriority.value,
       note: formNote.value.trim() || null,
+      estimated_cost: formEstimatedCost.value ? Math.round(Number(formEstimatedCost.value) * 100) : null,
+      vendor: formVendor.value.trim() || null,
+      contact: formContact.value.trim() || null,
     }
     if (editingTask.value) {
       await tasksStore.updateTask(editingTask.value.id, payload)
@@ -212,8 +244,13 @@ async function handleSubmit() {
         status: 'not_started' as TaskStatus,
         completed_at: null,
         recurring_rule: null,
+        created_by: authStore.memberId ?? null,
+        last_done_date: null,
         deleted: false,
-      })
+        scope: appStore.scope,
+        owner_id: appStore.scope === 'personal' ? authStore.memberId : null,      rotation_enabled: false,
+      rotation_members: '',
+      rotation_index: 0,      })
     }
     drawerOpen.value = false
   } finally {
@@ -259,7 +296,7 @@ onMounted(async () => {
 
 <template>
   <PageContainer>
-    <PageHeader title="Tasks" subtitle="Household to-dos and chores" class="page-enter" :style="{ '--stagger': 0 }">
+    <PageHeader title="Tasks" subtitle="Household to-dos, chores & maintenance" class="page-enter" :style="{ '--stagger': 0 }">
       <template #actions>
         <SButton @click="openCreateDrawer">Add Task</SButton>
       </template>
@@ -269,11 +306,13 @@ onMounted(async () => {
       <InlineStat label="Total" :value="tasksStore.items.length" />
       <InlineStat label="Due Today" :value="tasksStore.dueToday.length" />
       <InlineStat label="Overdue" :value="tasksStore.overdueTasks.length" :trend="tasksStore.overdueTasks.length > 0 ? 'down' : 'neutral'" />
+      <InlineStat label="Maintenance" :value="tasksStore.maintenanceTasks.length" />
     </div>
 
     <ErrorBanner v-if="tasksStore.error" :message="tasksStore.error" @retry="authStore.householdId && tasksStore.fetchTasks(authStore.householdId)" />
 
     <FilterBar v-model:search="search" show-search class="page-enter" :style="{ '--stagger': 2 }">
+      <SSelect v-model="typeFilter" :options="typeOptions" placeholder="Type" />
       <SSelect v-model="statusFilter" :options="statusOptions" placeholder="Status" />
       <SSelect v-model="priorityFilter" :options="priorityOptions" placeholder="Priority" />
       <SSelect v-model="assigneeFilter" :options="memberOptions" placeholder="Assignee" />
@@ -297,6 +336,7 @@ onMounted(async () => {
               <div class="task-row" @click="toggleExpand(task.id)">
                 <span class="task-row__title">{{ task.title }}</span>
                 <div class="task-row__meta">
+                  <SBadge v-if="task.task_type === 'maintenance'" variant="default" size="sm">maintenance</SBadge>
                   <SBadge :variant="priorityVariant(task.priority)" size="sm">{{ task.priority }}</SBadge>
                   <StatusBadge :variant="statusVariant(task.status)">{{ task.status.replace('_', ' ') }}</StatusBadge>
                   <span v-if="task.due_date" class="task-row__due">{{ formatRelativeDate(task.due_date) }}</span>
@@ -314,6 +354,12 @@ onMounted(async () => {
 
               <div v-if="expandedTaskId === task.id" class="task-expanded" @click.stop>
                 <div v-if="task.description" class="task-expanded__desc">{{ task.description }}</div>
+                <div v-if="task.task_type === 'maintenance'" class="task-expanded__maintenance">
+                  <span v-if="task.vendor" class="task-expanded__detail"><strong>Vendor:</strong> {{ task.vendor }}</span>
+                  <span v-if="task.contact" class="task-expanded__detail"><strong>Contact:</strong> {{ task.contact }}</span>
+                  <span v-if="task.estimated_cost != null" class="task-expanded__detail"><strong>Est. Cost:</strong> ${{ (task.estimated_cost / 100).toFixed(2) }}</span>
+                  <span v-if="task.last_done_date" class="task-expanded__detail"><strong>Last Done:</strong> {{ formatRelativeDate(task.last_done_date) }}</span>
+                </div>
                 <div class="task-expanded__subtasks">
                   <p class="task-expanded__label">Subtasks</p>
                   <div v-for="sub in (tasksStore.subtasks.get(task.id) ?? [])" :key="sub.id" class="subtask-row">
@@ -340,6 +386,7 @@ onMounted(async () => {
 
     <FormDrawer :open="drawerOpen" :title="editingTask ? 'Edit Task' : 'Add Task'" :submit-label="editingTask ? 'Update' : 'Create'" :loading="drawerLoading" @close="drawerOpen = false" @submit="handleSubmit">
       <FormSection>
+        <FormField><SSelect v-model="formTaskType" label="Type" :options="typeFormOptions" /></FormField>
         <FormField><SInput v-model="formTitle" label="Title" required placeholder="What needs doing?" /></FormField>
         <FormField><STextarea v-model="formDescription" label="Description" :rows="3" placeholder="Optional details…" /></FormField>
         <FormField><SSelect v-model="formAssignee" label="Assignee" :options="memberFormOptions" placeholder="Select member" /></FormField>
@@ -348,6 +395,11 @@ onMounted(async () => {
         <FormField><SInput v-model="formDueDate" label="Due Date" type="date" /></FormField>
         <FormField><SSelect v-model="formPriority" label="Priority" :options="priorityFormOptions" /></FormField>
         <FormField><STextarea v-model="formNote" label="Note" :rows="2" placeholder="Any extra notes…" /></FormField>
+      </FormSection>
+      <FormSection v-if="formTaskType === 'maintenance'" title="Maintenance Details">
+        <FormField><SInput v-model="formEstimatedCost" label="Estimated Cost ($)" type="number" placeholder="0.00" /></FormField>
+        <FormField><SInput v-model="formVendor" label="Vendor / Service" placeholder="e.g. Bob's Plumbing" /></FormField>
+        <FormField><SInput v-model="formContact" label="Contact" placeholder="Phone or email" /></FormField>
       </FormSection>
     </FormDrawer>
 
@@ -362,7 +414,7 @@ onMounted(async () => {
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-l);
   background: var(--color-surface-card);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-2), var(--shadow-card);
   margin-bottom: var(--space-l);
   overflow: hidden;
 }
@@ -451,6 +503,19 @@ onMounted(async () => {
   font: var(--text-caption);
   color: var(--color-fg-secondary);
   margin-bottom: var(--space-s);
+}
+
+.task-expanded__maintenance {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-s) var(--space-l);
+  margin-bottom: var(--space-s);
+  font: var(--text-caption);
+  color: var(--color-fg-secondary);
+}
+
+.task-expanded__detail strong {
+  color: var(--color-fg-primary);
 }
 
 .task-expanded__label {

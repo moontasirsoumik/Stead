@@ -1,4 +1,5 @@
 import type { HouseholdEntity } from '@/models/base.model'
+import type { DataScope } from '@/models/enums'
 
 export interface Income extends HouseholdEntity {
   date: string
@@ -9,4 +10,6 @@ export interface Income extends HouseholdEntity {
   recurring: boolean
   recurring_rule: string | null
   note: string | null
+  scope: DataScope
+  owner_id: string | null
 }

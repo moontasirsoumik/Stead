@@ -9,4 +9,6 @@ export const noteSchema = householdEntitySchema.extend({
   linked_type: z.string().nullable(),
   linked_id: z.string().uuid().nullable(),
   created_by: z.string().uuid().nullable(),
+  scope: z.enum(['household', 'personal']),
+  owner_id: z.string().uuid().nullable(),
 })

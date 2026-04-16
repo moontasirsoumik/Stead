@@ -4,7 +4,7 @@ import { tasksDataService } from '@/services/data/tasks.data'
 import { subtasksDataService } from '@/services/data/subtasks.data'
 import type { Task } from '@/models/task.model'
 import type { Subtask } from '@/models/subtask.model'
-import type { TaskStatus, TaskPriority } from '@/models/enums'
+import type { TaskStatus, TaskPriority, TaskType } from '@/models/enums'
 
 export const useTasksStore = defineStore('tasks', () => {
   const items = ref<Task[]>([])
@@ -168,6 +168,52 @@ export const useTasksStore = defineStore('tasks', () => {
     return items.value.filter((t) => t.priority === priority)
   }
 
+  // Task type filters
+  const regularTasks = computed(() =>
+    items.value.filter((t) => t.task_type === 'regular'),
+  )
+
+  const maintenanceTasks = computed(() =>
+    items.value.filter((t) => t.task_type === 'maintenance'),
+  )
+
+  function filteredByType(taskType: TaskType | 'all') {
+    if (taskType === 'all') return items.value
+    return items.value.filter((t) => t.task_type === taskType)
+  }
+
+  // Maintenance-specific actions
+  async function markMaintenanceDone(id: string) {
+    return updateTask(id, {
+      status: 'done' as TaskStatus,
+      completed_at: new Date().toISOString(),
+      last_done_date: new Date().toISOString().split('T')[0],
+    })
+  }
+
+  async function skipTask(id: string) {
+    return updateTask(id, { status: 'skipped' as TaskStatus })
+  }
+
+  // Maintenance-specific computed
+  const overdueMaintenanceTasks = computed(() =>
+    maintenanceTasks.value.filter((t) => {
+      if (t.status === 'done' || t.status === 'skipped') return false
+      if (!t.due_date) return false
+      return new Date(t.due_date) < new Date(new Date().toDateString())
+    }),
+  )
+
+  const upcomingMaintenanceTasks = computed(() =>
+    maintenanceTasks.value
+      .filter((t) => t.status === 'not_started')
+      .sort((a, b) => {
+        if (!a.due_date) return 1
+        if (!b.due_date) return -1
+        return a.due_date.localeCompare(b.due_date)
+      }),
+  )
+
   return {
     items,
     subtasks,
@@ -187,5 +233,12 @@ export const useTasksStore = defineStore('tasks', () => {
     dueToday,
     filteredByAssignee,
     filteredByPriority,
+    regularTasks,
+    maintenanceTasks,
+    filteredByType,
+    markMaintenanceDone,
+    skipTask,
+    overdueMaintenanceTasks,
+    upcomingMaintenanceTasks,
   }
 })

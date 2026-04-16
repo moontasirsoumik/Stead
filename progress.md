@@ -1,7 +1,7 @@
 # Stead — Implementation Progress Tracker
 
 > **Last updated:** 2026-04-16
-> **Current Phase:** P14 — Polish + Deploy
+> **Current Phase:** P26 — Complete (all new features implemented)
 
 ---
 
@@ -24,6 +24,18 @@
 | P12 | Dashboard | ✅ Done | 2026-04-15 | 2026-04-15 | Widget grid, stats bar, all modules |
 | P13 | Maintenance Module | ✅ Done | 2026-04-16 | 2026-04-16 | Store, page, dashboard widget |
 | P14 | Polish + Deploy | 🟡 In Progress | 2026-04-16 | — | CI workflow done; Material 3 migration in progress |
+| P15 | Merge Tasks + Maintenance | ✅ Done | 2026-04-16 | 2026-04-16 | Unified Tasks module with task_type discriminator |
+| P16 | Merge Shopping + Inventory → Pantry | ✅ Done | 2026-04-16 | 2026-04-16 | Tabbed Pantry module, restock integration |
+| P17 | Personal Scope | ✅ Done | 2026-04-16 | 2026-04-16 | scope + owner_id on 7 tables, SScopeToggle, personal dashboard |
+| P18 | Global Scope Switcher | ✅ Done | 2026-04-16 | 2026-04-16 | Global scope in sidebar, scope-aware nav + dashboard |
+| P19 | Wishlist (Personal) | ✅ Done | 2026-04-16 | 2026-04-16 | Model, schema, store, page, route |
+| P20 | Subscriptions (Personal) | ✅ Done | 2026-04-16 | 2026-04-16 | Model, schema, store, page, route |
+| P21 | Personal Journal | ✅ Done | 2026-04-16 | 2026-04-16 | Model, schema, store, page, route |
+| P22 | Habit Tracker (Personal) | ✅ Done | 2026-04-16 | 2026-04-16 | Model, schema, store, page, route |
+| P23 | Contacts / Service Providers | ✅ Done | 2026-04-16 | 2026-04-16 | Model, schema, store, page, route |
+| P24 | Documents / Warranties | ✅ Done | 2026-04-16 | 2026-04-16 | Model, schema, store, page, route |
+| P25 | Meal Planning | ✅ Done | 2026-04-16 | 2026-04-16 | Model, schema, store, page, route |
+| P26 | Chore Rotation | ✅ Done | 2026-04-16 | 2026-04-16 | Rotation fields added to tasks model + schema + migration |
 
 ---
 
@@ -321,3 +333,66 @@
 | 2026-04-15 | Initial plan.md, progress.md, folder structure, agent definitions created (P0-01 through P0-04) |
 | 2026-04-15 | Migrated architecture from Google Sheets + Apps Script to Supabase. Updated plan.md, progress.md, agents, directory structure. |
 | 2026-04-16 | Switched design guidance from Fluent-inspired direction to Material Design 3, added shell/navigation quality rules, and began app-wide M3 migration. |
+| 2026-04-16 | Planned P15 (merge Tasks+Maintenance), P16 (merge Shopping+Inventory→Pantry), P17 (personal scope). Updated plan.md §25 and progress.md. |
+
+---
+
+## Phase 15 — Merge Tasks + Maintenance
+
+### Tasks
+
+| ID | Task | Status | Files |
+|---|---|---|---|
+| P15-01 | Write migration 006 (add maintenance fields to tasks, migrate data) | ⬜ Not Started | `supabase/migrations/006_merge_tasks_maintenance.sql` |
+| P15-02 | Update Task model + add TaskType enum | ⬜ Not Started | `src/models/task.model.ts`, `src/models/enums.ts` |
+| P15-03 | Update task Zod schema | ⬜ Not Started | `src/schemas/task.schema.ts` |
+| P15-04 | Update Dexie DB (remove maintenance table, update tasks) | ⬜ Not Started | `src/services/cache/db.ts` |
+| P15-05 | Update tasks data service | ⬜ Not Started | `src/services/data/tasks.data.ts` |
+| P15-06 | Merge maintenance store logic into tasks store | ⬜ Not Started | `src/stores/tasks.store.ts` |
+| P15-07 | Update TasksPage (type filter, conditional maintenance fields) | ⬜ Not Started | `src/features/tasks/TasksPage.vue` |
+| P15-08 | Update DashboardPage (remove maintenance store, integrate) | ⬜ Not Started | `src/features/dashboard/DashboardPage.vue` |
+| P15-09 | Update NavRail + MobileNav (remove maintenance item) | ⬜ Not Started | `src/components/layout/NavRail.vue`, `MobileNav.vue` |
+| P15-10 | Update router (remove /maintenance route) | ⬜ Not Started | `src/router/index.ts` |
+| P15-11 | Remove maintenance module files | ⬜ Not Started | Delete: `maintenance.model.ts`, `maintenance.schema.ts`, `maintenance.data.ts`, `maintenance.store.ts`, `MaintenancePage.vue` |
+| P15-12 | Update model/schema index exports | ⬜ Not Started | `src/models/index.ts`, `src/schemas/index.ts` |
+| P15-13 | Verify build + type-check | ⬜ Not Started | `npm run build` |
+
+---
+
+## Phase 16 — Merge Shopping + Inventory → Pantry
+
+### Tasks
+
+| ID | Task | Status | Files |
+|---|---|---|---|
+| P16-01 | Create PantryLayout with tabs | ⬜ Not Started | `src/features/pantry/PantryLayout.vue` |
+| P16-02 | Move ShoppingPage to pantry module | ⬜ Not Started | `src/features/pantry/pages/ShoppingPage.vue` |
+| P16-03 | Move InventoryPage to pantry module | ⬜ Not Started | `src/features/pantry/pages/InventoryPage.vue` |
+| P16-04 | Add "Add to Shopping List" action on inventory items | ⬜ Not Started | `src/features/pantry/pages/InventoryPage.vue` |
+| P16-05 | Update router (pantry routes, remove old routes) | ⬜ Not Started | `src/router/index.ts` |
+| P16-06 | Update NavRail + MobileNav (Pantry replaces Shopping+Inventory) | ⬜ Not Started | `NavRail.vue`, `MobileNav.vue` |
+| P16-07 | Update DashboardPage imports | ⬜ Not Started | `src/features/dashboard/DashboardPage.vue` |
+| P16-08 | Remove old feature folders | ⬜ Not Started | `src/features/shopping/`, `src/features/inventory/` |
+| P16-09 | Verify build + type-check | ⬜ Not Started | `npm run build` |
+
+---
+
+## Phase 17 — Personal Scope
+
+### Tasks
+
+| ID | Task | Status | Files |
+|---|---|---|---|
+| P17-01 | Write migration 007 (add scope + owner_id to 7 tables) | ⬜ Not Started | `supabase/migrations/007_personal_scope.sql` |
+| P17-02 | Write migration 008 (update RLS policies for personal scope) | ⬜ Not Started | `supabase/migrations/008_personal_rls.sql` |
+| P17-03 | Add DataScope enum + update affected models | ⬜ Not Started | `src/models/enums.ts`, affected `.model.ts` files |
+| P17-04 | Update Zod schemas for affected entities | ⬜ Not Started | Affected `.schema.ts` files |
+| P17-05 | Build SScopeToggle component | ⬜ Not Started | `src/components/ui/SScopeToggle.vue` |
+| P17-06 | Update data services for scope-aware queries | ⬜ Not Started | Affected `.data.ts` files |
+| P17-07 | Update stores with scope filtering | ⬜ Not Started | Affected `.store.ts` files |
+| P17-08 | Update Money pages with scope toggle | ⬜ Not Started | Expenses, Income, Budgets, Savings pages |
+| P17-09 | Update TasksPage with scope toggle | ⬜ Not Started | `TasksPage.vue` |
+| P17-10 | Update NotesPage with scope toggle | ⬜ Not Started | `NotesPage.vue` |
+| P17-11 | Update DashboardPage with personal section | ⬜ Not Started | `DashboardPage.vue` |
+| P17-12 | Update Dexie DB indexes for scope | ⬜ Not Started | `src/services/cache/db.ts` |
+| P17-13 | Verify build + type-check | ⬜ Not Started | `npm run build` |

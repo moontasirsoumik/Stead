@@ -24,32 +24,95 @@ const themeToggleLabel = computed(() =>
   appStore.resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode',
 )
 
-const overviewItems = [
+const scopeLabel = computed(() =>
+  appStore.scope === 'personal' ? 'Personal' : 'Household',
+)
+const scopeIcon = computed(() =>
+  appStore.scope === 'personal' ? 'person' : 'home',
+)
+
+// Household nav
+const householdOverview = [
   { to: '/', icon: 'dashboard', label: 'Dashboard' },
   { to: '/money/expenses', icon: 'money', label: 'Money' },
 ] as const
 
-const manageItems = [
+const householdManage = [
   { to: '/tasks', icon: 'tasks', label: 'Tasks' },
-  { to: '/shopping', icon: 'shopping', label: 'Shopping' },
-  { to: '/inventory', icon: 'inventory', label: 'Inventory' },
+  { to: '/pantry/shopping', icon: 'shopping', label: 'Pantry' },
   { to: '/reminders', icon: 'reminders', label: 'Reminders' },
 ] as const
 
-const thinkItems = [
-  { to: '/notes', icon: 'notes', label: 'Notes' },
-  { to: '/maintenance', icon: 'maintenance', label: 'Maintenance' },
+const householdPlan = [
+  { to: '/meals', icon: 'restaurant', label: 'Meals' },
 ] as const
+
+const householdThink = [
+  { to: '/notes', icon: 'notes', label: 'Notes' },
+] as const
+
+const householdReference = [
+  { to: '/contacts', icon: 'contacts', label: 'Contacts' },
+  { to: '/documents', icon: 'description', label: 'Documents' },
+] as const
+
+// Personal nav
+const personalOverview = [
+  { to: '/', icon: 'dashboard', label: 'Dashboard' },
+  { to: '/money/expenses', icon: 'money', label: 'Money' },
+] as const
+
+const personalManage = [
+  { to: '/tasks', icon: 'tasks', label: 'Tasks' },
+  { to: '/habits', icon: 'fitness_center', label: 'Habits' },
+] as const
+
+const personalThink = [
+  { to: '/notes', icon: 'notes', label: 'Notes' },
+  { to: '/journal', icon: 'book', label: 'Journal' },
+] as const
+
+const personalStuff = [
+  { to: '/wishlist', icon: 'favorite', label: 'Wishlist' },
+  { to: '/subscriptions', icon: 'subscriptions', label: 'Subscriptions' },
+] as const
+
+// Dynamic computed nav
+const overviewItems = computed(() =>
+  appStore.isPersonal ? personalOverview : householdOverview,
+)
+const manageItems = computed(() =>
+  appStore.isPersonal ? personalManage : householdManage,
+)
+const thinkItems = computed(() =>
+  appStore.isPersonal ? personalThink : householdThink,
+)
+const extraItems = computed(() =>
+  appStore.isPersonal ? personalStuff : [...householdPlan, ...householdReference],
+)
 </script>
 
 <template>
-  <div :class="['sidebar', { 'sidebar--collapsed': collapsed }]">
+  <div :class="['sidebar', { 'sidebar--collapsed': collapsed, 'sidebar--personal': appStore.isPersonal }]">
     <!-- Header -->
     <div class="sidebar__header">
       <RouterLink to="/" class="sidebar__brand" @click="$emit('navigate')">
         <span class="sidebar__monogram" aria-hidden="true">S</span>
         <span class="sidebar__wordmark">Stead</span>
       </RouterLink>
+    </div>
+
+    <!-- Scope Switcher -->
+    <div class="sidebar__scope">
+      <button
+        class="scope-switch"
+        :title="`Switch to ${appStore.isPersonal ? 'Household' : 'Personal'}`"
+        @click="appStore.toggleScope()"
+      >
+        <span class="scope-switch__icon material-symbols-rounded">{{ scopeIcon }}</span>
+        <span class="scope-switch__label">{{ scopeLabel }}</span>
+        <span class="scope-switch__toggle material-symbols-rounded">swap_horiz</span>
+      </button>
     </div>
 
     <!-- Nav -->
@@ -85,6 +148,20 @@ const thinkItems = [
       <div class="sidebar__section">
         <NavItem
           v-for="item in thinkItems"
+          :key="item.to"
+          :to="item.to"
+          :icon="item.icon"
+          :label="item.label"
+          :collapsed="collapsed"
+          @click="$emit('navigate')"
+        />
+      </div>
+
+      <div v-if="extraItems.length" class="sidebar__divider" />
+
+      <div v-if="extraItems.length" class="sidebar__section">
+        <NavItem
+          v-for="item in extraItems"
           :key="item.to"
           :to="item.to"
           :icon="item.icon"
@@ -197,6 +274,72 @@ const thinkItems = [
   padding: var(--space-s);
   overflow-y: auto;
   scrollbar-width: none;
+}
+
+/* ── Scope Switcher ── */
+.sidebar__scope {
+  padding: 0 var(--space-s);
+  flex-shrink: 0;
+}
+
+.scope-switch {
+  display: flex;
+  align-items: center;
+  gap: var(--space-m);
+  width: 100%;
+  height: 44px;
+  padding: 0 var(--space-m);
+  border-radius: var(--radius-l);
+  border: none;
+  background: var(--color-surface-nav-hover);
+  color: var(--color-nav-fg-active);
+  cursor: pointer;
+  overflow: hidden;
+  transition: background var(--duration-fast) var(--easing-standard);
+}
+
+.scope-switch:hover {
+  background: var(--color-surface-nav-active);
+}
+
+.scope-switch__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.scope-switch__label {
+  flex: 1;
+  text-align: left;
+  font: var(--text-label-lg);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.scope-switch__toggle {
+  font-size: 18px;
+  flex-shrink: 0;
+  opacity: 0.5;
+  transition: opacity var(--duration-fast) var(--easing-standard);
+}
+
+.scope-switch:hover .scope-switch__toggle {
+  opacity: 1;
+}
+
+.sidebar--collapsed .scope-switch__label,
+.sidebar--collapsed .scope-switch__toggle {
+  display: none;
+}
+
+.sidebar--collapsed .scope-switch {
+  padding: 0 var(--space-m);
 }
 
 .sidebar__nav::-webkit-scrollbar {

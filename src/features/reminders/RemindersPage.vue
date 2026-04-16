@@ -254,7 +254,7 @@ onMounted(async () => {
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-l);
   background: var(--color-surface-card);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-2), var(--shadow-card);
   margin-bottom: var(--space-l);
   overflow: hidden;
 }
@@ -280,10 +280,6 @@ onMounted(async () => {
 
 .reminder-row:hover {
   background: var(--color-bg-tertiary);
-}
-
-.reminder-row--overdue {
-  border-left: 2px solid var(--color-error);
 }
 
 .reminder-row__title {

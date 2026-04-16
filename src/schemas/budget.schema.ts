@@ -5,4 +5,6 @@ export const budgetSchema = householdEntitySchema.extend({
   month: z.string(),
   category: z.string(),
   budget_amount: z.number().int(),
+  scope: z.enum(['household', 'personal']),
+  owner_id: z.string().uuid().nullable(),
 })

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
 import ContentCard from '@/components/layout/ContentCard.vue'
@@ -12,7 +12,7 @@ import SButton from '@/components/ui/SButton.vue'
 import SSelect from '@/components/ui/SSelect.vue'
 import SInput from '@/components/ui/SInput.vue'
 import STextarea from '@/components/ui/STextarea.vue'
-import SCheckbox from '@/components/ui/SCheckbox.vue'
+import SToggle from '@/components/ui/SToggle.vue'
 import SBadge from '@/components/ui/SBadge.vue'
 import SAvatar from '@/components/ui/SAvatar.vue'
 import FormDrawer from '@/components/forms/FormDrawer.vue'
@@ -21,16 +21,19 @@ import FormSection from '@/components/forms/FormSection.vue'
 import MonthSummary from '@/features/money/components/MonthSummary.vue'
 import MoneyTabs from '@/features/money/components/MoneyTabs.vue'
 import { useExpensesStore } from '@/stores/expenses.store'
+import { useExpenseSplitsStore } from '@/stores/expense-splits.store'
 import { useAuthStore } from '@/stores/auth.store'
+import { useAppStore } from '@/stores/app.store'
 import { useHouseholdStore } from '@/stores/household.store'
 import { formatCents, formatDate } from '@/utils/format'
 import { EXPENSE_CATEGORIES } from '@/constants/categories'
 import type { Expense } from '@/models/expense.model'
 
 const expensesStore = useExpensesStore()
+const splitsStore = useExpenseSplitsStore()
 const authStore = useAuthStore()
+const appStore = useAppStore()
 const householdStore = useHouseholdStore()
-
 const search = ref('')
 const categoryFilter = ref('')
 const drawerOpen = ref(false)
@@ -44,10 +47,52 @@ const form = ref({
   subcategory: '',
   description: '',
   paid_by: '',
-  shared: false,
+  split: false,
+  split_mode: 'even' as 'even' | 'custom',
   tags: '',
   note: '',
 })
+
+// Per-member custom split amounts (string for input binding)
+const splitAmounts = ref<Record<string, string>>({})
+
+function recalcEvenSplits() {
+  const members = householdStore.activeMembers
+  if (!members.length) return
+  const total = parseFloat(form.value.amount || '0')
+  const perPerson = (total / members.length).toFixed(2)
+  splitAmounts.value = Object.fromEntries(members.map((m) => [m.id, perPerson]))
+}
+
+// Reactively update even splits when amount or mode changes
+watch(
+  () => form.value.amount,
+  () => {
+    if (form.value.split && form.value.split_mode === 'even') recalcEvenSplits()
+  },
+)
+
+watch(
+  () => form.value.split_mode,
+  (mode) => {
+    if (mode === 'even' && form.value.split) recalcEvenSplits()
+  },
+)
+
+watch(
+  () => form.value.split,
+  (on) => {
+    if (on) recalcEvenSplits()
+  },
+)
+
+const splitTotal = computed(() =>
+  Object.values(splitAmounts.value).reduce((s, v) => s + (parseFloat(v) || 0), 0),
+)
+const splitRemaining = computed(() =>
+  parseFloat(form.value.amount || '0') - splitTotal.value,
+)
+const splitBalanced = computed(() => Math.abs(splitRemaining.value) <= 0.01)
 
 const categoryOptions = EXPENSE_CATEGORIES.map((c) => ({
   value: c,
@@ -74,12 +119,13 @@ const filteredGroups = computed(() => {
   const result: Record<string, Expense[]> = {}
   for (const [date, expenses] of Object.entries(groups)) {
     const filtered = expenses.filter((e) => {
+      const matchScope = e.scope === appStore.scope
       const matchCategory = !categoryFilter.value || e.category === categoryFilter.value
       const matchSearch =
         !search.value ||
         e.description.toLowerCase().includes(search.value.toLowerCase()) ||
         e.category.toLowerCase().includes(search.value.toLowerCase())
-      return matchCategory && matchSearch
+      return matchScope && matchCategory && matchSearch
     })
     if (filtered.length) result[date] = filtered
   }
@@ -112,15 +158,19 @@ function openAdd() {
     subcategory: '',
     description: '',
     paid_by: authStore.memberId ?? '',
-    shared: false,
+    split: false,
+    split_mode: 'even',
     tags: '',
     note: '',
   }
+  splitAmounts.value = {}
   drawerOpen.value = true
 }
 
 function openEdit(expense: Expense) {
   editingId.value = expense.id
+  const existingSplits = splitsStore.splitsById[expense.id] ?? []
+  const hasSplits = existingSplits.length > 0
   form.value = {
     date: expense.date.slice(0, 10),
     amount: String(expense.amount / 100),
@@ -128,9 +178,17 @@ function openEdit(expense: Expense) {
     subcategory: expense.subcategory ?? '',
     description: expense.description,
     paid_by: expense.paid_by,
-    shared: expense.shared,
+    split: hasSplits,
+    split_mode: hasSplits ? 'custom' : 'even',
     tags: expense.tags?.join(', ') ?? '',
     note: expense.note ?? '',
+  }
+  if (hasSplits) {
+    splitAmounts.value = Object.fromEntries(
+      existingSplits.map((s) => [s.member_id, String(s.amount / 100)])
+    )
+  } else {
+    splitAmounts.value = {}
   }
   drawerOpen.value = true
 }
@@ -151,17 +209,33 @@ async function handleSubmit() {
       subcategory: form.value.subcategory || null,
       description: form.value.description,
       paid_by: form.value.paid_by,
-      shared: form.value.shared,
+      shared: form.value.split,
       tags,
       note: form.value.note || null,
       deleted: false,
+      scope: appStore.scope,
+      owner_id: appStore.scope === 'personal' ? authStore.memberId : null,
     }
 
+    let expenseId: string
     if (editingId.value) {
       await expensesStore.update(editingId.value, payload)
+      expenseId = editingId.value
     } else {
-      await expensesStore.create(payload)
+      const created = await expensesStore.create(payload)
+      expenseId = created.id
     }
+
+    // Save splits
+    if (form.value.split && authStore.householdId) {
+      const splitPayload = Object.entries(splitAmounts.value)
+        .map(([member_id, val]) => ({ member_id, amount: Math.round(parseFloat(val) * 100) }))
+        .filter((s) => s.amount > 0)
+      await splitsStore.upsertForExpense(expenseId, authStore.householdId, splitPayload)
+    } else if (editingId.value) {
+      await splitsStore.deleteByExpense(editingId.value)
+    }
+
     drawerOpen.value = false
   } finally {
     saving.value = false
@@ -173,7 +247,10 @@ onMounted(async () => {
     if (!householdStore.activeMembers.length) {
       await householdStore.loadMembers(authStore.householdId)
     }
-    await expensesStore.fetchFresh(authStore.householdId)
+    await Promise.all([
+      expensesStore.fetchFresh(authStore.householdId),
+      splitsStore.fetchByHousehold(authStore.householdId),
+    ])
   }
 })
 </script>
@@ -309,9 +386,58 @@ onMounted(async () => {
             required
           />
         </FormField>
-        <FormField row>
-          <SCheckbox v-model="form.shared" label="Shared expense" />
+
+        <FormField>
+          <SToggle v-model="form.split" label="Split between members" />
         </FormField>
+
+        <template v-if="form.split">
+          <FormField>
+            <SSelect
+              v-model="form.split_mode"
+              label="Split method"
+              :options="[
+                { value: 'even', label: 'Split evenly' },
+                { value: 'custom', label: 'Custom amounts' },
+              ]"
+            />
+          </FormField>
+
+          <div class="split-breakdown">
+            <div
+              v-for="member in householdStore.activeMembers"
+              :key="member.id"
+              class="split-row"
+            >
+              <div class="split-row__member">
+                <SAvatar :name="member.name" :color="member.color" size="sm" />
+                <span class="split-row__name">{{ member.name }}</span>
+              </div>
+              <div class="split-row__amount">
+                <span v-if="form.split_mode === 'even'" class="split-row__value">
+                  ${{ splitAmounts[member.id] ?? '0.00' }}
+                </span>
+                <input
+                  v-else
+                  v-model="splitAmounts[member.id]"
+                  type="number"
+                  step="0.01"
+                  inputmode="decimal"
+                  placeholder="0.00"
+                  class="split-row__editor"
+                />
+              </div>
+            </div>
+
+            <div class="split-status" :class="splitBalanced ? 'split-status--ok' : 'split-status--error'">
+              <span v-if="splitBalanced" class="material-symbols-rounded split-status__icon">check_circle</span>
+              <span v-else class="material-symbols-rounded split-status__icon">error</span>
+              <span v-if="splitBalanced">Balanced</span>
+              <span v-else-if="splitRemaining > 0">${{ splitRemaining.toFixed(2) }} unallocated</span>
+              <span v-else>${{ Math.abs(splitRemaining).toFixed(2) }} over budget</span>
+            </div>
+          </div>
+        </template>
       </FormSection>
 
       <FormSection title="Extra">
@@ -339,7 +465,7 @@ onMounted(async () => {
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-l);
   background: var(--color-surface-card);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-2), var(--shadow-card);
 }
 
 .expense-row {
@@ -411,5 +537,127 @@ onMounted(async () => {
     width: 100%;
     justify-content: flex-end;
   }
+}
+
+/* ── Split breakdown ───────────────────────────────────── */
+.split-breakdown {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-l);
+  background: var(--color-surface-card);
+  overflow: hidden;
+}
+
+.split-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--height-row-min);
+  padding: 0 var(--space-l);
+  gap: var(--space-m);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.split-row:last-of-type {
+  border-bottom: none;
+}
+
+.split-row__member {
+  display: flex;
+  align-items: center;
+  gap: var(--space-m);
+  flex: 1;
+  min-width: 0;
+}
+
+.split-row__name {
+  font: var(--text-body-2);
+  color: var(--color-fg-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.split-row__amount {
+  flex-shrink: 0;
+  width: 132px;
+}
+
+.split-row__value {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: var(--height-control-sm);
+  padding: 0 var(--space-m);
+  font: var(--text-body-2);
+  font-family: var(--font-mono);
+  color: var(--color-fg-secondary);
+}
+
+.split-row__editor {
+  width: 100%;
+  box-sizing: border-box;
+  height: var(--height-control-sm);
+  padding: 0 calc(var(--space-m) + var(--space-2xs)) 0 var(--space-m);
+  border-color: var(--color-border-input);
+  background: var(--color-surface-input);
+  border-style: solid;
+  border-width: 1px;
+  box-shadow: none;
+  border-radius: var(--radius-s);
+  outline: none;
+  text-align: right;
+  font: var(--text-body-2);
+  font-family: var(--font-mono);
+  color: var(--color-fg-primary);
+  -moz-appearance: textfield;
+  transition:
+    border-color var(--duration-fast) var(--easing-standard),
+    background var(--duration-fast) var(--easing-standard);
+}
+
+.split-row__editor::placeholder {
+  color: var(--color-fg-tertiary);
+}
+
+.split-row__editor:hover {
+  background: var(--color-surface-input-hover);
+  border-color: var(--color-border-input-hover);
+}
+
+.split-row__editor:focus {
+  background: var(--color-surface-card);
+  border-color: var(--color-brand-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-brand-primary) 20%, transparent);
+}
+
+.split-row__editor::-webkit-outer-spin-button,
+.split-row__editor::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.split-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: var(--space-s) var(--space-l);
+  font: var(--text-caption);
+  font-weight: var(--font-weight-medium);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.split-status__icon {
+  font-size: 16px;
+}
+
+.split-status--ok {
+  color: var(--color-success);
+  background: color-mix(in srgb, var(--color-success) 6%, transparent);
+}
+
+.split-status--error {
+  color: var(--color-error);
+  background: color-mix(in srgb, var(--color-error) 6%, transparent);
 }
 </style>

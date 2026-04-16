@@ -7,4 +7,6 @@ export const goalContributionSchema = householdEntitySchema.extend({
   date: z.string(),
   contributed_by: z.string().uuid(),
   note: z.string().nullable(),
+  scope: z.enum(['household', 'personal']),
+  owner_id: z.string().uuid().nullable(),
 })

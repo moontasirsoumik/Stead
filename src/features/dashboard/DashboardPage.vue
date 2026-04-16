@@ -8,6 +8,7 @@ import InlineStat from '@/components/data/InlineStat.vue'
 import SBadge from '@/components/ui/SBadge.vue'
 import LoadingSkeleton from '@/components/feedback/LoadingSkeleton.vue'
 import { useAuthStore } from '@/stores/auth.store'
+import { useAppStore } from '@/stores/app.store'
 import { useHouseholdStore } from '@/stores/household.store'
 import { useExpensesStore } from '@/stores/expenses.store'
 import { useIncomeStore } from '@/stores/income.store'
@@ -18,12 +19,15 @@ import { useInventoryStore } from '@/stores/inventory.store'
 import { useRemindersStore } from '@/stores/reminders.store'
 import { useNotesStore } from '@/stores/notes.store'
 import { useSavingsStore } from '@/stores/savings.store'
-import { useMaintenanceStore } from '@/stores/maintenance.store'
+import { useWishlistStore } from '@/stores/wishlist.store'
+import { useSubscriptionsStore } from '@/stores/subscriptions.store'
+import { useHabitsStore } from '@/stores/habits.store'
 import { formatCents, formatRelativeDate } from '@/utils/format'
 import type { TaskPriority } from '@/models/enums'
 import type { BadgeVariant } from '@/components/ui/SBadge.vue'
 
 const auth = useAuthStore()
+const app = useAppStore()
 const household = useHouseholdStore()
 const expenses = useExpensesStore()
 const income = useIncomeStore()
@@ -34,7 +38,9 @@ const inventory = useInventoryStore()
 const reminders = useRemindersStore()
 const notes = useNotesStore()
 const savings = useSavingsStore()
-const maintenance = useMaintenanceStore()
+const wishlist = useWishlistStore()
+const subscriptions = useSubscriptionsStore()
+const habits = useHabitsStore()
 
 const greeting = computed(() => {
   const hour = new Date().getHours()
@@ -46,11 +52,19 @@ const greeting = computed(() => {
 
 const householdName = computed(() => household.household?.name ?? '')
 
+// Scope-aware filtering helper
+function scoped<T extends { scope?: string; owner_id?: string | null }>(items: T[]): T[] {
+  if (app.scope === 'personal') {
+    return items.filter((i) => i.scope === 'personal' && i.owner_id === auth.memberId)
+  }
+  return items.filter((i) => !i.scope || i.scope === 'household')
+}
+
 // Tasks widget
 const tasksDue = computed(() => {
-  const combined = [...tasks.overdueTasks, ...tasks.dueToday]
+  const all = scoped([...tasks.overdueTasks, ...tasks.dueToday])
   const ids = new Set<string>()
-  return combined.filter((t) => {
+  return all.filter((t) => {
     if (ids.has(t.id)) return false
     ids.add(t.id)
     return true
@@ -64,14 +78,14 @@ const nextBills = computed(() =>
 
 // Expenses widget — last 5 sorted by date desc
 const recentExpenses = computed(() =>
-  [...expenses.items]
+  [...scoped(expenses.items)]
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 5),
 )
 
 // Savings widget — active goals max 3
 const activeGoals = computed(() =>
-  savings.goals.filter((g) => g.status === 'active').slice(0, 3),
+  scoped(savings.goals).filter((g) => g.status === 'active').slice(0, 3),
 )
 
 // Low stock items widget
@@ -97,12 +111,23 @@ const upcomingReminders = computed(() => {
 
 // Notes widget — pinned max 3
 const pinned = computed(() =>
-  notes.pinnedNotes.slice(0, 3),
+  scoped(notes.pinnedNotes).slice(0, 3),
 )
 
-// Maintenance widget — overdue + upcoming max 5
+// Personal-only widgets
+const wishlistItems = computed(() =>
+  wishlist.wantedItems.slice(0, 5),
+)
+const activeSubscriptions = computed(() =>
+  subscriptions.activeSubscriptions.slice(0, 5),
+)
+const activeHabits = computed(() =>
+  habits.activeHabits.slice(0, 5),
+)
+
+// Maintenance widget — overdue + upcoming max 5 (now from tasks store)
 const maintenanceAlerts = computed(() => {
-  const combined = [...maintenance.overdueItems, ...maintenance.upcomingItems]
+  const combined = [...tasks.overdueMaintenanceTasks, ...tasks.upcomingMaintenanceTasks]
   const ids = new Set<string>()
   return combined.filter((i) => {
     if (ids.has(i.id)) return false
@@ -143,7 +168,7 @@ function truncate(text: string, max: number): string {
 const isLoading = computed(() =>
   tasks.loading || bills.loading || expenses.loading || income.loading
   || shopping.loading || inventory.loading || reminders.loading || notes.loading
-  || savings.loading || maintenance.loading,
+  || savings.loading,
 )
 
 onMounted(() => {
@@ -161,7 +186,10 @@ onMounted(() => {
   reminders.fetchReminders(hid)
   notes.fetchNotes(hid)
   savings.loadGoals(hid)
-  maintenance.fetchItems(hid)
+  wishlist.fetchItems(hid)
+  subscriptions.fetchSubscriptions(hid)
+  habits.fetchHabits(hid)
+  habits.fetchLogs(hid)
 })
 </script>
 
@@ -227,7 +255,8 @@ onMounted(() => {
         </div>
       </ContentCard>
 
-      <ContentCard padding="md" class="bento__card page-enter" :style="{ '--stagger': 3 }">
+      <!-- Bills (household only) -->
+      <ContentCard v-if="!app.isPersonal" padding="md" class="bento__card page-enter" :style="{ '--stagger': 3 }">
         <div class="widget__header">
           <h3 class="widget__title">Upcoming Bills</h3>
           <RouterLink to="/money/bills" class="widget__link">View All</RouterLink>
@@ -306,10 +335,11 @@ onMounted(() => {
         </div>
       </ContentCard>
 
-      <ContentCard padding="md" class="bento__card page-enter" :style="{ '--stagger': 6 }">
+      <!-- Low Stock (household only) -->
+      <ContentCard v-if="!app.isPersonal" padding="md" class="bento__card page-enter" :style="{ '--stagger': 6 }">
         <div class="widget__header">
           <h3 class="widget__title">Low Stock</h3>
-          <RouterLink to="/inventory" class="widget__link">View All</RouterLink>
+          <RouterLink to="/pantry/inventory" class="widget__link">View All</RouterLink>
         </div>
         <LoadingSkeleton v-if="inventory.loading" :lines="3" />
         <template v-else-if="lowStock.length">
@@ -327,11 +357,11 @@ onMounted(() => {
         </div>
       </ContentCard>
 
-      <!-- Row 3: Shopping (wide) + Reminders -->
-      <ContentCard padding="md" class="bento__card bento--wide page-enter" :style="{ '--stagger': 7 }">
+      <!-- Row 3: Shopping (wide) + Reminders (household only) -->
+      <ContentCard v-if="!app.isPersonal" padding="md" class="bento__card bento--wide page-enter" :style="{ '--stagger': 7 }">
         <div class="widget__header">
           <h3 class="widget__title">Shopping List</h3>
-          <RouterLink to="/shopping" class="widget__link">View All</RouterLink>
+          <RouterLink to="/pantry/shopping" class="widget__link">View All</RouterLink>
         </div>
         <LoadingSkeleton v-if="shopping.loading" :lines="3" />
         <template v-else-if="neededItems.length">
@@ -350,7 +380,7 @@ onMounted(() => {
         </div>
       </ContentCard>
 
-      <ContentCard padding="md" class="bento__card page-enter" :style="{ '--stagger': 8 }">
+      <ContentCard v-if="!app.isPersonal" padding="md" class="bento__card page-enter" :style="{ '--stagger': 8 }">
         <div class="widget__header">
           <h3 class="widget__title">Reminders</h3>
           <RouterLink to="/reminders" class="widget__link">View All</RouterLink>
@@ -397,20 +427,23 @@ onMounted(() => {
         </div>
       </ContentCard>
 
-      <ContentCard padding="md" class="bento__card bento--wide page-enter" :style="{ '--stagger': 10 }">
+      <!-- Maintenance (household only) -->
+      <ContentCard v-if="!app.isPersonal" padding="md" class="bento__card bento--wide page-enter" :style="{ '--stagger': 10 }">
         <div class="widget__header">
           <h3 class="widget__title">Maintenance</h3>
-          <RouterLink to="/maintenance" class="widget__link">View All</RouterLink>
+          <RouterLink to="/tasks" class="widget__link">View All</RouterLink>
         </div>
-        <LoadingSkeleton v-if="maintenance.loading" :lines="3" />
+        <LoadingSkeleton v-if="tasks.loading" :lines="3" />
         <template v-else-if="maintenanceAlerts.length">
           <ul class="widget__list">
             <li v-for="item in maintenanceAlerts" :key="item.id" class="widget__item">
               <div class="widget__item-main">
-                <span class="widget__item-title">{{ item.item }}</span>
-                <SBadge :variant="item.status === 'overdue' ? 'error' : 'default'" size="sm">{{ item.status }}</SBadge>
+                <span class="widget__item-title">{{ item.title }}</span>
+                <SBadge :variant="item.status === 'overdue' || (item.due_date && new Date(item.due_date) < new Date(new Date().toDateString())) ? 'error' : 'default'" size="sm">
+                  {{ item.status === 'not_started' ? 'upcoming' : item.status }}
+                </SBadge>
               </div>
-              <span v-if="item.next_due_date" class="widget__item-meta">{{ formatRelativeDate(item.next_due_date) }}</span>
+              <span v-if="item.due_date" class="widget__item-meta">{{ formatRelativeDate(item.due_date) }}</span>
             </li>
           </ul>
         </template>
@@ -419,6 +452,74 @@ onMounted(() => {
         </div>
       </ContentCard>
     </div>
+
+    <!-- Personal scope widgets (only when personal) -->
+    <template v-if="app.isPersonal">
+      <div class="bento">
+        <ContentCard padding="md" class="bento__card page-enter" :style="{ '--stagger': 11 }">
+          <div class="widget__header">
+            <h3 class="widget__title">Wishlist</h3>
+            <RouterLink to="/wishlist" class="widget__link">View All</RouterLink>
+          </div>
+          <template v-if="wishlistItems.length">
+            <ul class="widget__list">
+              <li v-for="item in wishlistItems" :key="item.id" class="widget__item">
+                <div class="widget__item-main">
+                  <span class="widget__item-title">{{ item.name }}</span>
+                  <span class="widget__item-amount">{{ formatCents(item.price) }}</span>
+                </div>
+                <SBadge :variant="item.priority === 'high' ? 'error' : item.priority === 'medium' ? 'warning' : 'default'" size="sm">{{ item.priority }}</SBadge>
+              </li>
+            </ul>
+          </template>
+          <div v-else class="widget__empty">
+            <p class="widget__empty-text">Your wishlist is empty — start dreaming!</p>
+          </div>
+        </ContentCard>
+
+        <ContentCard padding="md" class="bento__card page-enter" :style="{ '--stagger': 12 }">
+          <div class="widget__header">
+            <h3 class="widget__title">Subscriptions</h3>
+            <RouterLink to="/subscriptions" class="widget__link">View All</RouterLink>
+          </div>
+          <template v-if="activeSubscriptions.length">
+            <p class="widget__count">{{ formatCents(subscriptions.monthlyTotal) }}/mo</p>
+            <ul class="widget__list">
+              <li v-for="sub in activeSubscriptions" :key="sub.id" class="widget__item">
+                <div class="widget__item-main">
+                  <span class="widget__item-title">{{ sub.name }}</span>
+                  <span class="widget__item-amount">{{ formatCents(sub.amount) }}</span>
+                </div>
+                <SBadge variant="info" size="sm">{{ sub.frequency }}</SBadge>
+              </li>
+            </ul>
+          </template>
+          <div v-else class="widget__empty">
+            <p class="widget__empty-text">No subscriptions tracked</p>
+          </div>
+        </ContentCard>
+
+        <ContentCard padding="md" class="bento__card page-enter" :style="{ '--stagger': 13 }">
+          <div class="widget__header">
+            <h3 class="widget__title">Habits Today</h3>
+            <RouterLink to="/habits" class="widget__link">View All</RouterLink>
+          </div>
+          <template v-if="activeHabits.length">
+            <ul class="widget__list">
+              <li v-for="habit in activeHabits" :key="habit.id" class="widget__item">
+                <div class="widget__item-main">
+                  <span class="widget__item-title">{{ habit.name }}</span>
+                  <SBadge variant="default" size="sm">{{ habit.frequency }}</SBadge>
+                </div>
+              </li>
+            </ul>
+          </template>
+          <div v-else class="widget__empty">
+            <p class="widget__empty-text">No habits yet — build your first one!</p>
+          </div>
+        </ContentCard>
+      </div>
+    </template>
   </PageContainer>
 </template>
 
@@ -435,6 +536,7 @@ onMounted(() => {
   background: var(--color-surface-card);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-l);
+  box-shadow: var(--shadow-2), var(--shadow-card);
   overflow: hidden;
 }
 
@@ -447,6 +549,12 @@ onMounted(() => {
 
 .bento--wide {
   grid-column: span 2;
+}
+
+.section-title {
+  font: var(--text-title-3);
+  color: var(--color-fg-primary);
+  margin: var(--space-xl) 0 var(--space-l);
 }
 
 /* ── Responsive ── */

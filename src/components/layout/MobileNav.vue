@@ -1,16 +1,30 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useAppStore } from '@/stores/app.store'
 
 const route = useRoute()
+const appStore = useAppStore()
 
-const items = [
+const householdItems = [
   { to: '/', icon: 'dashboard', label: 'Home' },
   { to: '/money/expenses', icon: 'account_balance_wallet', label: 'Money' },
   { to: '/tasks', icon: 'checklist', label: 'Tasks' },
-  { to: '/shopping', icon: 'shopping_cart', label: 'Shopping' },
+  { to: '/pantry/shopping', icon: 'shopping_cart', label: 'Pantry' },
   { to: '/notes', icon: 'sticky_note_2', label: 'Notes' },
 ] as const
+
+const personalItems = [
+  { to: '/', icon: 'dashboard', label: 'Home' },
+  { to: '/money/expenses', icon: 'account_balance_wallet', label: 'Money' },
+  { to: '/tasks', icon: 'checklist', label: 'Tasks' },
+  { to: '/habits', icon: 'fitness_center', label: 'Habits' },
+  { to: '/wishlist', icon: 'favorite', label: 'Wishlist' },
+] as const
+
+const items = computed(() =>
+  appStore.isPersonal ? personalItems : householdItems,
+)
 
 function isActive(to: string): boolean {
   if (to === '/') return route.path === '/'

@@ -102,6 +102,9 @@ defineEmits<{
   overflow-x: hidden;
   padding: var(--space-xl);
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xl);
 }
 
 .drawer__footer {
