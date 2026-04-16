@@ -76,3 +76,38 @@ body {
   scrollbar-width: thin;
   scrollbar-color: var(--color-border-strong) transparent;
 }
+
+/* ── Font Scaling ── */
+:root {
+  --font-scale: 1;
+}
+
+html {
+  font-size: calc(16px * var(--font-scale));
+}
+
+/* ── Compact Mode ── */
+html.compact {
+  --space-s: 6px;
+  --space-m: 8px;
+  --space-l: 12px;
+  --space-xl: 16px;
+  --space-2xl: 24px;
+}
+
+/* ── High Contrast ── */
+html.high-contrast {
+  --color-fg-secondary: var(--color-fg-primary);
+  --color-fg-tertiary: var(--color-fg-secondary);
+  --color-border-default: var(--color-border-strong);
+  --color-border-subtle: var(--color-border-default);
+}
+
+/* ── No Animations ── */
+html.no-animations,
+html.no-animations *,
+html.no-animations *::before,
+html.no-animations *::after {
+  animation-duration: 0s !important;
+  transition-duration: 0s !important;
+}

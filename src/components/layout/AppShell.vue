@@ -73,7 +73,7 @@ function closeMobile() {
 <style scoped>
 .shell {
   display: flex;
-  min-height: 100dvh;
+  height: 100dvh;
   overflow: hidden;
   background: var(--color-bg-primary);
 }

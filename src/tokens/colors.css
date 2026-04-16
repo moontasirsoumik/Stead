@@ -250,3 +250,151 @@
     --color-nav-brand-indicator: #8AD1BF;
   }
 }
+
+/* ============================================================
+   Accent Color Overrides (data-accent attribute)
+   ============================================================ */
+
+/* ── Blue accent — light ── */
+:root[data-accent='blue'] {
+  --color-brand-primary: #1A56DB;
+  --color-brand-hover: #1648B8;
+  --color-brand-pressed: #123B96;
+  --color-brand-selected: #EBF0FF;
+  --color-brand-subtle: #DBEAFE;
+  --color-border-brand: #1A56DB;
+  --color-surface-nav-active: #DBEAFE;
+  --color-nav-brand-indicator: #1A56DB;
+}
+
+:root[data-theme='dark'][data-accent='blue'] {
+  --color-brand-primary: #93B4F4;
+  --color-brand-hover: #AECAFF;
+  --color-brand-pressed: #7AA2E8;
+  --color-brand-selected: #0F1A2E;
+  --color-brand-subtle: #1A2744;
+  --color-border-brand: #93B4F4;
+  --color-surface-nav-active: #0F1A2E;
+  --color-nav-brand-indicator: #93B4F4;
+  --color-fg-on-brand: #111111;
+}
+
+/* ── Purple accent — light ── */
+:root[data-accent='purple'] {
+  --color-brand-primary: #7C3AED;
+  --color-brand-hover: #6D28D9;
+  --color-brand-pressed: #5B21B6;
+  --color-brand-selected: #F3EEFF;
+  --color-brand-subtle: #EDE9FE;
+  --color-border-brand: #7C3AED;
+  --color-surface-nav-active: #EDE9FE;
+  --color-nav-brand-indicator: #7C3AED;
+}
+
+:root[data-theme='dark'][data-accent='purple'] {
+  --color-brand-primary: #C4B5FD;
+  --color-brand-hover: #D4C8FF;
+  --color-brand-pressed: #A78BFA;
+  --color-brand-selected: #1A0F2E;
+  --color-brand-subtle: #2A1D44;
+  --color-border-brand: #C4B5FD;
+  --color-surface-nav-active: #1A0F2E;
+  --color-nav-brand-indicator: #C4B5FD;
+  --color-fg-on-brand: #111111;
+}
+
+/* ── Rose accent — light ── */
+:root[data-accent='rose'] {
+  --color-brand-primary: #E11D48;
+  --color-brand-hover: #BE123C;
+  --color-brand-pressed: #9F1239;
+  --color-brand-selected: #FFF1F2;
+  --color-brand-subtle: #FFE4E6;
+  --color-border-brand: #E11D48;
+  --color-surface-nav-active: #FFE4E6;
+  --color-nav-brand-indicator: #E11D48;
+}
+
+:root[data-theme='dark'][data-accent='rose'] {
+  --color-brand-primary: #FDA4AF;
+  --color-brand-hover: #FFB8C2;
+  --color-brand-pressed: #F48898;
+  --color-brand-selected: #2E0F14;
+  --color-brand-subtle: #441A22;
+  --color-border-brand: #FDA4AF;
+  --color-surface-nav-active: #2E0F14;
+  --color-nav-brand-indicator: #FDA4AF;
+  --color-fg-on-brand: #111111;
+}
+
+/* ── Amber accent — light ── */
+:root[data-accent='amber'] {
+  --color-brand-primary: #D97706;
+  --color-brand-hover: #B45309;
+  --color-brand-pressed: #92400E;
+  --color-brand-selected: #FFFBEB;
+  --color-brand-subtle: #FEF3C7;
+  --color-border-brand: #D97706;
+  --color-surface-nav-active: #FEF3C7;
+  --color-nav-brand-indicator: #D97706;
+}
+
+:root[data-theme='dark'][data-accent='amber'] {
+  --color-brand-primary: #FCD34D;
+  --color-brand-hover: #FDE68A;
+  --color-brand-pressed: #F5C63A;
+  --color-brand-selected: #2E2006;
+  --color-brand-subtle: #44300E;
+  --color-border-brand: #FCD34D;
+  --color-surface-nav-active: #2E2006;
+  --color-nav-brand-indicator: #FCD34D;
+  --color-fg-on-brand: #111111;
+}
+
+/* ── Slate accent — light ── */
+:root[data-accent='slate'] {
+  --color-brand-primary: #475569;
+  --color-brand-hover: #334155;
+  --color-brand-pressed: #1E293B;
+  --color-brand-selected: #F1F5F9;
+  --color-brand-subtle: #E2E8F0;
+  --color-border-brand: #475569;
+  --color-surface-nav-active: #E2E8F0;
+  --color-nav-brand-indicator: #475569;
+}
+
+:root[data-theme='dark'][data-accent='slate'] {
+  --color-brand-primary: #94A3B8;
+  --color-brand-hover: #B0BEC5;
+  --color-brand-pressed: #7B8FA0;
+  --color-brand-selected: #0F1520;
+  --color-brand-subtle: #1A2535;
+  --color-border-brand: #94A3B8;
+  --color-surface-nav-active: #0F1520;
+  --color-nav-brand-indicator: #94A3B8;
+  --color-fg-on-brand: #111111;
+}
+
+/* ── Teal accent (standalone, not scope) — light ── */
+:root[data-accent='teal']:not([data-scope='personal']) {
+  --color-brand-primary: #2E6B5E;
+  --color-brand-hover: #245A4E;
+  --color-brand-pressed: #1B493F;
+  --color-brand-selected: #E4F6F1;
+  --color-brand-subtle: #BFE8DC;
+  --color-border-brand: #2E6B5E;
+  --color-surface-nav-active: #BFE8DC;
+  --color-nav-brand-indicator: #2E6B5E;
+}
+
+:root[data-theme='dark'][data-accent='teal']:not([data-scope='personal']) {
+  --color-brand-primary: #8AD1BF;
+  --color-brand-hover: #9ADFC9;
+  --color-brand-pressed: #74C4AE;
+  --color-brand-selected: #122520;
+  --color-brand-subtle: #1E3A32;
+  --color-border-brand: #8AD1BF;
+  --color-surface-nav-active: #122520;
+  --color-nav-brand-indicator: #8AD1BF;
+  --color-fg-on-brand: #111111;
+}
