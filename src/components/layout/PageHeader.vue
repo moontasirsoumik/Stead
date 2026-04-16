@@ -22,14 +22,14 @@ defineProps<{
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--space-l);
-  margin-bottom: var(--space-l);
+  gap: var(--space-xl);
+  margin-bottom: var(--space-xl);
 }
 
 .pageheader__text {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2xs);
+  gap: var(--space-xs);
 }
 
 .pageheader__title {
@@ -53,7 +53,7 @@ defineProps<{
 @media (max-width: 640px) {
   .pageheader {
     flex-direction: column;
-    gap: var(--space-m);
+    gap: var(--space-l);
   }
 
   .pageheader__title {

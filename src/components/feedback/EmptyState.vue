@@ -97,8 +97,7 @@ defineEmits<{
   cursor: pointer;
   transition:
     background-color var(--duration-fast) var(--easing-standard),
-    box-shadow var(--duration-fast) var(--easing-standard),
-    transform var(--duration-ultra-fast) var(--easing-standard);
+    box-shadow var(--duration-fast) var(--easing-standard);
 }
 
 .emptystate__action:hover {
@@ -108,6 +107,5 @@ defineEmits<{
 
 .emptystate__action:active {
   background: var(--color-brand-pressed);
-  transform: scale(0.98);
 }
 </style>

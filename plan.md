@@ -71,10 +71,10 @@ Build a modern, polished, local-first household management SPA for a family. Dep
 | Router | Vue Router 4 | Standard Vue routing, lazy-loaded routes |
 | State | Pinia | Official Vue state, typed stores, devtools |
 | Local DB | Dexie.js 4 | Typed IndexedDB wrapper, migrations, ergonomic API |
-| Design | Fluent 2-inspired custom tokens + Vue components | Full control, no shadow DOM friction |
+| Design | Material Design 3-inspired custom tokens + Vue components | Full control with a coherent system language and custom brand execution |
 | Validation | Zod | Runtime schema validation for API responses and forms |
 | Dates | date-fns | Tree-shakeable, modern |
-| Icons | Fluent UI System Icons (SVG subset) | Consistent with Fluent aesthetic |
+| Icons | Lucide outline icons | Modern outline style with broad coverage and consistent stroke language |
 | Linting | ESLint 9 (flat config) + @typescript-eslint | Code quality |
 | Formatting | Prettier | Consistent style |
 | Unit tests | Vitest | Vite-native, fast |
@@ -812,13 +812,13 @@ The Supabase free tier allows: 500 MB database, 1 GB file storage, 50k monthly a
 Stead's visual identity is built on the principle of **quiet confidence**: an interface that communicates quality through restraint, craft, and intentional detail — not through flashiness or visual noise.
 
 **Core Aesthetic Direction:**
-- **Warm professionalism** — not sterile corporate (Microsoft Teams), not childish consumer (Notion pastel-land). Think: premium stationery, a well-designed analog clock, a Muji product.
-- **Fluent 2 as foundation, not ceiling** — we use Fluent 2's token architecture and interaction patterns, but elevate with custom personality, spatial craft, and animation polish that Fluent's defaults don't provide.
-- **Depth and layering** — surfaces feel physical. Cards rest on backgrounds with real shadows. Elevated elements (drawers, dropdowns) float convincingly. Translucent overlays create atmospheric depth.
-- **Typography does the heavy lifting** — 80% of visual hierarchy comes from font weight, size, and color contrast. Borders, backgrounds, and icons are supporting actors.
-- **Asymmetric spatial rhythm** — spacing is varied intentionally. Tighter between related elements, generous between sections. Not every card gets the same padding. Breathing room creates calm.
-- **Motion as communication** — every animation means something: an element arriving, confirming an action, drawing attention. Staggered page entry reveals (cascading children with 30-50ms delay increments) are the signature Stead animation pattern.
-- **Sparse brand color** — the brand blue appears rarely and always communicates "interactive" or "selected." Neutrals carry 90% of the UI. This makes brand color appearances feel significant.
+- **Warm professionalism** — not sterile enterprise, not playful toy-app. Think: a carefully tuned Material 3 product adapted for family routines.
+- **Material 3 as system foundation** — we use Material 3 concepts for surface roles, elevation, navigation families, and state layers, then tailor them to Stead's tone and information density.
+- **Depth and layering** — surfaces feel intentional even on pure white and pure black foundations. Cards, drawers, and bars must read as distinct container levels.
+- **Typography does the heavy lifting** — hierarchy should come first from weight, size, rhythm, and contrast. Decorative styling is secondary.
+- **Structural clarity across breakpoints** — desktop, tablet, and phone each get one primary navigation pattern with explicit affordances and no overlap.
+- **Motion as communication** — animations confirm change, entry, and focus. Staggered page entry remains the signature Stead pattern.
+- **Sparse brand color** — brand color appears with purpose for action, focus, active state, and emphasis. Containers and neutrals carry the bulk of the interface.
 
 **Visual Quality Gates (every page/component must pass):**
 1. Can you identify the most important element within 0.5 seconds?
@@ -837,6 +837,8 @@ Stead's visual identity is built on the principle of **quiet confidence**: an in
 - Every card looking identical (visual monotony kills perceived quality)
 - Pages that feel like spreadsheets — if it's tabular, add visual breaks
 - Cookie-cutter component grids with zero spatial personality
+- Collapsible navigation with no visible way to expand it again
+- Phone layouts showing both drawer/sidebar navigation and bottom navigation simultaneously
 
 ### 10.1 Color Tokens (Light Theme)
 

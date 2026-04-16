@@ -75,7 +75,7 @@ defineEmits<{
 }
 
 .sinput__label {
-  font: var(--text-body-2);
+  font: var(--text-label-md);
   color: var(--color-fg-secondary);
   font-weight: var(--font-weight-medium);
 }
@@ -91,8 +91,9 @@ defineEmits<{
   height: var(--height-input);
   background: var(--color-surface-input);
   border: 1px solid var(--color-border-input);
-  border-radius: var(--radius-m);
+  border-radius: var(--radius-l);
   overflow: hidden;
+  box-shadow: var(--shadow-inset);
   transition:
     border-color var(--duration-fast) var(--easing-standard),
     box-shadow var(--duration-fast) var(--easing-standard),
@@ -101,17 +102,19 @@ defineEmits<{
 
 .sinput__wrapper:hover:not(.sinput--disabled .sinput__wrapper) {
   border-color: var(--color-border-input-hover);
+  background: var(--color-surface-input-hover);
 }
 
 .sinput__wrapper:focus-within {
   border-color: var(--color-brand-primary);
-  box-shadow: 0 0 0 1px var(--color-brand-primary);
+  background: var(--color-surface-card);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand-primary) 24%, transparent);
 }
 
 .sinput__field {
   flex: 1;
   height: 100%;
-  padding: 0 var(--space-m);
+  padding: 0 var(--space-l);
   background: transparent;
   border: none;
   font: var(--text-body-1);
@@ -135,12 +138,12 @@ defineEmits<{
 }
 
 .sinput__prefix {
-  padding-left: var(--space-m);
+  padding-left: var(--space-l);
   padding-right: 0;
 }
 
 .sinput__suffix {
-  padding-right: var(--space-m);
+  padding-right: var(--space-l);
   padding-left: 0;
 }
 
@@ -149,7 +152,7 @@ defineEmits<{
 }
 
 .sinput--error .sinput__wrapper:focus-within {
-  box-shadow: 0 0 0 1px var(--color-error);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-error) 24%, transparent);
 }
 
 .sinput--disabled {

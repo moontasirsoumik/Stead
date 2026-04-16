@@ -15,7 +15,7 @@ This is the **Stead** household management app — a production-quality, local-f
 - **Remote**: Supabase Postgres via `@supabase/supabase-js` (PostgREST)
 - **Auth**: Supabase Auth (email/password, JWT)
 - **Security**: Row Level Security (RLS) — every table scoped to household
-- **Design**: Fluent 2-inspired custom token system + Vue components — **refined, premium, non-generic aesthetic**
+- **Design**: Material Design 3-inspired custom token system + Vue components — **refined, premium, non-generic aesthetic**
 
 ## Design Quality Standard (ALL AGENTS)
 

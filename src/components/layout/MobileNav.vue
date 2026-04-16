@@ -1,14 +1,15 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
 
 const items = [
   { to: '/', icon: 'dashboard', label: 'Home' },
-  { to: '/money/expenses', icon: 'money', label: 'Money' },
-  { to: '/tasks', icon: 'tasks', label: 'Tasks' },
-  { to: '/shopping', icon: 'shopping', label: 'Shopping' },
-  { to: '/notes', icon: 'notes', label: 'Notes' },
+  { to: '/money/expenses', icon: 'account_balance_wallet', label: 'Money' },
+  { to: '/tasks', icon: 'checklist', label: 'Tasks' },
+  { to: '/shopping', icon: 'shopping_cart', label: 'Shopping' },
+  { to: '/notes', icon: 'sticky_note_2', label: 'Notes' },
 ] as const
 
 function isActive(to: string): boolean {
@@ -26,32 +27,8 @@ function isActive(to: string): boolean {
       :class="['mobilenav__item', { 'mobilenav__item--active': isActive(item.to) }]"
       :aria-current="isActive(item.to) ? 'page' : undefined"
     >
-      <span class="mobilenav__icon" aria-hidden="true">
-        <!-- Reuse same SVG icons as NavItem -->
-        <svg v-if="item.icon === 'dashboard'" width="24" height="24" viewBox="0 0 20 20" fill="none">
-          <rect x="2" y="2" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5" />
-          <rect x="11" y="2" width="7" height="4" rx="1.5" stroke="currentColor" stroke-width="1.5" />
-          <rect x="2" y="11" width="7" height="4" rx="1.5" stroke="currentColor" stroke-width="1.5" />
-          <rect x="11" y="8" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5" />
-        </svg>
-        <svg v-else-if="item.icon === 'money'" width="24" height="24" viewBox="0 0 20 20" fill="none">
-          <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" />
-          <path d="M10 5V15M7 8C7 6.9 8.34 6 10 6C11.66 6 13 6.9 13 8C13 9.1 11.66 10 10 10C8.34 10 7 10.9 7 12C7 13.1 8.34 14 10 14C11.66 14 13 13.1 13 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-        </svg>
-        <svg v-else-if="item.icon === 'tasks'" width="24" height="24" viewBox="0 0 20 20" fill="none">
-          <rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5" />
-          <path d="M7 10L9 12L13 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-        <svg v-else-if="item.icon === 'shopping'" width="24" height="24" viewBox="0 0 20 20" fill="none">
-          <path d="M3 3H5L7 13H15L17 6H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-          <circle cx="8" cy="16" r="1" fill="currentColor" />
-          <circle cx="14" cy="16" r="1" fill="currentColor" />
-        </svg>
-        <svg v-else-if="item.icon === 'notes'" width="24" height="24" viewBox="0 0 20 20" fill="none">
-          <path d="M4 3H16V14L12 17H4V3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
-          <path d="M12 14V17L16 14H12Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
-          <path d="M7 7H13M7 10H11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-        </svg>
+      <span class="mobilenav__pill">
+        <span class="material-symbols-rounded">{{ item.icon }}</span>
       </span>
       <span class="mobilenav__label">{{ item.label }}</span>
     </RouterLink>
@@ -64,60 +41,69 @@ function isActive(to: string): boolean {
   bottom: 0;
   left: 0;
   right: 0;
-  height: var(--height-mobile-nav);
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   align-items: center;
-  justify-content: space-around;
-  background: rgba(255, 255, 255, 0.90);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  height: calc(var(--height-mobile-nav) + env(safe-area-inset-bottom));
+  padding: var(--space-s) var(--space-s) calc(var(--space-s) + env(safe-area-inset-bottom));
+  background: color-mix(in srgb, var(--color-surface-card) 88%, transparent);
   border-top: 1px solid var(--color-border-default);
+  box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.08);
   z-index: 100;
+}
+
+@supports (backdrop-filter: blur(1px)) {
+  .mobilenav {
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+  }
 }
 
 .mobilenav__item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-2xs);
-  padding: var(--space-xs) var(--space-m);
+  gap: 4px;
+  padding: var(--space-xs) 0;
   color: var(--color-fg-tertiary);
   text-decoration: none;
-  border-radius: var(--radius-m);
-  position: relative;
-  transition: color var(--duration-fast) var(--easing-standard);
+  transition:
+    color var(--duration-fast) var(--easing-standard),
+    opacity var(--duration-fast) var(--easing-standard);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .mobilenav__item--active {
-  color: var(--color-brand-primary);
+  color: var(--color-on-primary-container);
 }
 
-.mobilenav__item--active::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 14px;
-  height: 2px;
-  background: var(--color-brand-primary);
-  border-radius: 2px;
-}
-
-.mobilenav__icon {
+.mobilenav__pill {
   display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 32px;
+  border-radius: var(--radius-circle);
+  transition:
+    background-color var(--duration-normal) var(--easing-decelerate),
+    transform var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard);
 }
 
-.mobilenav__icon > svg {
-  width: 18px;
-  height: 18px;
+.mobilenav__item--active .mobilenav__pill {
+  background: var(--color-primary-container);
+}
+
+.mobilenav__item:active {
+  opacity: 0.7;
 }
 
 .mobilenav__label {
-  font: var(--text-caption);
+  font: var(--text-label-sm);
+  line-height: 1;
 }
 
 .mobilenav__item--active .mobilenav__label {
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
 }
 </style>

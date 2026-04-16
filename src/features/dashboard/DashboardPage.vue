@@ -174,27 +174,27 @@ onMounted(() => {
       :style="{ '--stagger': 0 }"
     />
 
-    <!-- Top stats bar -->
-    <div class="stats-bar page-enter" :style="{ '--stagger': 1 }">
-      <div class="stat">
+    <!-- Stats row — 4 individual cards instead of a monolithic bar -->
+    <div class="stats-row page-enter" :style="{ '--stagger': 1 }">
+      <div class="stat-card">
         <InlineStat
           label="Monthly spending"
           :value="formatCents(expenses.currentMonthTotal)"
         />
       </div>
-      <div class="stat">
+      <div class="stat-card">
         <InlineStat
           label="Monthly income"
           :value="formatCents(income.currentMonthTotal)"
         />
       </div>
-      <div class="stat">
+      <div class="stat-card">
         <InlineStat
           label="Upcoming bills"
           :value="String(bills.upcomingBills.length)"
         />
       </div>
-      <div class="stat">
+      <div class="stat-card">
         <InlineStat
           label="Tasks due"
           :value="String(tasks.overdueTasks.length + tasks.dueToday.length)"
@@ -202,10 +202,10 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Widget grid -->
-    <div class="dashboard-grid">
-      <!-- Tasks Due -->
-      <ContentCard padding="md" class="widget page-enter" :style="{ '--stagger': 2 }">
+    <!-- Bento grid — asymmetric card sizes -->
+    <div class="bento">
+      <!-- Row 1: Tasks (wide) + Bills (narrow) -->
+      <ContentCard padding="md" class="bento__card bento--wide page-enter" :style="{ '--stagger': 2 }">
         <div class="widget__header">
           <h3 class="widget__title">Tasks Due</h3>
           <RouterLink to="/tasks" class="widget__link">View All</RouterLink>
@@ -223,12 +223,11 @@ onMounted(() => {
           </ul>
         </template>
         <div v-else class="widget__empty">
-          <p class="widget__empty-text">All caught up</p>
+          <p class="widget__empty-text">All caught up — no tasks due</p>
         </div>
       </ContentCard>
 
-      <!-- Upcoming Bills -->
-      <ContentCard padding="md" class="widget page-enter" :style="{ '--stagger': 3 }">
+      <ContentCard padding="md" class="bento__card page-enter" :style="{ '--stagger': 3 }">
         <div class="widget__header">
           <h3 class="widget__title">Upcoming Bills</h3>
           <RouterLink to="/money/bills" class="widget__link">View All</RouterLink>
@@ -253,8 +252,8 @@ onMounted(() => {
         </div>
       </ContentCard>
 
-      <!-- Recent Expenses -->
-      <ContentCard padding="md" class="widget page-enter" :style="{ '--stagger': 4 }">
+      <!-- Row 2: Expenses + Savings + Inventory — 3 equal -->
+      <ContentCard padding="md" class="bento__card page-enter" :style="{ '--stagger': 4 }">
         <div class="widget__header">
           <h3 class="widget__title">Recent Expenses</h3>
           <RouterLink to="/money/expenses" class="widget__link">View All</RouterLink>
@@ -279,8 +278,7 @@ onMounted(() => {
         </div>
       </ContentCard>
 
-      <!-- Savings Progress -->
-      <ContentCard padding="md" class="widget page-enter" :style="{ '--stagger': 5 }">
+      <ContentCard padding="md" class="bento__card page-enter" :style="{ '--stagger': 5 }">
         <div class="widget__header">
           <h3 class="widget__title">Savings Progress</h3>
           <RouterLink to="/money/savings" class="widget__link">View All</RouterLink>
@@ -308,8 +306,7 @@ onMounted(() => {
         </div>
       </ContentCard>
 
-      <!-- Low Stock -->
-      <ContentCard padding="md" class="widget page-enter" :style="{ '--stagger': 6 }">
+      <ContentCard padding="md" class="bento__card page-enter" :style="{ '--stagger': 6 }">
         <div class="widget__header">
           <h3 class="widget__title">Low Stock</h3>
           <RouterLink to="/inventory" class="widget__link">View All</RouterLink>
@@ -330,8 +327,8 @@ onMounted(() => {
         </div>
       </ContentCard>
 
-      <!-- Shopping List -->
-      <ContentCard padding="md" class="widget page-enter" :style="{ '--stagger': 7 }">
+      <!-- Row 3: Shopping (wide) + Reminders -->
+      <ContentCard padding="md" class="bento__card bento--wide page-enter" :style="{ '--stagger': 7 }">
         <div class="widget__header">
           <h3 class="widget__title">Shopping List</h3>
           <RouterLink to="/shopping" class="widget__link">View All</RouterLink>
@@ -349,12 +346,11 @@ onMounted(() => {
           </ul>
         </template>
         <div v-else class="widget__empty">
-          <p class="widget__empty-text">Shopping list empty</p>
+          <p class="widget__empty-text">Shopping list is empty</p>
         </div>
       </ContentCard>
 
-      <!-- Reminders -->
-      <ContentCard padding="md" class="widget page-enter" :style="{ '--stagger': 8 }">
+      <ContentCard padding="md" class="bento__card page-enter" :style="{ '--stagger': 8 }">
         <div class="widget__header">
           <h3 class="widget__title">Reminders</h3>
           <RouterLink to="/reminders" class="widget__link">View All</RouterLink>
@@ -381,8 +377,8 @@ onMounted(() => {
         </div>
       </ContentCard>
 
-      <!-- Pinned Notes -->
-      <ContentCard padding="md" class="widget page-enter" :style="{ '--stagger': 9 }">
+      <!-- Row 4: Notes + Maintenance (wide) -->
+      <ContentCard padding="md" class="bento__card page-enter" :style="{ '--stagger': 9 }">
         <div class="widget__header">
           <h3 class="widget__title">Pinned Notes</h3>
           <RouterLink to="/notes" class="widget__link">View All</RouterLink>
@@ -401,8 +397,7 @@ onMounted(() => {
         </div>
       </ContentCard>
 
-      <!-- Maintenance -->
-      <ContentCard padding="md" class="widget page-enter" :style="{ '--stagger': 10 }">
+      <ContentCard padding="md" class="bento__card bento--wide page-enter" :style="{ '--stagger': 10 }">
         <div class="widget__header">
           <h3 class="widget__title">Maintenance</h3>
           <RouterLink to="/maintenance" class="widget__link">View All</RouterLink>
@@ -428,71 +423,78 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.stats-bar {
-  display: flex;
-  align-items: stretch;
-  margin-bottom: var(--space-l);
+/* ── Stats row: 4 separate cards ── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-l);
+  margin-bottom: var(--space-xl);
+}
+
+.stat-card {
   background: var(--color-surface-card);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-l);
-  box-shadow: var(--shadow-card);
   overflow: hidden;
 }
 
-.stat {
-  flex: 1;
-  border-right: 1px solid var(--color-border-subtle);
-}
-
-.stat:last-child {
-  border-right: none;
-}
-
-.dashboard-grid {
+/* ── Bento grid: 3-column base with wide cards spanning 2 ── */
+.bento {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-l);
 }
 
+.bento--wide {
+  grid-column: span 2;
+}
+
+/* ── Responsive ── */
 @media (max-width: 1200px) {
-  .dashboard-grid {
+  .stats-row {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .bento {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .bento--wide {
+    grid-column: span 2;
   }
 }
 
 @media (max-width: 768px) {
-  .stats-bar {
-    flex-wrap: wrap;
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .stat {
-    flex-basis: 50%;
-    border-bottom: 1px solid var(--color-border-subtle);
+  .bento {
+    grid-template-columns: 1fr;
   }
 
-  .stat:nth-child(2) {
-    border-right: none;
+  .bento--wide {
+    grid-column: span 1;
   }
+}
 
-  .stat:nth-last-child(-n+2) {
-    border-bottom: none;
-  }
-
-  .dashboard-grid {
+@media (max-width: 480px) {
+  .stats-row {
     grid-template-columns: 1fr;
   }
 }
 
+/* ── Widget internals ── */
 .widget__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--space-s);
+  margin-bottom: var(--space-m);
 }
 
 .widget__title {
   font: var(--text-caption);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-fg-tertiary);
   text-transform: uppercase;
   letter-spacing: var(--tracking-caps);
@@ -514,13 +516,12 @@ onMounted(() => {
 .widget__count {
   font: var(--text-caption);
   color: var(--color-fg-secondary);
-  margin-bottom: var(--space-xs);
+  margin-bottom: var(--space-s);
 }
 
 .widget__list {
   display: flex;
   flex-direction: column;
-  gap: 0;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -529,16 +530,20 @@ onMounted(() => {
 .widget__item {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2xs);
-  padding: var(--space-xs) 0;
+  gap: 2px;
+  padding: var(--space-s) 0;
   border-bottom: 1px solid var(--color-border-subtle);
-  transition: background var(--duration-fast) var(--easing-standard);
-  min-height: 28px;
+  min-height: 32px;
   justify-content: center;
 }
 
 .widget__item:last-child {
   border-bottom: none;
+  padding-bottom: 0;
+}
+
+.widget__item:first-child {
+  padding-top: 0;
 }
 
 .widget__item-main {
@@ -579,7 +584,7 @@ onMounted(() => {
 }
 
 .widget__empty {
-  padding: var(--space-l) 0;
+  padding: var(--space-xl) 0;
   text-align: center;
 }
 
@@ -592,16 +597,21 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
-  padding: var(--space-xs) 0;
+  padding: var(--space-s) 0;
   border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .widget__goal:last-child {
   border-bottom: none;
+  padding-bottom: 0;
+}
+
+.widget__goal:first-child {
+  padding-top: 0;
 }
 
 .progress-bar {
-  height: 3px;
+  height: 4px;
   width: 100%;
   background: var(--color-bg-tertiary);
   border-radius: var(--radius-s);
@@ -616,12 +626,17 @@ onMounted(() => {
 }
 
 .widget__note {
-  padding: var(--space-xs) 0;
+  padding: var(--space-s) 0;
   border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .widget__note:last-child {
   border-bottom: none;
+  padding-bottom: 0;
+}
+
+.widget__note:first-child {
+  padding-top: 0;
 }
 
 .widget__note-title {
@@ -629,12 +644,12 @@ onMounted(() => {
   font-weight: var(--font-weight-medium);
   color: var(--color-fg-primary);
   display: block;
-  margin-bottom: var(--space-2xs);
+  margin-bottom: 2px;
 }
 
 .widget__note-preview {
   font: var(--text-caption);
   color: var(--color-fg-secondary);
-  line-height: 1.4;
+  line-height: 1.5;
 }
 </style>

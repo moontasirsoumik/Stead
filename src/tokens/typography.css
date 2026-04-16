@@ -1,32 +1,32 @@
 /* ============================================================
    Stead — Typography Tokens
-   Outfit for distinctive modern character; tighter scale
+   Plus Jakarta Sans with a Material 3-inspired scale.
    ============================================================ */
 
 :root {
-  /* ── Font Families ── */
-  --font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
 
-  /* ── Type Scale ── */
-  --text-display: 700 36px/42px var(--font-family);
-  --text-title-1: 600 28px/34px var(--font-family);
-  --text-title-2: 600 22px/28px var(--font-family);
-  --text-title-3: 600 19px/24px var(--font-family);
-  --text-subtitle-1: 400 20px/26px var(--font-family);
-  --text-body-1: 400 16px/24px var(--font-family);
-  --text-body-1-strong: 500 16px/24px var(--font-family);
-  --text-body-2: 400 15px/22px var(--font-family);
-  --text-caption: 400 14px/20px var(--font-family);
+  --text-display: 700 32px/40px var(--font-family);
+  --text-title-1: 700 24px/32px var(--font-family);
+  --text-title-2: 600 20px/28px var(--font-family);
+  --text-title-3: 600 17px/24px var(--font-family);
+  --text-subtitle-1: 600 15px/22px var(--font-family);
+  --text-body-1: 400 14px/22px var(--font-family);
+  --text-body-1-strong: 600 14px/22px var(--font-family);
+  --text-body-2: 400 13px/20px var(--font-family);
+  --text-caption: 500 12px/18px var(--font-family);
+  --text-label-lg: 600 13px/20px var(--font-family);
+  --text-label-md: 600 12px/18px var(--font-family);
+  --text-label-sm: 600 11px/16px var(--font-family);
 
-  /* ── Individual Weights ── */
   --font-weight-regular: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
+  --font-weight-bold: 700;
 
-  /* ── Letter Spacing ── */
   --tracking-tight: -0.02em;
   --tracking-normal: 0;
-  --tracking-wide: 0.04em;
+  --tracking-wide: 0.02em;
   --tracking-caps: 0.06em;
 }

@@ -23,7 +23,7 @@
 | P11 | Notes Module | ✅ Done | 2026-04-15 | 2026-04-15 | Store, page, pin toggle, card grid |
 | P12 | Dashboard | ✅ Done | 2026-04-15 | 2026-04-15 | Widget grid, stats bar, all modules |
 | P13 | Maintenance Module | ✅ Done | 2026-04-16 | 2026-04-16 | Store, page, dashboard widget |
-| P14 | Polish + Deploy | 🟡 In Progress | 2026-04-16 | — | CI workflow done |
+| P14 | Polish + Deploy | 🟡 In Progress | 2026-04-16 | — | CI workflow done; Material 3 migration in progress |
 
 ---
 
@@ -310,7 +310,7 @@
 | P14-05 | Configure CI (lint + typecheck + build) | ✅ Done | `.github/workflows/ci.yml` |
 | P14-06 | Set up Cloudflare Pages deployment | ✅ Done | `public/_redirects`, `public/_headers` |
 | P14-07 | Write deployment docs | ⬜ Not Started | `docs/deployment.md` |
-| P14-08 | Final visual polish pass | ⬜ Not Started | — |
+| P14-08 | Final visual polish pass | 🟡 In Progress | Material 3 migration, shell cleanup, theme controls |
 
 ---
 
@@ -320,3 +320,4 @@
 |---|---|
 | 2026-04-15 | Initial plan.md, progress.md, folder structure, agent definitions created (P0-01 through P0-04) |
 | 2026-04-15 | Migrated architecture from Google Sheets + Apps Script to Supabase. Updated plan.md, progress.md, agents, directory structure. |
+| 2026-04-16 | Switched design guidance from Fluent-inspired direction to Material Design 3, added shell/navigation quality rules, and began app-wide M3 migration. |

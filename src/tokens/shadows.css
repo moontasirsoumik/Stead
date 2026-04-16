@@ -1,15 +1,39 @@
 /* ============================================================
    Stead — Shadow Tokens
-   Navy-tinted shadows for layered depth
+   Subtle elevation for Material 3-inspired surfaces.
    ============================================================ */
 
 :root {
-  --shadow-2: 0 1px 2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.04);
-  --shadow-4: 0 2px 4px rgba(15, 23, 42, 0.06), 0 4px 6px rgba(15, 23, 42, 0.03);
-  --shadow-8: 0 4px 8px rgba(15, 23, 42, 0.07), 0 8px 16px rgba(15, 23, 42, 0.04);
-  --shadow-16: 0 8px 24px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15, 23, 42, 0.04);
-  --shadow-28: 0 16px 48px rgba(15, 23, 42, 0.14), 0 4px 12px rgba(15, 23, 42, 0.06);
-  --shadow-inset: inset 0 1px 2px rgba(15, 23, 42, 0.06);
-  --shadow-brand: 0 2px 8px rgba(37, 99, 235, 0.25), 0 1px 2px rgba(37, 99, 235, 0.15);
-  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.04), 0 0 0 1px rgba(15, 23, 42, 0.03);
+  --shadow-2: 0 1px 2px rgba(18, 25, 15, 0.06), 0 1px 3px rgba(18, 25, 15, 0.08);
+  --shadow-4: 0 2px 6px rgba(18, 25, 15, 0.08), 0 1px 2px rgba(18, 25, 15, 0.06);
+  --shadow-8: 0 6px 18px rgba(18, 25, 15, 0.10), 0 2px 6px rgba(18, 25, 15, 0.06);
+  --shadow-16: 0 12px 28px rgba(18, 25, 15, 0.14), 0 4px 10px rgba(18, 25, 15, 0.08);
+  --shadow-28: 0 20px 56px rgba(18, 25, 15, 0.18), 0 8px 18px rgba(18, 25, 15, 0.10);
+  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  --shadow-brand: 0 8px 20px rgba(73, 102, 46, 0.18), 0 2px 6px rgba(73, 102, 46, 0.10);
+  --shadow-card: 0 0 0 1px rgba(22, 29, 19, 0.04);
+}
+
+:root[data-theme='dark'] {
+  --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.22), 0 1px 3px rgba(0, 0, 0, 0.26);
+  --shadow-4: 0 2px 6px rgba(0, 0, 0, 0.26), 0 1px 2px rgba(0, 0, 0, 0.18);
+  --shadow-8: 0 6px 18px rgba(0, 0, 0, 0.34), 0 2px 6px rgba(0, 0, 0, 0.22);
+  --shadow-16: 0 12px 28px rgba(0, 0, 0, 0.42), 0 4px 10px rgba(0, 0, 0, 0.26);
+  --shadow-28: 0 20px 56px rgba(0, 0, 0, 0.52), 0 8px 18px rgba(0, 0, 0, 0.32);
+  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --shadow-brand: 0 10px 26px rgba(170, 209, 138, 0.16), 0 2px 8px rgba(170, 209, 138, 0.08);
+  --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.22), 0 1px 3px rgba(0, 0, 0, 0.26);
+    --shadow-4: 0 2px 6px rgba(0, 0, 0, 0.26), 0 1px 2px rgba(0, 0, 0, 0.18);
+    --shadow-8: 0 6px 18px rgba(0, 0, 0, 0.34), 0 2px 6px rgba(0, 0, 0, 0.22);
+    --shadow-16: 0 12px 28px rgba(0, 0, 0, 0.42), 0 4px 10px rgba(0, 0, 0, 0.26);
+    --shadow-28: 0 20px 56px rgba(0, 0, 0, 0.52), 0 8px 18px rgba(0, 0, 0, 0.32);
+    --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    --shadow-brand: 0 10px 26px rgba(170, 209, 138, 0.16), 0 2px 8px rgba(170, 209, 138, 0.08);
+    --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.04);
+  }
 }

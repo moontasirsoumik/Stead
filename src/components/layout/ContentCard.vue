@@ -22,20 +22,21 @@ withDefaults(
   background: var(--color-surface-card);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-l);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-2), var(--shadow-card);
   transition:
     box-shadow var(--duration-fast) var(--easing-standard),
     border-color var(--duration-fast) var(--easing-standard),
-    transform var(--duration-fast) var(--easing-standard);
+    background-color var(--duration-fast) var(--easing-standard);
 }
 
 .contentcard--pad-none { padding: 0; }
-.contentcard--pad-sm { padding: var(--space-m); }
-.contentcard--pad-md { padding: var(--space-l); }
-.contentcard--pad-lg { padding: var(--space-xl); }
+.contentcard--pad-sm { padding: var(--space-l); }
+.contentcard--pad-md { padding: var(--space-xl); }
+.contentcard--pad-lg { padding: var(--space-2xl); }
 
 .contentcard--hoverable:hover {
-  box-shadow: var(--shadow-4);
-  border-color: var(--color-border-strong);
+  background: var(--color-surface-card-hover);
+  box-shadow: var(--shadow-8), var(--shadow-card);
+  border-color: var(--color-outline-variant);
 }
 </style>

@@ -53,8 +53,8 @@ defineEmits<{
   justify-content: center;
   gap: var(--space-s);
   border: 1px solid transparent;
-  border-radius: var(--radius-m);
-  font: var(--text-body-1-strong);
+  border-radius: var(--radius-circle);
+  font: var(--text-label-lg);
   cursor: pointer;
   position: relative;
   white-space: nowrap;
@@ -62,25 +62,23 @@ defineEmits<{
   transition:
     background-color var(--duration-fast) var(--easing-standard),
     box-shadow var(--duration-fast) var(--easing-standard),
-    transform var(--duration-ultra-fast) var(--easing-standard),
-    border-color var(--duration-fast) var(--easing-standard);
+    border-color var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard);
 }
 
 .sbutton--sm {
-  height: 24px;
+  height: var(--height-control-sm);
   padding: 0 var(--space-m);
-  font: var(--text-body-2);
-  font-weight: var(--font-weight-medium);
-  border-radius: var(--radius-s);
+  font: var(--text-label-sm);
 }
 
 .sbutton--md {
-  height: var(--height-input);
+  height: var(--height-control-md);
   padding: 0 var(--space-l);
 }
 
 .sbutton--lg {
-  height: 34px;
+  height: var(--height-control-lg);
   padding: 0 var(--space-xl);
 }
 
@@ -101,40 +99,37 @@ defineEmits<{
 
 .sbutton--primary:active:not(:disabled) {
   background-color: var(--color-brand-pressed);
-  box-shadow: none;
-  transform: scale(0.98);
+  box-shadow: var(--shadow-2);
 }
 
 .sbutton--secondary {
-  background-color: var(--color-bg-primary);
+  background-color: var(--color-surface-card);
   color: var(--color-fg-primary);
   border-color: var(--color-border-default);
 }
 
 .sbutton--secondary:hover:not(:disabled) {
-  background-color: var(--color-bg-secondary);
-  border-color: var(--color-border-strong);
-  box-shadow: var(--shadow-2);
+  background-color: var(--color-surface-container-low);
+  border-color: var(--color-outline-variant);
+  box-shadow: var(--shadow-4);
 }
 
 .sbutton--secondary:active:not(:disabled) {
-  background-color: var(--color-bg-tertiary);
-  transform: scale(0.98);
+  background-color: var(--color-surface-container-high);
 }
 
 .sbutton--subtle {
   background-color: transparent;
-  color: var(--color-fg-secondary);
+  color: var(--color-brand-primary);
 }
 
 .sbutton--subtle:hover:not(:disabled) {
-  background-color: var(--color-bg-tertiary);
-  color: var(--color-fg-primary);
+  background-color: var(--color-brand-selected);
+  color: var(--color-brand-hover);
 }
 
 .sbutton--subtle:active:not(:disabled) {
-  background-color: var(--color-border-default);
-  transform: scale(0.98);
+  background-color: var(--color-brand-subtle);
 }
 
 .sbutton--danger {
@@ -145,12 +140,11 @@ defineEmits<{
 
 .sbutton--danger:hover:not(:disabled) {
   background-color: var(--color-error-fg);
-  box-shadow: var(--shadow-4);
+  box-shadow: var(--shadow-8);
 }
 
 .sbutton--danger:active:not(:disabled) {
-  transform: scale(0.98);
-  box-shadow: none;
+  background-color: var(--color-error-fg);
 }
 
 .sbutton:disabled {
@@ -160,8 +154,8 @@ defineEmits<{
 }
 
 .sbutton:focus-visible {
-  outline: 2px solid var(--color-brand-primary);
-  outline-offset: 1px;
+  outline: 3px solid color-mix(in srgb, var(--color-brand-primary) 34%, transparent);
+  outline-offset: 2px;
 }
 
 .sbutton__content {

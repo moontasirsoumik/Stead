@@ -130,7 +130,7 @@ async function deactivateMember(member: Member) {
 </script>
 
 <template>
-  <PageContainer :narrow="true">
+  <PageContainer>
     <PageHeader
       title="Settings"
       subtitle="Manage your household and members"
@@ -435,11 +435,11 @@ async function deactivateMember(member: Member) {
   border-radius: var(--radius-circle);
   border: 2px solid transparent;
   cursor: pointer;
-  transition: transform var(--duration-fast) var(--easing-standard);
+  transition: box-shadow var(--duration-fast) var(--easing-standard);
 }
 
 .color-swatch:hover {
-  transform: scale(1.15);
+  box-shadow: 0 0 0 2px var(--color-fg-tertiary);
 }
 
 .color-swatch--selected {

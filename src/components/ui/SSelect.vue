@@ -37,9 +37,9 @@ withDefaults(
         :disabled="disabled"
         :required="required"
         :aria-invalid="!!error"
-        class="sselect__field"
+        :class="['sselect__field', { 'sselect__field--placeholder': !model }]"
       >
-        <option v-if="placeholder" value="" disabled>{{ placeholder }}</option>
+        <option v-if="placeholder" value="" disabled class="sselect__placeholder-opt">{{ placeholder }}</option>
         <option
           v-for="opt in options"
           :key="opt.value"
@@ -104,6 +104,28 @@ withDefaults(
   transition:
     border-color var(--duration-fast) var(--easing-standard),
     box-shadow var(--duration-fast) var(--easing-standard);
+}
+
+/* Ensure dropdown options have proper contrast in all themes */
+.sselect__field option {
+  background: var(--color-surface-dialog);
+  color: var(--color-fg-primary);
+}
+
+.sselect__field option:disabled {
+  color: var(--color-fg-tertiary);
+}
+
+/* Hide placeholder option from the dropdown list */
+.sselect__placeholder-opt {
+  display: none;
+}
+
+/* Placeholder state — when no value selected */
+.sselect__field--placeholder,
+.sselect__field:invalid,
+.sselect__field option[value=""][disabled] {
+  color: var(--color-fg-tertiary);
 }
 
 .sselect__field:hover:not(:disabled) {

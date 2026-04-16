@@ -36,42 +36,44 @@ defineEmits<{
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: none;
-  border-radius: var(--radius-m);
+  border: 1px solid transparent;
+  border-radius: var(--radius-circle);
   cursor: pointer;
   color: var(--color-fg-tertiary);
   transition:
     background-color var(--duration-fast) var(--easing-standard),
     color var(--duration-fast) var(--easing-standard),
-    transform var(--duration-ultra-fast) var(--easing-standard);
+    box-shadow var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard);
 }
 
-.siconbutton--sm { width: 28px; height: 28px; border-radius: var(--radius-s); }
-.siconbutton--md { width: var(--height-input); height: var(--height-input); }
-.siconbutton--lg { width: 42px; height: 42px; }
+.siconbutton--sm { width: var(--height-control-sm); height: var(--height-control-sm); }
+.siconbutton--md { width: var(--height-control-md); height: var(--height-control-md); }
+.siconbutton--lg { width: var(--height-control-lg); height: var(--height-control-lg); }
 
 .siconbutton--subtle {
   background: transparent;
 }
 
 .siconbutton--subtle:hover:not(:disabled) {
-  background: var(--color-bg-tertiary);
-  color: var(--color-fg-primary);
+  background: var(--color-brand-selected);
+  color: var(--color-brand-primary);
 }
 
 .siconbutton--secondary {
-  background: var(--color-bg-primary);
+  background: var(--color-surface-card);
   border: 1px solid var(--color-border-default);
 }
 
 .siconbutton--secondary:hover:not(:disabled) {
-  background: var(--color-bg-secondary);
-  border-color: var(--color-border-strong);
-  box-shadow: var(--shadow-2);
+  background: var(--color-surface-container-low);
+  border-color: var(--color-outline-variant);
+  box-shadow: var(--shadow-4);
+  color: var(--color-fg-primary);
 }
 
 .siconbutton:active:not(:disabled) {
-  transform: scale(0.92);
+  opacity: 0.7;
 }
 
 .siconbutton:disabled {
@@ -80,7 +82,7 @@ defineEmits<{
 }
 
 .siconbutton:focus-visible {
-  outline: 2px solid var(--color-brand-primary);
-  outline-offset: 1px;
+  outline: 3px solid color-mix(in srgb, var(--color-brand-primary) 34%, transparent);
+  outline-offset: 2px;
 }
 </style>

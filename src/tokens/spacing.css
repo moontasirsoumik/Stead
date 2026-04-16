@@ -1,16 +1,16 @@
 /* ============================================================
    Stead — Spacing Tokens
-   Compressed scale for information density
+   Generous 4px-grid scale for breathing room
    ============================================================ */
 
 :root {
-  --space-2xs: 1px;
-  --space-xs: 2px;
-  --space-s: 4px;
-  --space-m: 6px;
-  --space-l: 10px;
-  --space-xl: 14px;
-  --space-2xl: 20px;
-  --space-3xl: 28px;
-  --space-4xl: 40px;
+  --space-2xs: 2px;
+  --space-xs: 4px;
+  --space-s: 8px;
+  --space-m: 12px;
+  --space-l: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+  --space-3xl: 48px;
+  --space-4xl: 64px;
 }

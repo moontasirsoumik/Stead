@@ -18,11 +18,10 @@ withDefaults(
 <style scoped>
 .pagecontainer {
   width: 100%;
-  max-width: var(--width-content-max);
-  margin: 0 auto;
 }
 
 .pagecontainer--narrow {
   max-width: 720px;
+  margin: 0 auto;
 }
 </style>

@@ -1,22 +1,26 @@
 /* ============================================================
    Stead — Layout Tokens
-   Compact structural values
+   Material 3-inspired sizing for navigation and controls.
    ============================================================ */
 
 :root {
-  /* ── Breakpoints ── */
   --bp-mobile: 640px;
   --bp-tablet: 1024px;
   --bp-desktop: 1280px;
   --bp-wide: 1440px;
 
-  /* ── Structural Widths ── */
-  --width-nav-collapsed: 54px;
-  --width-nav-expanded: 220px;
-  --width-content-max: 1080px;
-  --width-drawer: 400px;
-  --height-header: 56px;
-  --height-input: 40px;
-  --height-row-min: 46px;
-  --height-mobile-nav: 64px;
+  --width-sidebar-expanded: 292px;
+  --width-sidebar-collapsed: 88px;
+  --width-nav-collapsed: 60px;
+  --width-nav-expanded: 288px;
+  --width-content-max: 1440px;
+  --width-drawer: 440px;
+  --height-header: 64px;
+  --height-input: 48px;
+  --height-control-sm: 32px;
+  --height-control-md: 40px;
+  --height-control-lg: 48px;
+  --height-row-min: 52px;
+  --height-nav-item: 56px;
+  --height-mobile-nav: 80px;
 }

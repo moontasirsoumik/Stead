@@ -17,6 +17,7 @@ import FormDrawer from '@/components/forms/FormDrawer.vue'
 import FormField from '@/components/forms/FormField.vue'
 import FormSection from '@/components/forms/FormSection.vue'
 import MonthSummary from '@/features/money/components/MonthSummary.vue'
+import MoneyTabs from '@/features/money/components/MoneyTabs.vue'
 import { useSavingsStore } from '@/stores/savings.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { useHouseholdStore } from '@/stores/household.store'
@@ -205,12 +206,14 @@ onMounted(async () => {
       title="Savings"
       subtitle="Track your saving goals"
       class="page-enter"
-      :style="{ '--stagger': 1 }"
+      :style="{ '--stagger': 0 }"
     >
       <template #actions>
         <SButton @click="openAddGoal">Create Goal</SButton>
       </template>
     </PageHeader>
+
+    <MoneyTabs />
 
     <ErrorBanner
       v-if="savingsStore.error"

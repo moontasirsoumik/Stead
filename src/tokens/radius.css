@@ -1,12 +1,13 @@
 /* ============================================================
    Stead — Border Radius Tokens
-   Soft, modern radii for premium feel
+   Material 3-inspired soft shape system.
    ============================================================ */
 
 :root {
-  --radius-s: 3px;
-  --radius-m: 5px;
-  --radius-l: 8px;
-  --radius-xl: 12px;
-  --radius-circle: 50%;
+  --radius-s: 8px;
+  --radius-m: 12px;
+  --radius-l: 20px;
+  --radius-xl: 24px;
+  --radius-2xl: 28px;
+  --radius-circle: 999px;
 }

@@ -12,6 +12,7 @@ import SSelect from '@/components/ui/SSelect.vue'
 import FormDrawer from '@/components/forms/FormDrawer.vue'
 import FormField from '@/components/forms/FormField.vue'
 import FormSection from '@/components/forms/FormSection.vue'
+import MoneyTabs from '@/features/money/components/MoneyTabs.vue'
 import { useBudgetsStore } from '@/stores/budgets.store'
 import { useExpensesStore } from '@/stores/expenses.store'
 import { useAuthStore } from '@/stores/auth.store'
@@ -114,7 +115,7 @@ onMounted(async () => {
       title="Budgets"
       subtitle="Set and track spending limits"
       class="page-enter"
-      :style="{ '--stagger': 1 }"
+      :style="{ '--stagger': 0 }"
     >
       <template #actions>
         <SInput
@@ -125,6 +126,8 @@ onMounted(async () => {
         <SButton @click="openAdd">Add Budget</SButton>
       </template>
     </PageHeader>
+
+    <MoneyTabs />
 
     <ErrorBanner
       v-if="budgetsStore.error"
