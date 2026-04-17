@@ -1,6 +1,6 @@
 # Stead — Implementation Progress Tracker
 
-> **Last updated:** 2026-04-16
+> **Last updated:** 2026-04-17
 > **Current Phase:** P27 — Settings Customization (complete)
 
 ---
@@ -335,6 +335,7 @@
 | 2026-04-15 | Migrated architecture from Google Sheets + Apps Script to Supabase. Updated plan.md, progress.md, agents, directory structure. |
 | 2026-04-16 | Switched design guidance from Fluent-inspired direction to Material Design 3, added shell/navigation quality rules, and began app-wide M3 migration. |
 | 2026-04-16 | Planned P15 (merge Tasks+Maintenance), P16 (merge Shopping+Inventory→Pantry), P17 (personal scope). Updated plan.md §25 and progress.md. |
+| 2026-04-17 | **Database seeding & RLS fix**: Seeded 206+ rows across 23 tables (both household + personal scope). Fixed member `active=false` bug blocking RLS. Applied RLS policies for 10 new feature tables (wishlists, subscriptions, journal_entries, habits, habit_logs, contacts, documents, meal_plans, meals, expense_splits). Deleted duplicate empty household/member. All data now accessible via authenticated user. |
 
 ---
 
