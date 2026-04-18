@@ -219,14 +219,16 @@ onMounted(async () => {
             </span>
           </div>
         </div>
-        <div class="contact-row__category">
-          <SBadge :variant="categoryVariant(contact.category)" size="sm">{{ contact.category }}</SBadge>
-        </div>
-        <div class="contact-row__phone">
-          <a v-if="contact.phone" :href="`tel:${contact.phone}`" class="contact-link" @click.stop>{{ contact.phone }}</a>
-        </div>
-        <div class="contact-row__email">
-          <a v-if="contact.email" :href="`mailto:${contact.email}`" class="contact-link" @click.stop>{{ contact.email }}</a>
+        <div class="contact-row__chips">
+          <div class="contact-row__category">
+            <SBadge :variant="categoryVariant(contact.category)" size="sm">{{ contact.category }}</SBadge>
+          </div>
+          <div class="contact-row__phone">
+            <a v-if="contact.phone" :href="`tel:${contact.phone}`" class="contact-link" @click.stop>{{ contact.phone }}</a>
+          </div>
+          <div class="contact-row__email">
+            <a v-if="contact.email" :href="`mailto:${contact.email}`" class="contact-link" @click.stop>{{ contact.email }}</a>
+          </div>
         </div>
         <div class="contact-row__actions" @click.stop>
           <SIconButton label="Delete" size="sm" @click="confirmDelete(contact.id)">
@@ -371,12 +373,30 @@ onMounted(async () => {
   justify-content: flex-end;
 }
 
+.contact-row__chips {
+  display: contents;
+}
+
 @media (max-width: 640px) {
   .contact-table__header { display: none; }
   .contact-row {
-    grid-template-columns: 1fr auto auto;
+    grid-template-columns: 1fr 36px;
+    grid-template-rows: auto auto;
     padding: var(--space-s) var(--space-l);
+    row-gap: var(--space-2xs);
+    column-gap: var(--space-m);
   }
-  .contact-row__phone, .contact-row__email { display: none; }
+  .contact-row__name-col { grid-column: 1; grid-row: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .contact-row__actions { grid-column: 2; grid-row: 1 / -1; align-self: center; justify-self: center; }
+  .contact-row__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    grid-column: 1;
+    grid-row: 2;
+    align-items: center;
+  }
+  .contact-row__phone { font: var(--text-caption); }
+  .contact-row__email { font: var(--text-caption); overflow: hidden; text-overflow: ellipsis; }
 }
 </style>

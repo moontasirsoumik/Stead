@@ -11,6 +11,7 @@ const emit = defineEmits<{
 }>()
 
 const tabRefs = ref<HTMLElement[]>([])
+const navRef = ref<HTMLElement | null>(null)
 const pillStyle = ref<Record<string, string>>({})
 
 function updatePill(animate: boolean) {
@@ -42,7 +43,7 @@ watch(() => props.modelValue, () => {
 </script>
 
 <template>
-  <nav class="settings-tabs" aria-label="Settings sections">
+  <nav ref="navRef" class="settings-tabs" aria-label="Settings sections">
     <div class="settings-tabs__pill" :style="pillStyle" />
     <button
       v-for="(tab, i) in tabs"

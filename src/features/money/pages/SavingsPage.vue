@@ -222,6 +222,10 @@ onMounted(async () => {
 
     <MoneyTabs />
 
+    <div class="money-mobile-actions">
+      <SButton @click="openAddGoal">Create Goal</SButton>
+    </div>
+
     <ErrorBanner
       v-if="savingsStore.error"
       :message="savingsStore.error"
@@ -271,8 +275,10 @@ onMounted(async () => {
             <span class="goal-row__percent">{{ Math.round(savingsStore.goalProgress(goal.id)) }}%</span>
           </div>
           <div class="goal-row__saved">{{ formatCents(goal.current_amount) }}</div>
-          <div class="goal-row__target">{{ formatCents(goal.target_amount) }}</div>
-          <div class="goal-row__deadline">{{ goal.deadline ? formatDate(goal.deadline) : '—' }}</div>
+          <div class="goal-row__chips">
+            <div class="goal-row__target">{{ formatCents(goal.target_amount) }}</div>
+            <div class="goal-row__deadline">{{ goal.deadline ? formatDate(goal.deadline) : '—' }}</div>
+          </div>
         </div>
         <div class="goal-actions">
           <SButton variant="subtle" size="sm" @click.stop="openAddContribution(goal.id)">+ Contrib</SButton>
@@ -491,6 +497,10 @@ onMounted(async () => {
   text-align: right;
 }
 
+.goal-row__chips {
+  display: contents;
+}
+
 .goal-actions {
   display: flex;
   gap: var(--space-2xs);
@@ -549,14 +559,36 @@ onMounted(async () => {
   color: var(--color-fg-secondary);
 }
 
+.money-mobile-actions {
+  display: none;
+}
+
 @media (max-width: 768px) {
+  :deep(.pageheader__actions) { display: none; }
+  .money-mobile-actions { display: flex; margin-bottom: var(--space-m); }
   .goals-table__header { display: none; }
   .goal-row {
-    grid-template-columns: 1fr auto auto;
+    grid-template-columns: 1fr 5.5rem;
+    grid-template-rows: auto auto auto auto;
     padding: var(--space-s) var(--space-l);
+    row-gap: var(--space-2xs);
+    column-gap: var(--space-m);
   }
-  .goal-row__progress { display: none; }
-  .goal-row__target { display: none; }
-  .goal-row__deadline { display: none; }
+  .goal-row__name { grid-column: 1; grid-row: 1; }
+  .goal-row__saved { grid-column: 2; grid-row: 1 / -1; align-self: center; text-align: right; }
+  .goal-row__priority { grid-column: 1; grid-row: 2; justify-self: start; }
+  .goal-row__status { grid-column: 1; grid-row: 2; justify-self: start; margin-left: 4rem; }
+  .goal-row__progress { grid-column: 1; grid-row: 3; }
+  .goal-row__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    align-items: center;
+    grid-column: 1;
+    grid-row: 4;
+  }
+  .goal-row__target { font: var(--text-caption); color: var(--color-fg-tertiary); text-align: left; }
+  .goal-row__target::before { content: 'of '; }
+  .goal-row__deadline { font: var(--text-caption); color: var(--color-fg-tertiary); text-align: left; }
 }
 </style>

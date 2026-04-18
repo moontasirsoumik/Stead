@@ -276,6 +276,10 @@ onMounted(async () => {
 
     <MoneyTabs />
 
+    <div class="money-mobile-actions">
+      <SButton @click="openAdd">Add Expense</SButton>
+    </div>
+
     <ErrorBanner
       v-if="expensesStore.error"
       :message="expensesStore.error"
@@ -325,11 +329,13 @@ onMounted(async () => {
           <span class="expense-row__desc">{{ expense.description }}</span>
           <span v-if="expense.subcategory" class="expense-row__sub">{{ expense.subcategory }}</span>
         </div>
-        <div class="expense-row__date">
-          <SBadge variant="default" size="sm">{{ formatDate(expense.date) }}</SBadge>
-        </div>
-        <div class="expense-row__category">
-          <SBadge variant="brand" size="sm">{{ expense.category }}</SBadge>
+        <div class="expense-row__chips">
+          <div class="expense-row__date">
+            <SBadge variant="default" size="sm">{{ formatDate(expense.date) }}</SBadge>
+          </div>
+          <div class="expense-row__category">
+            <SBadge variant="brand" size="sm">{{ expense.category }}</SBadge>
+          </div>
         </div>
         <div class="expense-row__payer">
           <SAvatar :name="getMemberName(expense.paid_by)" :color="getMemberColor(expense.paid_by)" size="sm" />
@@ -546,13 +552,36 @@ onMounted(async () => {
   text-align: right;
 }
 
+.expense-row__chips {
+  display: contents;
+}
+
+.money-mobile-actions {
+  display: none;
+}
+
 @media (max-width: 640px) {
+  :deep(.pageheader__actions) { display: none; }
+  .money-mobile-actions { display: flex; margin-bottom: var(--space-m); }
   .expense-table__header { display: none; }
   .expense-row {
-    grid-template-columns: 1fr auto auto auto;
+    grid-template-columns: 1fr 28px 5.5rem;
+    grid-template-rows: auto auto;
     padding: var(--space-s) var(--space-l);
+    row-gap: var(--space-2xs);
+    column-gap: var(--space-m);
   }
-  .expense-row__date { display: none; }
+  .expense-row__name { grid-column: 1; grid-row: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .expense-row__payer { grid-column: 2; grid-row: 1 / -1; align-self: center; justify-self: center; }
+  .expense-row__amount { grid-column: 3; grid-row: 1 / -1; align-self: center; text-align: right; }
+  .expense-row__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    grid-column: 1;
+    grid-row: 2;
+    align-items: center;
+  }
 }
 
 /* ── Split breakdown ───────────────────────────────────── */

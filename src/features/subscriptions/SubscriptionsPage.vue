@@ -226,17 +226,19 @@ onMounted(async () => {
           @click="openEditDrawer(sub)"
         >
           <div class="sub-row__name">{{ sub.name }}</div>
-          <div class="sub-row__status">
-            <SBadge :variant="statusVariant(sub.status)" size="sm">{{ sub.status }}</SBadge>
-          </div>
-          <div class="sub-row__freq">
-            <SBadge size="sm">{{ frequencyLabel(sub.frequency) }}</SBadge>
-          </div>
-          <div class="sub-row__category">
-            <span v-if="sub.category" class="sub-row__cat-text">{{ sub.category }}</span>
+          <div class="sub-row__chips">
+            <div class="sub-row__status">
+              <SBadge :variant="statusVariant(sub.status)" size="sm">{{ sub.status }}</SBadge>
+            </div>
+            <div class="sub-row__freq">
+              <SBadge size="sm">{{ frequencyLabel(sub.frequency) }}</SBadge>
+            </div>
+            <div class="sub-row__category">
+              <span v-if="sub.category" class="sub-row__cat-text">{{ sub.category }}</span>
+            </div>
+            <div class="sub-row__next">{{ sub.next_billing_date ? formatDate(sub.next_billing_date) : '—' }}</div>
           </div>
           <div class="sub-row__amount">{{ formatCents(sub.amount) }}</div>
-          <div class="sub-row__next">{{ sub.next_billing_date ? formatDate(sub.next_billing_date) : '—' }}</div>
         </div>
       </div>
     </template>
@@ -371,12 +373,29 @@ onMounted(async () => {
   text-align: right;
 }
 
+.sub-row__chips {
+  display: contents;
+}
+
 @media (max-width: 640px) {
   .sub-table__header { display: none; }
   .sub-row {
-    grid-template-columns: 1fr auto auto auto;
+    grid-template-columns: 1fr 5.5rem;
+    grid-template-rows: auto auto;
     padding: var(--space-s) var(--space-l);
+    row-gap: var(--space-2xs);
+    column-gap: var(--space-m);
   }
-  .sub-row__freq, .sub-row__category, .sub-row__next { display: none; }
+  .sub-row__name { grid-column: 1; grid-row: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .sub-row__amount { grid-column: 2; grid-row: 1 / -1; align-self: center; text-align: right; }
+  .sub-row__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    grid-column: 1;
+    grid-row: 2;
+    align-items: center;
+  }
+  .sub-row__next { font: var(--text-caption); color: var(--color-fg-tertiary); }
 }
 </style>

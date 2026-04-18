@@ -357,17 +357,19 @@ onMounted(async () => {
                 <span class="task-row__title">{{ task.title }}</span>
                 <SBadge v-if="task.task_type === 'maintenance'" variant="default" size="sm">maintenance</SBadge>
               </div>
-              <div class="task-row__priority">
-                <SBadge :variant="priorityVariant(task.priority)" size="sm">{{ task.priority }}</SBadge>
-              </div>
-              <div class="task-row__status">
-                <SBadge :variant="statusVariant(task.status)" size="sm">{{ task.status.replace('_', ' ') }}</SBadge>
-              </div>
-              <div class="task-row__due">
-                <span v-if="task.due_date">{{ formatRelativeDate(task.due_date) }}</span>
-              </div>
-              <div class="task-row__assignee">
-                <SAvatar v-if="getMemberName(task.assignee)" :name="getMemberName(task.assignee)!" size="sm" />
+              <div class="task-row__chips">
+                <div class="task-row__priority">
+                  <SBadge :variant="priorityVariant(task.priority)" size="sm">{{ task.priority }}</SBadge>
+                </div>
+                <div class="task-row__status">
+                  <SBadge :variant="statusVariant(task.status)" size="sm">{{ task.status.replace('_', ' ') }}</SBadge>
+                </div>
+                <div class="task-row__due">
+                  <span v-if="task.due_date">{{ formatRelativeDate(task.due_date) }}</span>
+                </div>
+                <div class="task-row__assignee">
+                  <SAvatar v-if="getMemberName(task.assignee)" :name="getMemberName(task.assignee)!" size="sm" />
+                </div>
               </div>
               <div class="task-row__actions" @click.stop>
                 <SButton v-if="task.status === 'not_started'" variant="subtle" size="sm" @click="quickStatus(task.id, 'in_progress')">Start</SButton>
@@ -632,17 +634,31 @@ onMounted(async () => {
 }
 
 /* ── Responsive ── */
+.task-row__chips {
+  display: contents;
+}
+
 @media (max-width: 640px) {
   .stats-row { flex-direction: column; }
   .stat-cell { border-right: none; border-bottom: 1px solid var(--color-border-default); }
   .stat-cell:last-child { border-bottom: none; }
   .task-row {
-    grid-template-columns: 1fr auto auto;
-    gap: var(--space-s);
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    gap: var(--space-2xs) var(--space-m);
     padding: var(--space-s) var(--space-l);
   }
-  .task-row__priority,
-  .task-row__due { display: none; }
+  .task-row__title-col { grid-column: 1; grid-row: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .task-row__actions { grid-column: 2; grid-row: 1 / -1; align-self: center; min-width: 4.5rem; justify-self: end; }
+  .task-row__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    grid-column: 1;
+    grid-row: 2;
+    align-items: center;
+  }
+  .task-row__due { font: var(--text-caption); color: var(--color-fg-tertiary); }
   .task-expanded { padding-left: var(--space-m); }
 }
 </style>

@@ -406,14 +406,20 @@ async function handleSignOut() {
 /* ── Mobile sidebar overlay ── */
 .shell__mobile-sidebar {
   position: fixed;
-  left: 0;
-  top: 0;
-  bottom: 0;
+  left: var(--space-s);
+  top: var(--space-s);
+  bottom: var(--space-s);
   width: 200px;
   z-index: 200;
-  transform: translateX(-100%);
+  transform: translateX(calc(-100% - var(--space-s)));
   transition: transform var(--duration-slow) var(--easing-smooth);
   background: var(--color-surface-nav);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.shell__mobile-sidebar :deep(.rail) {
+  border-radius: 0;
 }
 
 .shell__mobile-sidebar--open {

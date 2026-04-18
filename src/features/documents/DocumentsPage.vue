@@ -246,17 +246,19 @@ onMounted(async () => {
           <span class="doc-row__title">{{ doc.title }}</span>
           <span v-if="doc.issuer" class="doc-row__issuer">{{ doc.issuer }}</span>
         </div>
-        <div class="doc-row__type">
-          <SBadge :variant="docTypeVariant(doc.doc_type)" size="sm">{{ doc.doc_type }}</SBadge>
+        <div class="doc-row__chips">
+          <div class="doc-row__type">
+            <SBadge :variant="docTypeVariant(doc.doc_type)" size="sm">{{ doc.doc_type }}</SBadge>
+          </div>
+          <div class="doc-row__status">
+            <SBadge v-if="expiryStatus(doc) === 'expired'" variant="error" size="sm">Expired</SBadge>
+            <SBadge v-else-if="expiryStatus(doc) === 'expiring'" variant="warning" size="sm">Expiring</SBadge>
+            <SBadge v-else-if="expiryStatus(doc) === 'ok'" variant="success" size="sm">Valid</SBadge>
+          </div>
+          <div class="doc-row__date">{{ doc.issue_date ? formatDate(doc.issue_date) : '—' }}</div>
+          <div class="doc-row__date">{{ doc.expiry_date ? formatDate(doc.expiry_date) : '—' }}</div>
+          <div class="doc-row__ref">{{ doc.reference_number ? '#' + doc.reference_number : '' }}</div>
         </div>
-        <div class="doc-row__status">
-          <SBadge v-if="expiryStatus(doc) === 'expired'" variant="error" size="sm">Expired</SBadge>
-          <SBadge v-else-if="expiryStatus(doc) === 'expiring'" variant="warning" size="sm">Expiring</SBadge>
-          <SBadge v-else-if="expiryStatus(doc) === 'ok'" variant="success" size="sm">Valid</SBadge>
-        </div>
-        <div class="doc-row__date">{{ doc.issue_date ? formatDate(doc.issue_date) : '—' }}</div>
-        <div class="doc-row__date">{{ doc.expiry_date ? formatDate(doc.expiry_date) : '—' }}</div>
-        <div class="doc-row__ref">{{ doc.reference_number ? '#' + doc.reference_number : '' }}</div>
         <div class="doc-row__actions" @click.stop>
           <SIconButton label="Delete" size="sm" @click="confirmDelete(doc.id)">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 4H12M5 4V2.5H9V4M5.5 6V10.5M8.5 6V10.5M3.5 4L4 11.5H10L10.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" /></svg>
@@ -436,12 +438,30 @@ onMounted(async () => {
   justify-content: flex-end;
 }
 
+.doc-row__chips {
+  display: contents;
+}
+
 @media (max-width: 640px) {
   .doc-table__header { display: none; }
   .doc-row {
-    grid-template-columns: 1fr auto auto auto;
+    grid-template-columns: 1fr 36px;
+    grid-template-rows: auto auto;
     padding: var(--space-s) var(--space-l);
+    row-gap: var(--space-2xs);
+    column-gap: var(--space-m);
   }
-  .doc-row__date, .doc-row__ref { display: none; }
+  .doc-row__name-col { grid-column: 1; grid-row: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .doc-row__actions { grid-column: 2; grid-row: 1 / -1; align-self: center; justify-self: center; }
+  .doc-row__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    grid-column: 1;
+    grid-row: 2;
+    align-items: center;
+  }
+  .doc-row__date { font: var(--text-caption); color: var(--color-fg-tertiary); }
+  .doc-row__ref { font: var(--text-caption); color: var(--color-fg-tertiary); }
 }
 </style>

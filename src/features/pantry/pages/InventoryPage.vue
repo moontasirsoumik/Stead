@@ -292,14 +292,16 @@ onMounted(async () => {
         <div class="inv-row__stock">
           <SBadge :variant="stockVariant(item.stock_status)" size="sm">{{ stockLabel(item.stock_status) }}</SBadge>
         </div>
-        <div class="inv-row__category">
-          <SBadge v-if="item.category" size="sm">{{ item.category }}</SBadge>
+        <div class="inv-row__chips">
+          <div class="inv-row__category">
+            <SBadge v-if="item.category" size="sm">{{ item.category }}</SBadge>
+          </div>
+          <div class="inv-row__location">
+            <span v-if="item.location">{{ item.location }}</span>
+          </div>
+          <div class="inv-row__target">{{ targetLabel(item.target_level) }}</div>
+          <div class="inv-row__checked">{{ item.last_checked_date ? formatDate(item.last_checked_date) : '—' }}</div>
         </div>
-        <div class="inv-row__location">
-          <span v-if="item.location">{{ item.location }}</span>
-        </div>
-        <div class="inv-row__target">{{ targetLabel(item.target_level) }}</div>
-        <div class="inv-row__checked">{{ item.last_checked_date ? formatDate(item.last_checked_date) : '—' }}</div>
       </div>
     </div>
 
@@ -427,12 +429,31 @@ onMounted(async () => {
   text-align: right;
 }
 
+.inv-row__chips {
+  display: contents;
+}
+
 @media (max-width: 640px) {
   .inv-table__header { display: none; }
   .inv-row {
-    grid-template-columns: 1fr auto auto;
+    grid-template-columns: 1fr 5rem;
+    grid-template-rows: auto auto;
     padding: var(--space-s) var(--space-l);
+    row-gap: var(--space-2xs);
+    column-gap: var(--space-m);
   }
-  .inv-row__category, .inv-row__location, .inv-row__target, .inv-row__checked { display: none; }
+  .inv-row__name { grid-column: 1; grid-row: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .inv-row__stock { grid-column: 2; grid-row: 1 / -1; align-self: center; justify-self: end; }
+  .inv-row__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    grid-column: 1;
+    grid-row: 2;
+    align-items: center;
+  }
+  .inv-row__location,
+  .inv-row__target,
+  .inv-row__checked { font: var(--text-caption); color: var(--color-fg-tertiary); }
 }
 </style>

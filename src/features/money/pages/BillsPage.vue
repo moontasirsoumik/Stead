@@ -183,6 +183,10 @@ onMounted(async () => {
 
     <MoneyTabs />
 
+    <div class="money-mobile-actions">
+      <SButton @click="openAdd">Add Bill</SButton>
+    </div>
+
     <ErrorBanner
       v-if="billsStore.error"
       :message="billsStore.error"
@@ -220,14 +224,16 @@ onMounted(async () => {
           <span class="bill-row__title">{{ bill.name }}</span>
           <span class="bill-row__meta">Day {{ bill.due_day }}</span>
         </div>
-        <div class="bill-row__status">
-          <SBadge :variant="statusVariant(bill.status)" size="sm">{{ bill.status }}</SBadge>
-        </div>
-        <div class="bill-row__freq">
-          <SBadge variant="default" size="sm">{{ bill.frequency }}</SBadge>
-        </div>
-        <div class="bill-row__autopay">
-          <SBadge v-if="bill.auto_pay" variant="info" size="sm">Auto-pay</SBadge>
+        <div class="bill-row__chips">
+          <div class="bill-row__status">
+            <SBadge :variant="statusVariant(bill.status)" size="sm">{{ bill.status }}</SBadge>
+          </div>
+          <div class="bill-row__freq">
+            <SBadge variant="default" size="sm">{{ bill.frequency }}</SBadge>
+          </div>
+          <div class="bill-row__autopay">
+            <SBadge v-if="bill.auto_pay" variant="info" size="sm">Auto-pay</SBadge>
+          </div>
         </div>
         <div class="bill-row__amount">{{ formatCents(bill.amount) }}</div>
       </div>
@@ -386,12 +392,34 @@ onMounted(async () => {
   text-align: right;
 }
 
+.bill-row__chips {
+  display: contents;
+}
+
+.money-mobile-actions {
+  display: none;
+}
+
 @media (max-width: 640px) {
+  :deep(.pageheader__actions) { display: none; }
+  .money-mobile-actions { display: flex; margin-bottom: var(--space-m); }
   .bills-table__header { display: none; }
   .bill-row {
-    grid-template-columns: 1fr auto auto auto;
+    grid-template-columns: 1fr 5.5rem;
+    grid-template-rows: auto auto;
     padding: var(--space-s) var(--space-l);
+    row-gap: var(--space-2xs);
+    column-gap: var(--space-m);
   }
-  .bill-row__freq { display: none; }
+  .bill-row__name { grid-column: 1; grid-row: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .bill-row__amount { grid-column: 2; grid-row: 1 / -1; align-self: center; text-align: right; }
+  .bill-row__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    grid-column: 1;
+    grid-row: 2;
+    align-items: center;
+  }
 }
 </style>

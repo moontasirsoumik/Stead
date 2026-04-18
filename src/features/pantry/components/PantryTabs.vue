@@ -1,6 +1,7 @@
 <script lang="ts">
 // Module-level — shared across all PantryTabs instances so pill animates across remounts
 let sharedPillPosition: { width: string; transform: string } | null = null
+let sharedScrollLeft = 0
 </script>
 
 <script setup lang="ts">
@@ -17,7 +18,16 @@ const tabs = [
 const activeTab = computed(() => route.name as string)
 
 const tabRefs = ref<HTMLElement[]>([])
+const navRef = ref<HTMLElement | null>(null)
 const pillStyle = ref<Record<string, string>>({})
+
+function saveScrollPosition() {
+  if (navRef.value) sharedScrollLeft = navRef.value.scrollLeft
+}
+
+function restoreScrollPosition() {
+  if (navRef.value) navRef.value.scrollLeft = sharedScrollLeft
+}
 
 function updatePill(animate: boolean) {
   const idx = tabs.findIndex((t) => t.name === activeTab.value)
@@ -37,6 +47,7 @@ function updatePill(animate: boolean) {
 
 onMounted(() => {
   nextTick(() => {
+    restoreScrollPosition()
     if (sharedPillPosition) {
       pillStyle.value = { ...sharedPillPosition, transition: 'none' }
       requestAnimationFrame(() => {
@@ -56,7 +67,7 @@ watch(activeTab, () => {
 </script>
 
 <template>
-  <nav class="pantry-tabs" aria-label="Pantry sections">
+  <nav ref="navRef" class="pantry-tabs" aria-label="Pantry sections" @scroll="saveScrollPosition">
     <div class="pantry-tabs__pill" :style="pillStyle" />
     <RouterLink
       v-for="(tab, i) in tabs"

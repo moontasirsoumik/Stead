@@ -295,17 +295,19 @@ onMounted(async () => {
             <SBadge :variant="statusVariant(item.status)" size="sm">{{ statusLabel(item.status) }}</SBadge>
           </button>
         </div>
-        <div class="shop-row__category">
-          <SBadge v-if="item.category" size="sm">{{ item.category }}</SBadge>
-        </div>
-        <div class="shop-row__priority">
-          <SBadge v-if="item.priority !== 'medium'" :variant="priorityVariant(item.priority)" size="sm">{{ item.priority }}</SBadge>
-        </div>
-        <div class="shop-row__qty">
-          <span v-if="item.quantity > 1 || item.unit">{{ item.quantity }}<template v-if="item.unit"> {{ item.unit }}</template></span>
-        </div>
-        <div class="shop-row__assignee">
-          <SAvatar v-if="getMemberName(item.assigned_to)" :name="getMemberName(item.assigned_to)!" size="sm" />
+        <div class="shop-row__chips">
+          <div class="shop-row__category">
+            <SBadge v-if="item.category" size="sm">{{ item.category }}</SBadge>
+          </div>
+          <div class="shop-row__priority">
+            <SBadge v-if="item.priority !== 'medium'" :variant="priorityVariant(item.priority)" size="sm">{{ item.priority }}</SBadge>
+          </div>
+          <div class="shop-row__qty">
+            <span v-if="item.quantity > 1 || item.unit">{{ item.quantity }}<template v-if="item.unit"> {{ item.unit }}</template></span>
+          </div>
+          <div class="shop-row__assignee">
+            <SAvatar v-if="getMemberName(item.assigned_to)" :name="getMemberName(item.assigned_to)!" size="sm" />
+          </div>
         </div>
       </div>
     </div>
@@ -441,12 +443,29 @@ onMounted(async () => {
   text-align: center;
 }
 
+.shop-row__chips {
+  display: contents;
+}
+
 @media (max-width: 640px) {
   .shop-table__header { display: none; }
   .shop-row {
-    grid-template-columns: 1fr auto auto auto;
+    grid-template-columns: 1fr 4.5rem;
+    grid-template-rows: auto auto;
     padding: var(--space-s) var(--space-l);
+    row-gap: var(--space-2xs);
+    column-gap: var(--space-m);
   }
-  .shop-row__category, .shop-row__priority, .shop-row__qty { display: none; }
+  .shop-row__name { grid-column: 1; grid-row: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .shop-row__status { grid-column: 2; grid-row: 1 / -1; align-self: center; justify-self: end; }
+  .shop-row__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    grid-column: 1;
+    grid-row: 2;
+    align-items: center;
+  }
+  .shop-row__qty { font: var(--text-caption); color: var(--color-fg-tertiary); }
 }
 </style>

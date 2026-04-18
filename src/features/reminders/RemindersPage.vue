@@ -228,17 +228,19 @@ onMounted(async () => {
         <div class="reminder-row__title-col">
           <span class="reminder-row__title">{{ reminder.title }}</span>
         </div>
-        <div class="reminder-row__status">
-          <SBadge :variant="statusVariant(reminder)" size="sm">{{ statusLabel(reminder) }}</SBadge>
-        </div>
-        <div class="reminder-row__type">
-          <SBadge v-if="reminder.type" size="sm">{{ reminder.type }}</SBadge>
-        </div>
-        <div class="reminder-row__due">
-          <span v-if="reminder.due_date">{{ formatRelativeDate(reminder.due_date) }}</span>
-        </div>
-        <div class="reminder-row__assignee">
-          <SAvatar v-if="getMemberName(reminder.assigned_to)" :name="getMemberName(reminder.assigned_to)!" size="sm" />
+        <div class="reminder-row__chips">
+          <div class="reminder-row__status">
+            <SBadge :variant="statusVariant(reminder)" size="sm">{{ statusLabel(reminder) }}</SBadge>
+          </div>
+          <div class="reminder-row__type">
+            <SBadge v-if="reminder.type" size="sm">{{ reminder.type }}</SBadge>
+          </div>
+          <div class="reminder-row__due">
+            <span v-if="reminder.due_date">{{ formatRelativeDate(reminder.due_date) }}</span>
+          </div>
+          <div class="reminder-row__assignee">
+            <SAvatar v-if="getMemberName(reminder.assigned_to)" :name="getMemberName(reminder.assigned_to)!" size="sm" />
+          </div>
         </div>
         <div class="reminder-row__actions" @click.stop>
           <SButton v-if="reminder.status === 'active'" variant="subtle" size="sm" @click="remindersStore.markDone(reminder.id)">Done</SButton>
@@ -377,16 +379,32 @@ onMounted(async () => {
   justify-content: flex-end;
 }
 
+.reminder-row__chips {
+  display: contents;
+}
+
 @media (max-width: 640px) {
   .stats-bar { flex-direction: column; }
   .stats-bar__cell { border-right: none; border-bottom: 1px solid var(--color-border-default); }
   .stats-bar__cell:last-child { border-bottom: none; }
   .reminder-table__header { display: none; }
   .reminder-row {
-    grid-template-columns: 1fr auto auto auto;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
     padding: var(--space-s) var(--space-m);
+    row-gap: var(--space-2xs);
+    column-gap: var(--space-m);
   }
-  .reminder-row__type,
-  .reminder-row__due { display: none; }
+  .reminder-row__title-col { grid-column: 1; grid-row: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .reminder-row__actions { grid-column: 2; grid-row: 1 / -1; align-self: center; min-width: 4.5rem; justify-self: end; }
+  .reminder-row__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    grid-column: 1;
+    grid-row: 2;
+    align-items: center;
+  }
+  .reminder-row__due { font: var(--text-caption); color: var(--color-fg-tertiary); }
 }
 </style>

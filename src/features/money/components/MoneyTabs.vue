@@ -1,6 +1,7 @@
 <script lang="ts">
 // Module-level — shared across all MoneyTabs instances so pill animates across remounts
 let sharedPillPosition: { width: string; transform: string } | null = null
+let sharedScrollLeft = 0
 </script>
 
 <script setup lang="ts">
@@ -21,7 +22,16 @@ const tabs = [
 const activeTab = computed(() => route.name as string)
 
 const tabRefs = ref<HTMLElement[]>([])
+const navRef = ref<HTMLElement | null>(null)
 const pillStyle = ref<Record<string, string>>({})
+
+function saveScrollPosition() {
+  if (navRef.value) sharedScrollLeft = navRef.value.scrollLeft
+}
+
+function restoreScrollPosition() {
+  if (navRef.value) navRef.value.scrollLeft = sharedScrollLeft
+}
 
 function updatePill(animate: boolean) {
   const idx = tabs.findIndex((t) => t.name === activeTab.value)
@@ -41,6 +51,7 @@ function updatePill(animate: boolean) {
 
 onMounted(() => {
   nextTick(() => {
+    restoreScrollPosition()
     if (sharedPillPosition) {
       // Start at the previous tab's pill position (no transition)
       pillStyle.value = { ...sharedPillPosition, transition: 'none' }
@@ -63,7 +74,7 @@ watch(activeTab, () => {
 </script>
 
 <template>
-  <nav class="money-tabs" aria-label="Money sections">
+  <nav ref="navRef" class="money-tabs" aria-label="Money sections" @scroll="saveScrollPosition">
     <div class="money-tabs__pill" :style="pillStyle" />
     <RouterLink
       v-for="(tab, i) in tabs"

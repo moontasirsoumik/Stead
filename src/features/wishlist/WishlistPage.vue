@@ -251,11 +251,13 @@ onMounted(async () => {
             <span class="wish-row__title">{{ item.name }}</span>
             <span v-if="item.category" class="wish-row__cat">{{ item.category }}</span>
           </div>
-          <div class="wish-row__priority">
-            <SBadge :variant="priorityVariant(item.priority)" size="sm">{{ item.priority }}</SBadge>
-          </div>
-          <div class="wish-row__status">
-            <SBadge :variant="statusVariant(item.status)" size="sm">{{ item.status }}</SBadge>
+          <div class="wish-row__chips">
+            <div class="wish-row__priority">
+              <SBadge :variant="priorityVariant(item.priority)" size="sm">{{ item.priority }}</SBadge>
+            </div>
+            <div class="wish-row__status">
+              <SBadge :variant="statusVariant(item.status)" size="sm">{{ item.status }}</SBadge>
+            </div>
           </div>
           <div class="wish-row__price">{{ formatCents(item.price) }}</div>
         </div>
@@ -385,5 +387,30 @@ onMounted(async () => {
   font-family: var(--font-mono);
   color: var(--color-fg-primary);
   text-align: right;
+}
+
+.wish-row__chips {
+  display: contents;
+}
+
+@media (max-width: 640px) {
+  .wish-table__header { display: none; }
+  .wish-row {
+    grid-template-columns: 1fr 5.5rem;
+    grid-template-rows: auto auto;
+    padding: var(--space-s) var(--space-l);
+    row-gap: var(--space-2xs);
+    column-gap: var(--space-m);
+  }
+  .wish-row__name { grid-column: 1; grid-row: 1; min-width: 0; }
+  .wish-row__price { grid-column: 2; grid-row: 1 / -1; align-self: center; text-align: right; }
+  .wish-row__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    grid-column: 1;
+    grid-row: 2;
+    align-items: center;
+  }
 }
 </style>

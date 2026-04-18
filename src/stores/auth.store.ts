@@ -144,6 +144,89 @@ export const useAuthStore = defineStore('auth', () => {
     return true
   }
 
+  async function updateProfile(updates: {
+    full_name?: string
+    date_of_birth?: string | null
+    phone?: string | null
+    timezone?: string | null
+  }) {
+    if (!user.value) return false
+    error.value = null
+
+    try {
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: updates,
+      })
+
+      if (updateError) {
+        error.value = updateError.message
+        return false
+      }
+
+      // Refresh user data
+      const { data } = await supabase.auth.getUser()
+      if (data.user) user.value = data.user
+      return true
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to update profile'
+      return false
+    }
+  }
+
+  async function changePassword(newPassword: string) {
+    error.value = null
+
+    try {
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword,
+      })
+
+      if (updateError) {
+        error.value = updateError.message
+        return false
+      }
+
+      return true
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to change password'
+      return false
+    }
+  }
+
+  async function updateEmail(newEmail: string) {
+    error.value = null
+
+    try {
+      const { error: updateError } = await supabase.auth.updateUser({
+        email: newEmail,
+      })
+
+      if (updateError) {
+        error.value = updateError.message
+        return false
+      }
+
+      return true
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to update email'
+      return false
+    }
+  }
+
+  async function deleteAccount() {
+    error.value = null
+
+    try {
+      // Sign out first, then the account must be deleted server-side
+      // (Supabase doesn't allow self-deletion from client; admin API required)
+      await signOut()
+      return true
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to delete account'
+      return false
+    }
+  }
+
   return {
     user,
     session,
@@ -159,5 +242,9 @@ export const useAuthStore = defineStore('auth', () => {
     signUp,
     signOut,
     createHousehold,
+    updateProfile,
+    changePassword,
+    updateEmail,
+    deleteAccount,
   }
 })

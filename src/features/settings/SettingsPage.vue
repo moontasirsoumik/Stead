@@ -15,11 +15,14 @@ import FormDrawer from '@/components/forms/FormDrawer.vue'
 import FormField from '@/components/forms/FormField.vue'
 import FormSection from '@/components/forms/FormSection.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
+import ConfirmDialog from '@/components/feedback/ConfirmDialog.vue'
 import { useHouseholdStore } from '@/stores/household.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { useAppStore } from '@/stores/app.store'
+import { useInvitationStore } from '@/stores/invitation.store'
 import type { Member } from '@/models/member.model'
 import type { MemberRole } from '@/models/enums'
+import type { InvitationStatus } from '@/models/invitation.model'
 import type {
   AccentColor,
   FontSize,
@@ -35,9 +38,11 @@ import type {
 const householdStore = useHouseholdStore()
 const authStore = useAuthStore()
 const app = useAppStore()
+const invitationStore = useInvitationStore()
 
 /* -- Tab navigation -- */
 const TABS = [
+  { id: 'account', label: 'Account' },
   { id: 'appearance', label: 'Appearance' },
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'formats', label: 'Formats' },
@@ -46,7 +51,7 @@ const TABS = [
   { id: 'privacy', label: 'Privacy' },
 ]
 
-const activeTab = ref('appearance')
+const activeTab = ref('account')
 
 /* -- Household -- */
 const householdName = ref('')
@@ -70,15 +75,77 @@ const ROLE_OPTIONS = [
   { value: 'member', label: 'Member' },
 ]
 
+const TIMEZONE_OPTIONS = [
+  { value: '', label: 'Not set' },
+  { value: 'UTC', label: 'UTC' },
+  { value: 'America/New_York', label: 'Eastern (US)' },
+  { value: 'America/Chicago', label: 'Central (US)' },
+  { value: 'America/Denver', label: 'Mountain (US)' },
+  { value: 'America/Los_Angeles', label: 'Pacific (US)' },
+  { value: 'Europe/London', label: 'London' },
+  { value: 'Europe/Paris', label: 'Paris' },
+  { value: 'Europe/Berlin', label: 'Berlin' },
+  { value: 'Asia/Tokyo', label: 'Tokyo' },
+  { value: 'Asia/Kolkata', label: 'Kolkata' },
+  { value: 'Asia/Dhaka', label: 'Dhaka' },
+  { value: 'Australia/Sydney', label: 'Sydney' },
+]
+
+const EXPIRY_OPTIONS = [
+  { value: '1', label: '1 day' },
+  { value: '3', label: '3 days' },
+  { value: '7', label: '7 days' },
+  { value: '14', label: '14 days' },
+  { value: '30', label: '30 days' },
+]
+
+// Account tab state
+const profileName = ref('')
+const profileDob = ref('')
+const profilePhone = ref('')
+const profileTimezone = ref('')
+const profileSaving = ref(false)
+const profileSuccess = ref(false)
+
+const newPassword = ref('')
+const confirmPassword = ref('')
+const passwordSaving = ref(false)
+const passwordSuccess = ref(false)
+const passwordError = ref('')
+
+const leavingHousehold = ref(false)
+const showLeaveConfirm = ref(false)
+
+// Invitation state
+const showInviteForm = ref(false)
+const inviteEmail = ref('')
+const inviteRole = ref<MemberRole>('member')
+const inviteExpiry = ref(7)
+const inviteCreating = ref(false)
+const copiedCode = ref<string | null>(null)
+
+const inviteExpiryStr = computed({
+  get: () => String(inviteExpiry.value),
+  set: (v: string) => { inviteExpiry.value = parseInt(v, 10) },
+})
+
 onMounted(async () => {
   if (authStore.householdId) {
     await Promise.all([
       householdStore.loadHousehold(authStore.householdId),
       householdStore.loadMembers(authStore.householdId),
+      invitationStore.loadInvitations(authStore.householdId),
     ])
     if (householdStore.household) {
       householdName.value = householdStore.household.name
     }
+  }
+  if (authStore.user) {
+    const meta = authStore.user.user_metadata
+    profileName.value = meta?.full_name ?? ''
+    profileDob.value = meta?.date_of_birth ?? ''
+    profilePhone.value = meta?.phone ?? ''
+    profileTimezone.value = meta?.timezone ?? ''
   }
   await nextTick()
 })
@@ -152,6 +219,111 @@ async function submitDrawer() {
 
 async function deactivateMember(member: Member) {
   await householdStore.removeMember(member.id)
+}
+
+/* -- Account functions -- */
+async function saveProfile() {
+  profileSaving.value = true
+  profileSuccess.value = false
+  try {
+    const success = await authStore.updateProfile({
+      full_name: profileName.value.trim() || undefined,
+      date_of_birth: profileDob.value || null,
+      phone: profilePhone.value.trim() || null,
+      timezone: profileTimezone.value || null,
+    })
+    if (success) {
+      if (authStore.memberId && profileName.value.trim()) {
+        const currentMember = householdStore.members.find(m => m.id === authStore.memberId)
+        if (currentMember && currentMember.name !== profileName.value.trim()) {
+          await householdStore.updateMember(authStore.memberId, { name: profileName.value.trim() })
+        }
+      }
+      profileSuccess.value = true
+      setTimeout(() => { profileSuccess.value = false }, 3000)
+    }
+  } finally {
+    profileSaving.value = false
+  }
+}
+
+async function handleChangePassword() {
+  passwordError.value = ''
+  passwordSuccess.value = false
+
+  if (newPassword.value.length < 6) {
+    passwordError.value = 'Password must be at least 6 characters'
+    return
+  }
+  if (newPassword.value !== confirmPassword.value) {
+    passwordError.value = 'Passwords do not match'
+    return
+  }
+
+  passwordSaving.value = true
+  try {
+    const success = await authStore.changePassword(newPassword.value)
+    if (success) {
+      newPassword.value = ''
+      confirmPassword.value = ''
+      passwordSuccess.value = true
+      setTimeout(() => { passwordSuccess.value = false }, 3000)
+    } else {
+      passwordError.value = authStore.error || 'Failed to change password'
+    }
+  } finally {
+    passwordSaving.value = false
+  }
+}
+
+async function leaveHousehold() {
+  if (!authStore.memberId) return
+  leavingHousehold.value = true
+  try {
+    await householdStore.removeMember(authStore.memberId)
+    await authStore.signOut()
+  } finally {
+    leavingHousehold.value = false
+    showLeaveConfirm.value = false
+  }
+}
+
+/* -- Invitation functions -- */
+async function createInvite() {
+  inviteCreating.value = true
+  try {
+    await invitationStore.createInvitation({
+      email: inviteEmail.value.trim() || null,
+      role: inviteRole.value,
+      expiry_days: inviteExpiry.value,
+    })
+    showInviteForm.value = false
+    inviteEmail.value = ''
+    inviteRole.value = 'member'
+    inviteExpiry.value = 7
+  } finally {
+    inviteCreating.value = false
+  }
+}
+
+async function revokeInvite(id: string) {
+  await invitationStore.revokeInvitation(id)
+}
+
+function copyCode(code: string) {
+  navigator.clipboard.writeText(code)
+  copiedCode.value = code
+  setTimeout(() => { copiedCode.value = null }, 2000)
+}
+
+function invitationStatusVariant(status: InvitationStatus): 'brand' | 'success' | 'default' {
+  const map: Record<InvitationStatus, 'brand' | 'success' | 'default'> = {
+    pending: 'brand',
+    accepted: 'success',
+    revoked: 'default',
+    expired: 'default',
+  }
+  return map[status]
 }
 
 /* -- Computed models -- */
@@ -292,6 +464,109 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
     <PageHeader title="Settings" subtitle="Customize your experience" class="page-enter" :style="{ '--stagger': 0 }" />
 
     <SettingsTabs v-model="activeTab" :tabs="TABS" class="page-enter" :style="{ '--stagger': 1 }" />
+
+    <!-- ----------- TAB: ACCOUNT ----------- -->
+    <template v-if="activeTab === 'account'">
+      <!-- Profile Section -->
+      <div class="settings-section page-enter" :style="{ '--stagger': 2 }">
+        <div class="card-header">
+          <SectionHeader title="Profile" />
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="row__label"><span class="row__name">Display name</span></div>
+            <div class="row__control"><SInput v-model="profileName" placeholder="Your name" /></div>
+          </div>
+          <div class="row">
+            <div class="row__label">
+              <span class="row__name">Email</span>
+              <span class="row__hint">{{ authStore.user?.email ?? 'Not set' }}</span>
+            </div>
+            <SBadge variant="default" size="sm">Verified</SBadge>
+          </div>
+          <div class="row">
+            <div class="row__label"><span class="row__name">Date of birth</span></div>
+            <div class="row__control"><SInput v-model="profileDob" type="date" /></div>
+          </div>
+          <div class="row">
+            <div class="row__label"><span class="row__name">Phone</span></div>
+            <div class="row__control"><SInput v-model="profilePhone" placeholder="Optional" type="tel" /></div>
+          </div>
+          <div class="row">
+            <div class="row__label"><span class="row__name">Timezone</span></div>
+            <div class="row__control"><SSelect v-model="profileTimezone" :options="TIMEZONE_OPTIONS" /></div>
+          </div>
+          <div class="row row--action">
+            <div v-if="profileSuccess" class="success-msg">
+              <span class="material-symbols-rounded" style="font-size: 16px;">check_circle</span>
+              Profile updated
+            </div>
+            <SButton size="sm" :loading="profileSaving" @click="saveProfile">Save profile</SButton>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security Section -->
+      <div class="settings-section page-enter" :style="{ '--stagger': 3 }">
+        <div class="card-header">
+          <SectionHeader title="Security" />
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="row__label"><span class="row__name">New password</span></div>
+            <div class="row__control"><SInput v-model="newPassword" type="password" placeholder="Min 6 characters" /></div>
+          </div>
+          <div class="row">
+            <div class="row__label"><span class="row__name">Confirm password</span></div>
+            <div class="row__control"><SInput v-model="confirmPassword" type="password" placeholder="Re-enter password" /></div>
+          </div>
+          <div v-if="passwordError" class="row">
+            <p class="error-msg">{{ passwordError }}</p>
+          </div>
+          <div class="row row--action">
+            <div v-if="passwordSuccess" class="success-msg">
+              <span class="material-symbols-rounded" style="font-size: 16px;">check_circle</span>
+              Password changed
+            </div>
+            <SButton size="sm" :loading="passwordSaving" @click="handleChangePassword">Change password</SButton>
+          </div>
+        </div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="settings-section settings-section--danger page-enter" :style="{ '--stagger': 4 }">
+        <div class="card-header">
+          <SectionHeader title="Danger Zone" />
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="row__label">
+              <span class="row__name">Leave household</span>
+              <span class="row__hint">Remove yourself from this household. This cannot be undone.</span>
+            </div>
+            <SButton size="sm" variant="subtle" class="danger-btn" @click="showLeaveConfirm = true">Leave</SButton>
+          </div>
+          <div class="row">
+            <div class="row__label">
+              <span class="row__name">Sign out everywhere</span>
+              <span class="row__hint">End all sessions on all devices</span>
+            </div>
+            <SButton size="sm" variant="subtle" @click="authStore.signOut()">Sign out</SButton>
+          </div>
+        </div>
+      </div>
+
+      <!-- Leave confirm dialog -->
+      <ConfirmDialog
+        :open="showLeaveConfirm"
+        title="Leave household?"
+        message="You will be removed from this household and all your assignments will be unlinked. You can rejoin later with a new invitation."
+        confirm-label="Leave household"
+        variant="danger"
+        @confirm="leaveHousehold"
+        @cancel="showLeaveConfirm = false"
+      />
+    </template>
 
     <!-- ----------- TAB: APPEARANCE ----------- -->
     <template v-if="activeTab === 'appearance'">
@@ -770,6 +1045,69 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
           />
         </div>
       </div>
+
+      <!-- Invitations section -->
+      <div class="settings-section page-enter" :style="{ '--stagger': 4 }">
+        <div class="card-header">
+          <SectionHeader title="Invitations" />
+          <SButton size="sm" @click="showInviteForm = !showInviteForm">
+            {{ showInviteForm ? 'Cancel' : 'Generate invite' }}
+          </SButton>
+        </div>
+        <div class="card-body">
+          <!-- Inline invite form -->
+          <div v-if="showInviteForm" class="invite-form">
+            <div class="row">
+              <div class="row__label"><span class="row__name">Email</span><span class="row__hint">Optional — leave blank for an open invite</span></div>
+              <div class="row__control"><SInput v-model="inviteEmail" type="email" placeholder="invitee@example.com" /></div>
+            </div>
+            <div class="row">
+              <div class="row__label"><span class="row__name">Role</span></div>
+              <div class="row__control"><SSelect v-model="inviteRole" :options="ROLE_OPTIONS" /></div>
+            </div>
+            <div class="row">
+              <div class="row__label"><span class="row__name">Expires in</span></div>
+              <div class="row__control"><SSelect v-model="inviteExpiryStr" :options="EXPIRY_OPTIONS" /></div>
+            </div>
+            <div class="row row--action">
+              <SButton size="sm" :loading="inviteCreating" @click="createInvite">Create invite</SButton>
+            </div>
+          </div>
+
+          <!-- Invitation list -->
+          <div v-if="invitationStore.invitations.length > 0" class="invitations">
+            <div
+              v-for="inv in invitationStore.invitations"
+              :key="inv.id"
+              class="invite-row"
+            >
+              <div class="invite-row__main">
+                <button class="invite-code" :title="copiedCode === inv.invite_code ? 'Copied!' : 'Click to copy'" @click="copyCode(inv.invite_code)">
+                  <span class="invite-code__text">{{ inv.invite_code }}</span>
+                  <span class="material-symbols-rounded invite-code__icon">{{ copiedCode === inv.invite_code ? 'check' : 'content_copy' }}</span>
+                </button>
+                <span v-if="inv.email" class="invite-email">{{ inv.email }}</span>
+              </div>
+              <div class="invite-row__meta">
+                <SBadge :variant="invitationStatusVariant(inv.status)" size="sm">{{ inv.status }}</SBadge>
+                <SBadge :variant="inv.role === 'admin' ? 'brand' : 'default'" size="sm">{{ inv.role }}</SBadge>
+                <span class="invite-expires">{{ new Date(inv.expires_at).toLocaleDateString() }}</span>
+              </div>
+              <div class="invite-row__actions">
+                <SButton v-if="inv.status === 'pending'" size="sm" variant="subtle" @click="revokeInvite(inv.id)">Revoke</SButton>
+              </div>
+            </div>
+          </div>
+
+          <EmptyState
+            v-else-if="!showInviteForm"
+            title="No invitations yet"
+            subtitle="Generate one to invite people to your household."
+            action-label="Generate invite"
+            @action="showInviteForm = true"
+          />
+        </div>
+      </div>
     </template>
 
     <!-- ----------- TAB: PRIVACY ----------- -->
@@ -909,6 +1247,7 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
 
 .row__control {
   flex-shrink: 0;
+  width: 220px;
 }
 
 /* -- Theme picker -- */
@@ -1118,6 +1457,112 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
   outline-offset: 0;
 }
 
+/* -- Account tab -- */
+.row--action {
+  justify-content: flex-end;
+  padding-top: var(--space-m);
+}
+
+.success-msg {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font: var(--text-body-2);
+  color: var(--color-fg-success, #2d7a3a);
+}
+
+.error-msg {
+  font: var(--text-body-2);
+  color: var(--color-fg-danger, #c4314b);
+}
+
+/* -- Danger zone -- */
+.settings-section--danger {
+  border-color: var(--color-border-danger, rgba(200, 60, 60, 0.3));
+}
+
+.danger-btn {
+  color: var(--color-fg-danger, #c4314b) !important;
+}
+
+/* -- Invitation form -- */
+.invite-form {
+  border-bottom: 1px solid var(--color-border-subtle);
+  margin-bottom: var(--space-s);
+  padding-bottom: var(--space-s);
+}
+
+/* -- Invitation list -- */
+.invitations {
+  display: flex;
+  flex-direction: column;
+}
+
+.invite-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-m);
+  padding: var(--space-m) 0;
+}
+
+.invite-row + .invite-row {
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.invite-row__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.invite-code {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 2px var(--space-s);
+  background: var(--color-surface-input);
+  border: 1px solid var(--color-border-input);
+  border-radius: var(--radius-s);
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  color: var(--color-fg-primary);
+  cursor: pointer;
+  width: fit-content;
+  transition: background-color var(--duration-fast) var(--easing-standard);
+}
+
+.invite-code:hover {
+  background: var(--color-surface-input-hover);
+}
+
+.invite-code__icon {
+  font-size: 14px;
+  color: var(--color-fg-tertiary);
+}
+
+.invite-email {
+  font: var(--text-caption);
+  color: var(--color-fg-tertiary);
+}
+
+.invite-row__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.invite-expires {
+  font: var(--text-caption);
+  color: var(--color-fg-tertiary);
+}
+
+.invite-row__actions {
+  flex-shrink: 0;
+}
+
 /* -- Responsive -- */
 @media (max-width: 640px) {
   .card-header {
@@ -1129,7 +1574,12 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
   }
 
   .row {
-    gap: var(--space-l);
+    flex-wrap: wrap;
+    gap: var(--space-s);
+  }
+
+  .row__control {
+    width: 100%;
   }
 
   .theme-group {

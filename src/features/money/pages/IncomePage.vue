@@ -164,6 +164,10 @@ onMounted(async () => {
 
     <MoneyTabs />
 
+    <div class="money-mobile-actions">
+      <SButton @click="openAdd">Add Income</SButton>
+    </div>
+
     <ErrorBanner
       v-if="incomeStore.error"
       :message="incomeStore.error"
@@ -199,15 +203,17 @@ onMounted(async () => {
         @click="openEdit(item)"
       >
         <div class="income-row__source">{{ item.source }}</div>
-        <div class="income-row__category">
-          <SBadge variant="success" size="sm">{{ item.category }}</SBadge>
+        <div class="income-row__chips">
+          <div class="income-row__category">
+            <SBadge variant="success" size="sm">{{ item.category }}</SBadge>
+          </div>
+          <div class="income-row__date">{{ formatDate(item.date) }}</div>
+          <div class="income-row__recurring">
+            <SBadge v-if="item.recurring" variant="info" size="sm">Recurring</SBadge>
+          </div>
         </div>
-        <div class="income-row__date">{{ formatDate(item.date) }}</div>
         <div class="income-row__payer">
           <SAvatar :name="getMemberName(item.received_by)" :color="getMemberColor(item.received_by)" size="sm" />
-        </div>
-        <div class="income-row__recurring">
-          <SBadge v-if="item.recurring" variant="info" size="sm">Recurring</SBadge>
         </div>
         <div class="income-row__amount">{{ formatCents(item.amount) }}</div>
       </div>
@@ -353,13 +359,35 @@ onMounted(async () => {
   text-align: right;
 }
 
+.income-row__chips {
+  display: contents;
+}
+
+.money-mobile-actions {
+  display: none;
+}
+
 @media (max-width: 640px) {
+  :deep(.pageheader__actions) { display: none; }
+  .money-mobile-actions { display: flex; margin-bottom: var(--space-m); }
   .income-table__header { display: none; }
   .income-row {
-    grid-template-columns: 1fr auto auto auto;
+    grid-template-columns: 1fr 28px 5.5rem;
+    grid-template-rows: auto auto;
     padding: var(--space-s) var(--space-l);
+    row-gap: var(--space-2xs);
+    column-gap: var(--space-m);
   }
-  .income-row__date,
-  .income-row__recurring { display: none; }
+  .income-row__source { grid-column: 1; grid-row: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .income-row__payer { grid-column: 2; grid-row: 1 / -1; align-self: center; justify-self: center; }
+  .income-row__amount { grid-column: 3; grid-row: 1 / -1; align-self: center; text-align: right; }
+  .income-row__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    grid-column: 1;
+    grid-row: 2;
+    align-items: center;
+  }
 }
 </style>

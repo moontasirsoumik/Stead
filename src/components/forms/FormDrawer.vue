@@ -154,13 +154,13 @@ defineEmits<{
 
 @media (max-width: 640px) {
   .drawer-overlay {
-    padding: 0;
+    padding: var(--space-s);
   }
 
   .drawer {
-    width: 100vw;
-    max-width: 100vw;
-    border-radius: 0;
+    width: 100%;
+    max-width: 100%;
+    border-radius: var(--radius-xl);
   }
 }
 </style>

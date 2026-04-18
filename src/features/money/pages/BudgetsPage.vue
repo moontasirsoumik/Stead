@@ -133,6 +133,15 @@ onMounted(async () => {
 
     <MoneyTabs />
 
+    <div class="money-mobile-actions">
+      <SInput
+        v-model="budgetsStore.selectedMonth"
+        type="text"
+        placeholder="YYYY-MM"
+      />
+      <SButton @click="openAdd">Add Budget</SButton>
+    </div>
+
     <ErrorBanner
       v-if="budgetsStore.error"
       :message="budgetsStore.error"
@@ -329,14 +338,28 @@ onMounted(async () => {
   text-align: right;
 }
 
+.money-mobile-actions {
+  display: none;
+}
+
 @media (max-width: 640px) {
+  :deep(.pageheader__actions) { display: none; }
+  .money-mobile-actions { display: flex; gap: var(--space-s); margin-bottom: var(--space-m); }
   .budgets-table__header { display: none; }
   .budget-row {
-    grid-template-columns: 1fr auto auto;
+    grid-template-columns: 1fr 5.5rem;
+    grid-template-rows: auto auto auto;
     padding: var(--space-s) var(--space-l);
+    row-gap: var(--space-2xs);
+    column-gap: var(--space-m);
   }
-  .budget-row__progress { display: none; }
-  .budget-row__budget { display: none; }
+  .budget-row__category { grid-column: 1; grid-row: 1; }
+  .budget-row__remaining { grid-column: 2; grid-row: 1 / -1; align-self: center; text-align: right; }
+  .budget-row__progress { grid-column: 1; grid-row: 2; }
+  .budget-row__spent { grid-column: 1; grid-row: 3; font: var(--text-caption); color: var(--color-fg-tertiary); }
+  .budget-row__spent::before { content: 'Spent: '; }
+  .budget-row__budget { grid-column: 2; grid-row: 3; font: var(--text-caption); color: var(--color-fg-tertiary); text-align: right; }
+  .budget-row__budget::before { content: 'of '; }
   .budget-row__percent { display: none; }
 }
 </style>

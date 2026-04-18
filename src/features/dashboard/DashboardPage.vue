@@ -738,6 +738,34 @@ onMounted(() => {
     grid-column: 2;
     grid-row: 2;
   }
+
+  .dash-row--compact {
+    grid-template-rows: auto;
+  }
+
+  .dash-row--compact .dash-row__trailing {
+    grid-row: 1;
+  }
+
+  .goal-row__info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .goal-row__amounts {
+    font-size: 11px;
+  }
+
+  .note-row {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .note-row__preview {
+    grid-column: 1;
+    grid-row: 2;
+  }
 }
 
 @media (max-width: 480px) {
