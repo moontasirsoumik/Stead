@@ -65,17 +65,21 @@ defineEmits<{
   z-index: 1000;
   display: flex;
   justify-content: flex-end;
+  align-items: stretch;
+  padding: 8px 8px 8px 0;
   background: var(--color-bg-overlay);
 }
 
 .drawer {
   display: flex;
   flex-direction: column;
-  width: var(--width-drawer);
-  max-width: 100vw;
+  width: 420px;
+  max-width: calc(100vw - 16px);
   height: 100%;
-  background: var(--color-surface-dialog);
-  box-shadow: var(--shadow-28);
+  background: var(--color-surface-nav);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
 }
 
 .drawer--wide {
@@ -104,7 +108,7 @@ defineEmits<{
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-2xl);
+  gap: var(--space-xl);
 }
 
 .drawer__footer {
@@ -137,7 +141,7 @@ defineEmits<{
 }
 
 .drawer-enter-from .drawer {
-  transform: translateX(100%);
+  transform: translateX(calc(100% + 8px));
 }
 
 .drawer-leave-to {
@@ -145,12 +149,18 @@ defineEmits<{
 }
 
 .drawer-leave-to .drawer {
-  transform: translateX(100%);
+  transform: translateX(calc(100% + 8px));
 }
 
 @media (max-width: 640px) {
+  .drawer-overlay {
+    padding: 0;
+  }
+
   .drawer {
     width: 100vw;
+    max-width: 100vw;
+    border-radius: 0;
   }
 }
 </style>

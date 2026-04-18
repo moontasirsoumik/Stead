@@ -2,7 +2,6 @@
 import { computed, onMounted } from 'vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
-import ContentCard from '@/components/layout/ContentCard.vue'
 import SAvatar from '@/components/ui/SAvatar.vue'
 import SButton from '@/components/ui/SButton.vue'
 import SBadge from '@/components/ui/SBadge.vue'
@@ -78,27 +77,23 @@ onMounted(async () => {
     </div>
 
     <template v-else>
-      <!-- Net summary card -->
-      <ContentCard
-        class="page-enter net-card"
-        :style="{ '--stagger': 2 }"
-        :class="{
-          'net-card--positive': netBalance > 0,
-          'net-card--negative': netBalance < 0,
-        }"
-      >
-        <div class="net-summary">
-          <div class="net-summary__label">Net balance</div>
-          <div class="net-summary__amount" :class="netBalance >= 0 ? 'net-positive' : 'net-negative'">
+      <!-- Net summary bar -->
+      <div class="stats-bar page-enter" :style="{ '--stagger': 2 }">
+        <div class="stats-bar__cell">
+          <span class="stats-bar__label">Net balance</span>
+          <span class="stats-bar__value" :class="netBalance >= 0 ? 'net-positive' : 'net-negative'">
             {{ netBalance >= 0 ? '+' : '' }}{{ formatCents(Math.abs(netBalance)) }}
-          </div>
-          <div class="net-summary__sub">
-            <span class="net-chip net-chip--owe">You owe {{ formatCents(totalIOwe) }}</span>
-            <span class="net-divider">·</span>
-            <span class="net-chip net-chip--owed">Owed to you {{ formatCents(totalTheyOwe) }}</span>
-          </div>
+          </span>
         </div>
-      </ContentCard>
+        <div class="stats-bar__cell">
+          <span class="stats-bar__label">You owe</span>
+          <span class="stats-bar__value net-negative">{{ formatCents(totalIOwe) }}</span>
+        </div>
+        <div class="stats-bar__cell">
+          <span class="stats-bar__label">Owed to you</span>
+          <span class="stats-bar__value net-positive">{{ formatCents(totalTheyOwe) }}</span>
+        </div>
+      </div>
 
       <!-- Others owe me -->
       <section
@@ -155,9 +150,9 @@ onMounted(async () => {
       </section>
 
       <!-- Empty -->
-      <ContentCard
+      <div
         v-if="!theyOwe.length && !iOwe.length"
-        class="page-enter"
+        class="empty-section page-enter"
         :style="{ '--stagger': 3 }"
       >
         <EmptyState
@@ -165,67 +160,42 @@ onMounted(async () => {
           subtitle="No outstanding balances — everyone's even"
           icon="empty"
         />
-      </ContentCard>
+      </div>
     </template>
   </PageContainer>
 </template>
 
 <style scoped>
-.net-card {
+.stats-bar {
+  display: flex;
+  align-items: stretch;
+  background: var(--color-surface-container-low);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-m);
   margin-bottom: var(--space-l);
+  overflow: hidden;
 }
-
-.net-summary {
+.stats-bar__cell {
+  flex: 1;
+  padding: var(--space-m) var(--space-l);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: var(--space-xl) var(--space-l);
-  gap: var(--space-xs);
+  gap: var(--space-2xs);
+  border-right: 1px solid var(--color-border-default);
 }
-
-.net-summary__label {
-  font: var(--text-label-2);
-  color: var(--color-fg-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+.stats-bar__cell:last-child { border-right: none; }
+.stats-bar__label {
+  font: var(--text-caption);
+  color: var(--color-fg-secondary);
 }
-
-.net-summary__amount {
-  font: var(--text-title-1);
-  font-weight: var(--font-weight-bold);
+.stats-bar__value {
+  font: var(--text-body-1-strong);
+  color: var(--color-fg-primary);
   font-family: var(--font-mono);
 }
 
 .net-positive { color: var(--color-success); }
 .net-negative { color: var(--color-error); }
-
-.net-summary__sub {
-  display: flex;
-  align-items: center;
-  gap: var(--space-s);
-  margin-top: var(--space-xs);
-}
-
-.net-divider {
-  color: var(--color-fg-tertiary);
-}
-
-.net-chip {
-  font: var(--text-caption);
-  font-weight: var(--font-weight-medium);
-  padding: 2px var(--space-s);
-  border-radius: var(--radius-pill);
-}
-
-.net-chip--owe {
-  background: color-mix(in srgb, var(--color-error) 12%, transparent);
-  color: var(--color-error);
-}
-
-.net-chip--owed {
-  background: color-mix(in srgb, var(--color-success) 12%, transparent);
-  color: var(--color-success);
-}
 
 .balance-section {
   margin-bottom: var(--space-l);
@@ -243,7 +213,6 @@ onMounted(async () => {
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-l);
   background: var(--color-surface-card);
-  box-shadow: var(--shadow-2), var(--shadow-card);
 }
 
 .balance-row {

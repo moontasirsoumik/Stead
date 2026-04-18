@@ -1,6 +1,6 @@
 /* ============================================================
-   Stead — Layout Tokens
-   Material 3-inspired sizing for navigation and controls.
+   Stead — Layout Tokens  ·  "Refined Utility"
+   Compact sizing for information-dense interfaces.
    ============================================================ */
 
 :root {
@@ -9,18 +9,18 @@
   --bp-desktop: 1280px;
   --bp-wide: 1440px;
 
-  --width-sidebar-expanded: 292px;
-  --width-sidebar-collapsed: 88px;
-  --width-nav-collapsed: 60px;
-  --width-nav-expanded: 288px;
+  --width-sidebar-expanded: 256px;
+  --width-sidebar-collapsed: 64px;
+  --width-nav-collapsed: 56px;
+  --width-nav-expanded: 256px;
   --width-content-max: 1440px;
-  --width-drawer: 440px;
-  --height-header: 64px;
-  --height-input: 48px;
-  --height-control-sm: 32px;
-  --height-control-md: 40px;
-  --height-control-lg: 48px;
-  --height-row-min: 52px;
-  --height-nav-item: 56px;
-  --height-mobile-nav: 80px;
+  --width-drawer: 420px;
+  --height-header: 52px;
+  --height-input: 40px;
+  --height-control-sm: 28px;
+  --height-control-md: 36px;
+  --height-control-lg: 44px;
+  --height-row-min: 48px;
+  --height-nav-item: 40px;
+  --height-mobile-nav: 64px;
 }

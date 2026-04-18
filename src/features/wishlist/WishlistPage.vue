@@ -2,7 +2,6 @@
 import { ref, computed, onMounted } from 'vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
-import ContentCard from '@/components/layout/ContentCard.vue'
 import FilterBar from '@/components/data/FilterBar.vue'
 import SButton from '@/components/ui/SButton.vue'
 import SIconButton from '@/components/ui/SIconButton.vue'
@@ -206,15 +205,15 @@ onMounted(async () => {
     <ErrorBanner v-if="wishlistStore.error" :message="wishlistStore.error" @retry="authStore.householdId && wishlistStore.fetchItems(authStore.householdId)" />
 
     <!-- Stats -->
-    <div class="stats-row page-enter" :style="{ '--stagger': 1 }">
-      <ContentCard class="stat-card">
-        <span class="stat-value">{{ activeItemCount }}</span>
-        <span class="stat-label">Items wanted</span>
-      </ContentCard>
-      <ContentCard class="stat-card">
-        <span class="stat-value">{{ formatCents(wishlistStore.totalWishlistValue) }}</span>
-        <span class="stat-label">Total value</span>
-      </ContentCard>
+    <div class="stats-bar page-enter" :style="{ '--stagger': 1 }">
+      <div class="stats-bar__cell">
+        <span class="stats-bar__label">Items wanted</span>
+        <span class="stats-bar__value">{{ activeItemCount }}</span>
+      </div>
+      <div class="stats-bar__cell">
+        <span class="stats-bar__label">Total value</span>
+        <span class="stats-bar__value">{{ formatCents(wishlistStore.totalWishlistValue) }}</span>
+      </div>
     </div>
 
     <FilterBar v-model:search="search" show-search class="page-enter" :style="{ '--stagger': 2 }">
@@ -222,59 +221,43 @@ onMounted(async () => {
       <SSelect v-model="priorityFilter" :options="priorityOptions" placeholder="Priority" />
     </FilterBar>
 
-    <ContentCard v-if="wishlistStore.loading && !wishlistStore.items.length" class="page-enter" :style="{ '--stagger': 3 }">
+    <div v-if="wishlistStore.loading && !wishlistStore.items.length" class="page-enter" :style="{ '--stagger': 3 }">
       <LoadingSkeleton :lines="5" />
-    </ContentCard>
+    </div>
 
     <template v-else-if="!filteredItems.length">
-      <ContentCard class="page-enter" :style="{ '--stagger': 3 }">
+      <div class="empty-section page-enter" :style="{ '--stagger': 3 }">
         <EmptyState v-if="!wishlistStore.items.length" title="Your wishlist is empty" subtitle="Start dreaming! Add the things you'd love to have." icon="empty" action-label="Add first item" @action="openCreateDrawer" />
         <EmptyState v-else title="No matches" subtitle="Try adjusting your filters or search term." icon="search" />
-      </ContentCard>
+      </div>
     </template>
 
     <template v-else>
-      <div class="wishlist-grid page-enter" :style="{ '--stagger': 3 }">
+      <div class="wish-table page-enter" :style="{ '--stagger': 3 }">
+        <div class="wish-table__header">
+          <span class="wish-table__th">Item</span>
+          <span class="wish-table__th wish-table__th--center">Priority</span>
+          <span class="wish-table__th wish-table__th--center">Status</span>
+          <span class="wish-table__th wish-table__th--right">Price</span>
+        </div>
         <div
           v-for="item in filteredItems"
           :key="item.id"
-          class="wishlist-card"
-          :class="{ 'wishlist-card--dimmed': isItemDimmed(item) }"
+          class="wish-row"
+          :class="{ 'wish-row--dimmed': isItemDimmed(item) }"
           @click="openEditDrawer(item)"
         >
-          <div class="wishlist-card__header">
-            <span class="wishlist-card__name">{{ item.name }}</span>
-            <SBadge :variant="statusVariant(item.status)" size="sm">{{ item.status }}</SBadge>
+          <div class="wish-row__name">
+            <span class="wish-row__title">{{ item.name }}</span>
+            <span v-if="item.category" class="wish-row__cat">{{ item.category }}</span>
           </div>
-
-          <div class="wishlist-card__price-row">
-            <span class="wishlist-card__price">{{ formatCents(item.price) }}</span>
+          <div class="wish-row__priority">
             <SBadge :variant="priorityVariant(item.priority)" size="sm">{{ item.priority }}</SBadge>
           </div>
-
-          <div v-if="item.status === 'saving' && item.price > 0" class="wishlist-card__progress">
-            <div class="progress-bar">
-              <div class="progress-bar__fill" :style="{ width: savingProgress(item) + '%' }" />
-            </div>
-            <span class="progress-text">{{ formatCents(item.saved_amount) }} / {{ formatCents(item.price) }}</span>
+          <div class="wish-row__status">
+            <SBadge :variant="statusVariant(item.status)" size="sm">{{ item.status }}</SBadge>
           </div>
-
-          <p v-if="item.description" class="wishlist-card__desc">{{ item.description }}</p>
-
-          <div class="wishlist-card__actions" @click.stop>
-            <SIconButton v-if="item.status === 'wanted'" label="Start saving" size="sm" @click="startSaving(item)">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2V10M2 6H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
-            </SIconButton>
-            <SIconButton v-if="item.status === 'wanted' || item.status === 'saving'" label="Mark bought" size="sm" @click="markAsBought(item)">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
-            </SIconButton>
-            <SIconButton v-if="item.status === 'wanted' || item.status === 'saving'" label="Drop item" size="sm" @click="dropItem(item)">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 3L9 9M9 3L3 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
-            </SIconButton>
-            <SIconButton label="Delete" size="sm" @click="confirmDelete(item.id)">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 3H10M4 3V2H8V3M5 5V9M7 5V9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" /></svg>
-            </SIconButton>
-          </div>
+          <div class="wish-row__price">{{ formatCents(item.price) }}</div>
         </div>
       </div>
     </template>
@@ -296,151 +279,111 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.stats-row {
+.stats-bar {
   display: flex;
-  gap: var(--space-m);
-  margin-bottom: var(--space-l);
-}
-
-.stat-card {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: var(--space-l);
-}
-
-.stat-value {
-  font: var(--text-title-2);
-  color: var(--color-fg-primary);
-  font-weight: var(--font-weight-semibold);
-}
-
-.stat-label {
-  font: var(--text-caption);
-  color: var(--color-fg-tertiary);
-  margin-top: var(--space-2xs);
-}
-
-.wishlist-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: var(--space-l);
-  margin-bottom: var(--space-l);
-}
-
-.wishlist-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  padding: var(--space-l);
-  background: var(--color-surface-card);
-  border-radius: var(--radius-l);
+  align-items: stretch;
+  background: var(--color-surface-container-low);
   border: 1px solid var(--color-border-default);
-  box-shadow: var(--shadow-2), var(--shadow-card);
-  cursor: pointer;
-  transition:
-    background-color var(--duration-fast) var(--easing-standard),
-    border-color var(--duration-fast) var(--easing-standard),
-    box-shadow var(--duration-fast) var(--easing-standard),
-    opacity var(--duration-fast) var(--easing-standard);
-}
-
-.wishlist-card:hover {
-  background: var(--color-surface-card-hover);
-  box-shadow: var(--shadow-8), var(--shadow-card);
-  border-color: var(--color-outline-variant);
-}
-
-.wishlist-card--dimmed {
-  opacity: 0.55;
-}
-
-.wishlist-card__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-xs);
-}
-
-.wishlist-card__name {
-  font: var(--text-body-2);
-  color: var(--color-fg-primary);
-  font-weight: var(--font-weight-medium);
-  white-space: nowrap;
+  border-radius: var(--radius-m);
+  margin-bottom: var(--space-l);
   overflow: hidden;
-  text-overflow: ellipsis;
+}
+.stats-bar__cell {
+  flex: 1;
+  padding: var(--space-m) var(--space-l);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  border-right: 1px solid var(--color-border-default);
+}
+.stats-bar__cell:last-child { border-right: none; }
+.stats-bar__label {
+  font: var(--text-caption);
+  color: var(--color-fg-secondary);
+}
+.stats-bar__value {
+  font: var(--text-body-1-strong);
+  color: var(--color-fg-primary);
+}
+
+.wish-table {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-l);
+  overflow: hidden;
+}
+
+.wish-table__header {
+  display: grid;
+  grid-template-columns: 1fr 90px 90px 110px;
+  align-items: center;
+  padding: var(--space-s) var(--space-l);
+  background: var(--color-surface-container-low);
+  border-bottom: 1px solid var(--color-border-default);
+  gap: var(--space-m);
+}
+
+.wish-table__th {
+  font: var(--text-label-sm);
+  color: var(--color-fg-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+}
+
+.wish-table__th--center { text-align: center; }
+.wish-table__th--right { text-align: right; }
+
+.wish-row {
+  display: grid;
+  grid-template-columns: 1fr 90px 90px 110px;
+  align-items: center;
+  min-height: var(--height-row-min);
+  padding: 0 var(--space-l);
+  gap: var(--space-m);
+  border-bottom: 1px solid var(--color-border-subtle);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--easing-standard);
+}
+
+.wish-row:last-child { border-bottom: none; }
+.wish-row:hover { background: var(--color-bg-tertiary); }
+.wish-row--dimmed { opacity: 0.5; }
+
+.wish-row__name {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-s);
   min-width: 0;
 }
 
-.wishlist-card__price-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-xs);
-}
-
-.wishlist-card__price {
-  font: var(--text-body-1);
+.wish-row__title {
+  font: var(--text-body-2);
+  font-weight: var(--font-weight-medium);
   color: var(--color-fg-primary);
-  font-weight: var(--font-weight-semibold);
-}
-
-.wishlist-card__progress {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2xs);
-}
-
-.progress-bar {
-  height: 4px;
-  background: var(--color-bg-tertiary);
-  border-radius: var(--radius-s);
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.progress-bar__fill {
-  height: 100%;
-  background: var(--color-brand-primary);
-  border-radius: var(--radius-s);
-  transition: width var(--duration-normal) var(--easing-standard);
-}
-
-.progress-text {
+.wish-row__cat {
   font: var(--text-caption);
   color: var(--color-fg-tertiary);
+  white-space: nowrap;
 }
 
-.wishlist-card__desc {
-  font: var(--text-caption);
-  color: var(--color-fg-secondary);
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
-
-.wishlist-card__actions {
+.wish-row__priority,
+.wish-row__status {
   display: flex;
-  justify-content: flex-end;
-  gap: var(--space-2xs);
-  opacity: 0;
-  transition: opacity var(--duration-fast) var(--easing-standard);
+  align-items: center;
+  justify-content: center;
 }
 
-.wishlist-card:hover .wishlist-card__actions {
-  opacity: 1;
-}
-
-@media (max-width: 640px) {
-  .stats-row {
-    flex-direction: column;
-  }
-  .wishlist-grid {
-    grid-template-columns: 1fr;
-  }
-  .wishlist-card__actions {
-    opacity: 1;
-  }
+.wish-row__price {
+  font: var(--text-body-2);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-mono);
+  color: var(--color-fg-primary);
+  text-align: right;
 }
 </style>

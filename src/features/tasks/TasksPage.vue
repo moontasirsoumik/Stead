@@ -2,11 +2,8 @@
 import { ref, computed, onMounted } from 'vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
-import ContentCard from '@/components/layout/ContentCard.vue'
 import FilterBar from '@/components/data/FilterBar.vue'
 import SectionHeader from '@/components/data/SectionHeader.vue'
-import DataList from '@/components/data/DataList.vue'
-import InlineStat from '@/components/data/InlineStat.vue'
 import SButton from '@/components/ui/SButton.vue'
 import SIconButton from '@/components/ui/SIconButton.vue'
 import SBadge from '@/components/ui/SBadge.vue'
@@ -15,7 +12,6 @@ import SInput from '@/components/ui/SInput.vue'
 import STextarea from '@/components/ui/STextarea.vue'
 import SCheckbox from '@/components/ui/SCheckbox.vue'
 import SAvatar from '@/components/ui/SAvatar.vue'
-import StatusBadge from '@/components/feedback/StatusBadge.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import ErrorBanner from '@/components/feedback/ErrorBanner.vue'
 import LoadingSkeleton from '@/components/feedback/LoadingSkeleton.vue'
@@ -302,11 +298,24 @@ onMounted(async () => {
       </template>
     </PageHeader>
 
+    <!-- Stats bar — compact cells with vertical dividers -->
     <div class="stats-row page-enter" :style="{ '--stagger': 1 }">
-      <InlineStat label="Total" :value="tasksStore.items.length" />
-      <InlineStat label="Due Today" :value="tasksStore.dueToday.length" />
-      <InlineStat label="Overdue" :value="tasksStore.overdueTasks.length" :trend="tasksStore.overdueTasks.length > 0 ? 'down' : 'neutral'" />
-      <InlineStat label="Maintenance" :value="tasksStore.maintenanceTasks.length" />
+      <div class="stat-cell">
+        <span class="stat-cell__label">Total</span>
+        <span class="stat-cell__value">{{ tasksStore.items.length }}</span>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-cell__label">Due Today</span>
+        <span class="stat-cell__value">{{ tasksStore.dueToday.length }}</span>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-cell__label">Overdue</span>
+        <span class="stat-cell__value" :class="{ 'stat-cell__value--warn': tasksStore.overdueTasks.length > 0 }">{{ tasksStore.overdueTasks.length }}</span>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-cell__label">Maintenance</span>
+        <span class="stat-cell__value">{{ tasksStore.maintenanceTasks.length }}</span>
+      </div>
     </div>
 
     <ErrorBanner v-if="tasksStore.error" :message="tasksStore.error" @retry="authStore.householdId && tasksStore.fetchTasks(authStore.householdId)" />
@@ -318,70 +327,84 @@ onMounted(async () => {
       <SSelect v-model="assigneeFilter" :options="memberOptions" placeholder="Assignee" />
     </FilterBar>
 
-    <ContentCard v-if="tasksStore.loading && !tasksStore.items.length" class="page-enter" :style="{ '--stagger': 3 }">
+    <!-- Loading state -->
+    <div v-if="tasksStore.loading && !tasksStore.items.length" class="page-enter" :style="{ '--stagger': 3 }">
       <LoadingSkeleton :lines="5" />
-    </ContentCard>
+    </div>
 
-    <ContentCard v-else-if="!filteredItems.length" class="page-enter" :style="{ '--stagger': 3 }">
+    <!-- Empty state -->
+    <div v-else-if="!filteredItems.length" class="page-enter" :style="{ '--stagger': 3 }">
       <EmptyState v-if="!tasksStore.items.length" title="All clear!" subtitle="No tasks right now. Add one to keep the household running smoothly." icon="success" action-label="Add task" @action="openCreateDrawer" />
       <EmptyState v-else title="No matches" subtitle="Try adjusting your filters or search term." icon="search" />
-    </ContentCard>
+    </div>
 
+    <!-- Task groups — flat sections, no cards -->
     <template v-else>
-      <div v-for="(group, gi) in statusGroups" :key="group.status" class="page-enter" :style="{ '--stagger': 3 + gi }">
+      <section v-for="(group, gi) in statusGroups" :key="group.status" class="task-group page-enter" :style="{ '--stagger': 3 + gi }">
         <SectionHeader :title="group.label" :count="group.tasks.length" />
-        <ContentCard>
-          <DataList dividers>
-            <div v-for="task in group.tasks" :key="task.id" class="task-row-wrapper" role="listitem">
-              <div class="task-row" @click="toggleExpand(task.id)">
+        <div class="task-table">
+          <div class="task-table__header">
+            <span class="task-table__th">Task</span>
+            <span class="task-table__th task-table__th--center">Priority</span>
+            <span class="task-table__th task-table__th--center">Status</span>
+            <span class="task-table__th task-table__th--right">Due</span>
+            <span class="task-table__th task-table__th--center">Assignee</span>
+            <span class="task-table__th task-table__th--right">Actions</span>
+          </div>
+          <div v-for="task in group.tasks" :key="task.id" class="task-row-wrapper" role="listitem">
+            <div class="task-row" @click="toggleExpand(task.id)">
+              <div class="task-row__title-col">
                 <span class="task-row__title">{{ task.title }}</span>
-                <div class="task-row__meta">
-                  <SBadge v-if="task.task_type === 'maintenance'" variant="default" size="sm">maintenance</SBadge>
-                  <SBadge :variant="priorityVariant(task.priority)" size="sm">{{ task.priority }}</SBadge>
-                  <StatusBadge :variant="statusVariant(task.status)">{{ task.status.replace('_', ' ') }}</StatusBadge>
-                  <span v-if="task.due_date" class="task-row__due">{{ formatRelativeDate(task.due_date) }}</span>
-                  <span v-if="subtaskProgress(task.id)" class="task-row__subtasks">{{ subtaskProgress(task.id) }}</span>
-                </div>
-                <div class="task-row__end">
-                  <SAvatar v-if="getMemberName(task.assignee)" :name="getMemberName(task.assignee)!" size="sm" />
-                  <div class="task-row__actions" @click.stop>
-                    <SButton v-if="task.status === 'not_started'" variant="subtle" size="sm" @click="quickStatus(task.id, 'in_progress')">Start</SButton>
-                    <SButton v-if="task.status !== 'done'" variant="subtle" size="sm" @click="quickStatus(task.id, 'done')">Complete</SButton>
-                    <SButton v-if="task.status !== 'skipped' && task.status !== 'done'" variant="subtle" size="sm" @click="quickStatus(task.id, 'skipped')">Skip</SButton>
-                  </div>
-                </div>
+                <SBadge v-if="task.task_type === 'maintenance'" variant="default" size="sm">maintenance</SBadge>
               </div>
-
-              <div v-if="expandedTaskId === task.id" class="task-expanded" @click.stop>
-                <div v-if="task.description" class="task-expanded__desc">{{ task.description }}</div>
-                <div v-if="task.task_type === 'maintenance'" class="task-expanded__maintenance">
-                  <span v-if="task.vendor" class="task-expanded__detail"><strong>Vendor:</strong> {{ task.vendor }}</span>
-                  <span v-if="task.contact" class="task-expanded__detail"><strong>Contact:</strong> {{ task.contact }}</span>
-                  <span v-if="task.estimated_cost != null" class="task-expanded__detail"><strong>Est. Cost:</strong> ${{ (task.estimated_cost / 100).toFixed(2) }}</span>
-                  <span v-if="task.last_done_date" class="task-expanded__detail"><strong>Last Done:</strong> {{ formatRelativeDate(task.last_done_date) }}</span>
-                </div>
-                <div class="task-expanded__subtasks">
-                  <p class="task-expanded__label">Subtasks</p>
-                  <div v-for="sub in (tasksStore.subtasks.get(task.id) ?? [])" :key="sub.id" class="subtask-row">
-                    <SCheckbox :model-value="sub.done" :label="sub.title" @update:model-value="tasksStore.toggleSubtask(sub.id, task.id)" />
-                    <SIconButton label="Delete subtask" size="sm" @click="tasksStore.removeSubtask(sub.id, task.id)">
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 3L9 9M9 3L3 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
-                    </SIconButton>
-                  </div>
-                  <div class="subtask-add">
-                    <SInput v-model="newSubtaskTitle" placeholder="Add a subtask…" @keydown.enter="handleAddSubtask(task.id)" />
-                    <SButton variant="subtle" size="sm" @click="handleAddSubtask(task.id)">Add</SButton>
-                  </div>
-                </div>
-                <div class="task-expanded__footer">
-                  <SButton variant="subtle" size="sm" @click="openEditDrawer(task)">Edit</SButton>
-                  <SButton variant="danger" size="sm" @click="confirmDelete(task.id)">Delete</SButton>
-                </div>
+              <div class="task-row__priority">
+                <SBadge :variant="priorityVariant(task.priority)" size="sm">{{ task.priority }}</SBadge>
+              </div>
+              <div class="task-row__status">
+                <SBadge :variant="statusVariant(task.status)" size="sm">{{ task.status.replace('_', ' ') }}</SBadge>
+              </div>
+              <div class="task-row__due">
+                <span v-if="task.due_date">{{ formatRelativeDate(task.due_date) }}</span>
+              </div>
+              <div class="task-row__assignee">
+                <SAvatar v-if="getMemberName(task.assignee)" :name="getMemberName(task.assignee)!" size="sm" />
+              </div>
+              <div class="task-row__actions" @click.stop>
+                <SButton v-if="task.status === 'not_started'" variant="subtle" size="sm" @click="quickStatus(task.id, 'in_progress')">Start</SButton>
+                <SButton v-if="task.status !== 'done'" variant="subtle" size="sm" @click="quickStatus(task.id, 'done')">Complete</SButton>
+                <SButton v-if="task.status !== 'skipped' && task.status !== 'done'" variant="subtle" size="sm" @click="quickStatus(task.id, 'skipped')">Skip</SButton>
               </div>
             </div>
-          </DataList>
-        </ContentCard>
-      </div>
+
+            <div v-if="expandedTaskId === task.id" class="task-expanded" @click.stop>
+              <div v-if="task.description" class="task-expanded__desc">{{ task.description }}</div>
+              <div v-if="task.task_type === 'maintenance'" class="task-expanded__maintenance">
+                <span v-if="task.vendor" class="task-expanded__detail"><strong>Vendor:</strong> {{ task.vendor }}</span>
+                <span v-if="task.contact" class="task-expanded__detail"><strong>Contact:</strong> {{ task.contact }}</span>
+                <span v-if="task.estimated_cost != null" class="task-expanded__detail"><strong>Est. Cost:</strong> ${{ (task.estimated_cost / 100).toFixed(2) }}</span>
+                <span v-if="task.last_done_date" class="task-expanded__detail"><strong>Last Done:</strong> {{ formatRelativeDate(task.last_done_date) }}</span>
+              </div>
+              <div class="task-expanded__subtasks">
+                <p class="task-expanded__label">Subtasks</p>
+                <div v-for="sub in (tasksStore.subtasks.get(task.id) ?? [])" :key="sub.id" class="subtask-row">
+                  <SCheckbox :model-value="sub.done" :label="sub.title" @update:model-value="tasksStore.toggleSubtask(sub.id, task.id)" />
+                  <SIconButton label="Delete subtask" size="sm" @click="tasksStore.removeSubtask(sub.id, task.id)">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 3L9 9M9 3L3 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
+                  </SIconButton>
+                </div>
+                <div class="subtask-add">
+                  <SInput v-model="newSubtaskTitle" placeholder="Add a subtask…" @keydown.enter="handleAddSubtask(task.id)" />
+                  <SButton variant="subtle" size="sm" @click="handleAddSubtask(task.id)">Add</SButton>
+                </div>
+              </div>
+              <div class="task-expanded__footer">
+                <SButton variant="subtle" size="sm" @click="openEditDrawer(task)">Edit</SButton>
+                <SButton variant="danger" size="sm" @click="confirmDelete(task.id)">Delete</SButton>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </template>
 
     <FormDrawer :open="drawerOpen" :title="editingTask ? 'Edit Task' : 'Add Task'" :submit-label="editingTask ? 'Update' : 'Create'" :loading="drawerLoading" @close="drawerOpen = false" @submit="handleSubmit">
@@ -408,38 +431,100 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+/* ── Stats row: compact bar with vertical dividers (matches dashboard) ── */
 .stats-row {
   display: flex;
   align-items: stretch;
+  background: var(--color-surface-container-low);
   border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-l);
-  background: var(--color-surface-card);
-  box-shadow: var(--shadow-2), var(--shadow-card);
+  border-radius: var(--radius-m);
   margin-bottom: var(--space-l);
   overflow: hidden;
 }
 
-.stats-row > * {
+.stat-cell {
   flex: 1;
-  border-right: 1px solid var(--color-border-subtle);
+  padding: var(--space-s) var(--space-l);
+  border-right: 1px solid var(--color-border-default);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.stats-row > *:last-child {
+.stat-cell:last-child {
   border-right: none;
 }
 
-.task-row {
+.stat-cell__label {
+  font: var(--text-caption);
+  color: var(--color-fg-tertiary);
+}
+
+.stat-cell__value {
+  font: var(--text-body-1);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-fg-primary);
+}
+
+.stat-cell__value--warn {
+  color: var(--color-error);
+}
+
+/* ── Task group sections ── */
+.task-group {
+  margin-bottom: var(--space-l);
+}
+
+/* ── Task table with headers ── */
+.task-table {
   display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-l);
+  overflow: hidden;
+}
+
+.task-table__header {
+  display: grid;
+  grid-template-columns: 1fr 80px 100px 90px 70px 180px;
+  align-items: center;
+  padding: var(--space-s) var(--space-l);
+  background: var(--color-surface-container-low);
+  border-bottom: 1px solid var(--color-border-default);
+  gap: var(--space-m);
+}
+
+.task-table__th {
+  font: var(--text-label-sm);
+  color: var(--color-fg-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+}
+
+.task-table__th--center { text-align: center; }
+.task-table__th--right { text-align: right; }
+
+.task-row {
+  display: grid;
+  grid-template-columns: 1fr 80px 100px 90px 70px 180px;
   align-items: center;
   gap: var(--space-m);
   min-height: var(--height-row-min);
-  padding: var(--space-xs) var(--space-l);
+  padding: 0 var(--space-l);
   cursor: pointer;
-  transition: background var(--duration-fast) var(--easing-standard);
+  transition: background-color var(--duration-fast) var(--easing-standard);
+  border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .task-row:hover {
   background: var(--color-bg-tertiary);
+}
+
+.task-row__title-col {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  min-width: 0;
 }
 
 .task-row__title {
@@ -450,51 +535,43 @@ onMounted(async () => {
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 0;
-  flex-shrink: 1;
 }
 
-.task-row__meta {
+.task-row__priority {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
-  flex-shrink: 0;
+  justify-content: center;
+}
+
+.task-row__status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .task-row__due {
   font: var(--text-caption);
   color: var(--color-fg-tertiary);
   white-space: nowrap;
+  text-align: right;
 }
 
-.task-row__subtasks {
-  font: var(--text-caption);
-  color: var(--color-fg-tertiary);
-  background: var(--color-bg-tertiary);
-  padding: 0 var(--space-xs);
-  border-radius: var(--radius-s);
-}
-
-.task-row__end {
+.task-row__assignee {
   display: flex;
   align-items: center;
-  gap: var(--space-s);
-  flex-shrink: 0;
-  margin-left: auto;
+  justify-content: center;
 }
 
 .task-row__actions {
   display: flex;
-  gap: var(--space-2xs);
-  opacity: 0;
-  transition: opacity var(--duration-fast) var(--easing-standard);
+  gap: var(--space-xs);
+  justify-content: flex-end;
 }
 
-.task-row:hover .task-row__actions {
-  opacity: 1;
-}
-
+/* ── Expanded task panel ── */
 .task-expanded {
-  padding: var(--space-s) var(--space-l) var(--space-m);
+  padding: var(--space-s) var(--space-m) var(--space-m);
+  padding-left: var(--space-xl);
   background: var(--color-bg-secondary);
   border-top: 1px solid var(--color-border-subtle);
 }
@@ -503,12 +580,13 @@ onMounted(async () => {
   font: var(--text-caption);
   color: var(--color-fg-secondary);
   margin-bottom: var(--space-s);
+  line-height: 1.5;
 }
 
 .task-expanded__maintenance {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-s) var(--space-l);
+  gap: var(--space-xs) var(--space-l);
   margin-bottom: var(--space-s);
   font: var(--text-caption);
   color: var(--color-fg-secondary);
@@ -524,7 +602,7 @@ onMounted(async () => {
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
   letter-spacing: var(--tracking-caps);
-  margin-bottom: var(--space-xs);
+  margin-bottom: var(--space-2xs);
 }
 
 .task-expanded__subtasks {
@@ -535,8 +613,8 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 26px;
-  padding: 0;
+  min-height: 28px;
+  padding-left: var(--space-s);
 }
 
 .subtask-add {
@@ -553,11 +631,18 @@ onMounted(async () => {
   border-top: 1px solid var(--color-border-subtle);
 }
 
+/* ── Responsive ── */
 @media (max-width: 640px) {
   .stats-row { flex-direction: column; }
-  .stats-row > * { border-right: none; border-bottom: 1px solid var(--color-border-subtle); }
-  .stats-row > *:last-child { border-bottom: none; }
-  .task-row { flex-wrap: wrap; }
-  .task-row__actions { opacity: 1; }
+  .stat-cell { border-right: none; border-bottom: 1px solid var(--color-border-default); }
+  .stat-cell:last-child { border-bottom: none; }
+  .task-row {
+    grid-template-columns: 1fr auto auto;
+    gap: var(--space-s);
+    padding: var(--space-s) var(--space-l);
+  }
+  .task-row__priority,
+  .task-row__due { display: none; }
+  .task-expanded { padding-left: var(--space-m); }
 }
 </style>

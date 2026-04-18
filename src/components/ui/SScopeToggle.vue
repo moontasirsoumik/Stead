@@ -32,7 +32,8 @@ const modelValue = defineModel<DataScope>({ default: 'household' })
   position: relative;
   gap: var(--space-2xs);
   padding: var(--space-2xs);
-  background: var(--color-surface-container-low);
+  background: var(--color-surface-container);
+  border: 1px solid var(--color-border-default);
   border-radius: var(--radius-m);
   width: fit-content;
 }
@@ -40,8 +41,9 @@ const modelValue = defineModel<DataScope>({ default: 'household' })
 .scope-toggle__btn {
   position: relative;
   z-index: 1;
-  padding: var(--space-xs) var(--space-l);
-  font: var(--text-label-lg);
+  height: var(--height-control-sm);
+  padding: 0 var(--space-l);
+  font: var(--text-label-md);
   color: var(--color-fg-secondary);
   background: none;
   border: none;

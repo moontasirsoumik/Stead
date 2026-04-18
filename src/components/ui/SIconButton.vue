@@ -36,15 +36,15 @@ defineEmits<{
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid transparent;
-  border-radius: var(--radius-circle);
+  border: none;
+  border-radius: var(--radius-m);
   cursor: pointer;
   color: var(--color-fg-tertiary);
+  background: transparent;
   transition:
     background-color var(--duration-fast) var(--easing-standard),
     color var(--duration-fast) var(--easing-standard),
-    box-shadow var(--duration-fast) var(--easing-standard),
-    border-color var(--duration-fast) var(--easing-standard);
+    opacity var(--duration-fast) var(--easing-standard);
 }
 
 .siconbutton--sm { width: var(--height-control-sm); height: var(--height-control-sm); }
@@ -56,19 +56,18 @@ defineEmits<{
 }
 
 .siconbutton--subtle:hover:not(:disabled) {
-  background: var(--color-brand-selected);
-  color: var(--color-brand-primary);
+  background: var(--color-surface-container);
+  color: var(--color-fg-primary);
 }
 
 .siconbutton--secondary {
-  background: var(--color-surface-card);
+  background: transparent;
   border: 1px solid var(--color-border-default);
 }
 
 .siconbutton--secondary:hover:not(:disabled) {
   background: var(--color-surface-container-low);
   border-color: var(--color-outline-variant);
-  box-shadow: var(--shadow-4);
   color: var(--color-fg-primary);
 }
 
@@ -82,7 +81,7 @@ defineEmits<{
 }
 
 .siconbutton:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--color-brand-primary) 34%, transparent);
+  outline: 2px solid var(--color-brand-primary);
   outline-offset: 2px;
 }
 </style>

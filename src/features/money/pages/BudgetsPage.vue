@@ -2,7 +2,6 @@
 import { ref, computed, onMounted } from 'vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
-import ContentCard from '@/components/layout/ContentCard.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import ErrorBanner from '@/components/feedback/ErrorBanner.vue'
 import LoadingSkeleton from '@/components/feedback/LoadingSkeleton.vue'
@@ -146,45 +145,44 @@ onMounted(async () => {
       <LoadingSkeleton :lines="5" />
     </div>
 
-    <div v-else-if="budgetCards.length" class="budgets-grid">
-      <ContentCard
+    <div v-else-if="budgetCards.length" class="budgets-table">
+      <div class="budgets-table__header">
+        <span class="budgets-table__th">Category</span>
+        <span class="budgets-table__th budgets-table__th--center">Progress</span>
+        <span class="budgets-table__th budgets-table__th--right">Spent</span>
+        <span class="budgets-table__th budgets-table__th--right">Budget</span>
+        <span class="budgets-table__th budgets-table__th--right">Remaining</span>
+        <span class="budgets-table__th budgets-table__th--right">%</span>
+      </div>
+      <div
         v-for="(card, idx) in budgetCards"
         :key="card.budget.id"
-        padding="md"
-        hoverable
-        class="budget-card page-enter"
+        class="budget-row page-enter"
         :style="{ '--stagger': 2 + idx }"
         @click="openEdit(card)"
       >
-        <div class="budget-card__header">
-          <span class="budget-card__category">
-            {{ card.budget.category.charAt(0).toUpperCase() + card.budget.category.slice(1) }}
-          </span>
+        <div class="budget-row__category">
+          {{ card.budget.category.charAt(0).toUpperCase() + card.budget.category.slice(1) }}
         </div>
-
-        <div class="budget-card__amounts">
-          <span class="budget-card__spent">{{ formatCents(card.spent) }}</span>
-          <span class="budget-card__of">of {{ formatCents(card.budget.budget_amount) }}</span>
+        <div class="budget-row__progress">
+          <div class="budget-bar">
+            <div
+              class="budget-bar__fill"
+              :class="`budget-bar__fill--${card.variant}`"
+              :style="{ width: `${Math.min(card.percent, 100)}%` }"
+            />
+          </div>
         </div>
-
-        <div class="budget-card__bar">
-          <div
-            class="budget-card__fill"
-            :class="`budget-card__fill--${card.variant}`"
-            :style="{ width: `${Math.min(card.percent, 100)}%` }"
-          />
+        <div class="budget-row__spent">{{ formatCents(card.spent) }}</div>
+        <div class="budget-row__budget">{{ formatCents(card.budget.budget_amount) }}</div>
+        <div :class="['budget-row__remaining', card.remaining < 0 ? 'budget-row__remaining--over' : '']">
+          {{ card.remaining >= 0 ? formatCents(card.remaining) + ' left' : formatCents(Math.abs(card.remaining)) + ' over' }}
         </div>
-
-        <div class="budget-card__footer">
-          <span :class="['budget-card__remaining', card.remaining < 0 ? 'budget-card__remaining--over' : '']">
-            {{ card.remaining >= 0 ? formatCents(card.remaining) + ' left' : formatCents(Math.abs(card.remaining)) + ' over' }}
-          </span>
-          <span class="budget-card__percent">{{ Math.round(card.percent) }}%</span>
-        </div>
-      </ContentCard>
+        <div class="budget-row__percent">{{ Math.round(card.percent) }}%</div>
+      </div>
     </div>
 
-    <ContentCard v-else class="page-enter" :style="{ '--stagger': 2 }">
+    <div v-else class="empty-section page-enter" :style="{ '--stagger': 2 }">
       <EmptyState
         title="No budgets for this month"
         subtitle="Create budgets to keep your spending in check"
@@ -192,7 +190,7 @@ onMounted(async () => {
         action-label="Add Budget"
         @action="openAdd"
       />
-    </ContentCard>
+    </div>
 
     <FormDrawer
       :open="drawerOpen"
@@ -224,90 +222,121 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.budgets-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: var(--space-l);
-}
-
-.budget-card {
-  cursor: pointer;
+.budgets-table {
   display: flex;
   flex-direction: column;
-  gap: var(--space-s);
-}
-
-.budget-card__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.budget-card__category {
-  font: var(--text-body-1);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-fg-primary);
-}
-
-.budget-card__amounts {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-xs);
-}
-
-.budget-card__spent {
-  font: var(--text-title-2);
-  color: var(--color-fg-primary);
-  letter-spacing: var(--tracking-tight);
-}
-
-.budget-card__of {
-  font: var(--text-caption);
-  color: var(--color-fg-tertiary);
-}
-
-.budget-card__bar {
-  height: 4px;
-  background: var(--color-bg-tertiary);
-  border-radius: var(--radius-s);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-l);
   overflow: hidden;
 }
 
-.budget-card__fill {
-  height: 100%;
-  border-radius: var(--radius-s);
-  transition: width var(--duration-normal) var(--easing-standard);
+.budgets-table__header {
+  display: grid;
+  grid-template-columns: 120px 1fr 100px 100px 110px 50px;
+  align-items: center;
+  padding: var(--space-s) var(--space-l);
+  background: var(--color-surface-container-low);
+  border-bottom: 1px solid var(--color-border-default);
+  gap: var(--space-m);
 }
 
-.budget-card__fill--green {
-  background: var(--color-success);
+.budgets-table__th {
+  font: var(--text-label-sm);
+  color: var(--color-fg-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
 }
 
-.budget-card__fill--yellow {
-  background: var(--color-warning);
+.budgets-table__th--center { text-align: center; }
+.budgets-table__th--right { text-align: right; }
+
+.budget-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 100px 100px 110px 50px;
+  align-items: center;
+  min-height: var(--height-row-min);
+  padding: 0 var(--space-l);
+  gap: var(--space-m);
+  border-bottom: 1px solid var(--color-border-subtle);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--easing-standard);
 }
 
-.budget-card__fill--red {
-  background: var(--color-error);
+.budget-row:last-child { border-bottom: none; }
+.budget-row:hover { background: var(--color-bg-tertiary); }
+
+.budget-row__category {
+  font: var(--text-body-2);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-fg-primary);
+  white-space: nowrap;
 }
 
-.budget-card__footer {
+.budget-row__progress {
   display: flex;
-  justify-content: space-between;
   align-items: center;
 }
 
-.budget-card__remaining {
-  font: var(--text-caption);
-  color: var(--color-fg-secondary);
+.budget-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-circle);
+  overflow: hidden;
 }
 
-.budget-card__remaining--over {
+.budget-bar__fill {
+  height: 100%;
+  border-radius: var(--radius-circle);
+  transition: width var(--duration-normal) var(--easing-standard);
+}
+
+.budget-bar__fill--green { background: var(--color-success); }
+.budget-bar__fill--yellow { background: var(--color-warning); }
+.budget-bar__fill--red { background: var(--color-error); }
+
+.budget-row__spent {
+  font: var(--text-body-2);
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-fg-primary);
+  white-space: nowrap;
+  text-align: right;
+}
+
+.budget-row__budget {
+  font: var(--text-caption);
+  font-family: var(--font-mono);
+  color: var(--color-fg-tertiary);
+  white-space: nowrap;
+  text-align: right;
+}
+
+.budget-row__remaining {
+  font: var(--text-caption);
+  color: var(--color-fg-secondary);
+  white-space: nowrap;
+  text-align: right;
+}
+
+.budget-row__remaining--over {
   color: var(--color-error);
 }
 
-.budget-card__percent {
+.budget-row__percent {
   font: var(--text-caption);
   color: var(--color-fg-tertiary);
+  text-align: right;
+}
+
+@media (max-width: 640px) {
+  .budgets-table__header { display: none; }
+  .budget-row {
+    grid-template-columns: 1fr auto auto;
+    padding: var(--space-s) var(--space-l);
+  }
+  .budget-row__progress { display: none; }
+  .budget-row__budget { display: none; }
+  .budget-row__percent { display: none; }
 }
 </style>

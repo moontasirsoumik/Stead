@@ -16,7 +16,15 @@ defineProps<{
   flex-direction: column;
 }
 
+.datalist :deep(> *) {
+  min-height: 40px;
+}
+
 .datalist--dividers :deep(> *:not(:last-child)) {
   border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.datalist :deep(> *) {
+  padding-inline: var(--space-s);
 }
 </style>

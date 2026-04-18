@@ -1,6 +1,6 @@
 /* ============================================================
-   Stead — Global Styles
-   Material 3-inspired base styles on high-contrast foundations.
+   Stead — Global Styles  ·  "Refined Utility"
+   Flat, compact, crisp — Material 3-inspired foundations.
    ============================================================ */
 
 html {
@@ -14,9 +14,7 @@ body {
   color: var(--color-fg-primary);
   background-color: var(--color-bg-primary);
   font-family: var(--font-family);
-  transition:
-    background-color var(--duration-normal) var(--easing-standard),
-    color var(--duration-fast) var(--easing-standard);
+  /* No transition — instant theme switching */
 }
 
 #app {
@@ -25,12 +23,12 @@ body {
   flex-direction: column;
 }
 
-/* ── Material Symbols ── */
+/* ── Material Symbols (compact, outline) ── */
 .material-symbols-rounded {
   font-family: 'Material Symbols Rounded';
   font-weight: normal;
   font-style: normal;
-  font-size: 22px;
+  font-size: 20px;
   line-height: 1;
   letter-spacing: normal;
   text-transform: none;
@@ -44,19 +42,21 @@ body {
   font-feature-settings: 'liga';
   font-variation-settings:
     'FILL' 0,
-    'wght' 400,
+    'wght' 300,
     'GRAD' 0,
-    'opsz' 24;
+    'opsz' 20;
 }
 
+/* ── Selection ── */
 ::selection {
   background-color: var(--color-brand-subtle);
   color: var(--color-fg-primary);
 }
 
+/* ── Scrollbar (global overrides) ── */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -64,17 +64,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border-strong);
+  background: var(--color-border-default);
   border-radius: var(--radius-circle);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-outline);
-}
-
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-border-strong) transparent;
+  background: var(--color-border-strong);
 }
 
 /* ── Font Scaling ── */
@@ -88,11 +83,12 @@ html {
 
 /* ── Compact Mode ── */
 html.compact {
-  --space-s: 6px;
-  --space-m: 8px;
-  --space-l: 12px;
-  --space-xl: 16px;
-  --space-2xl: 24px;
+  --space-xs: 2px;
+  --space-s: 4px;
+  --space-m: 6px;
+  --space-l: 10px;
+  --space-xl: 14px;
+  --space-2xl: 20px;
 }
 
 /* ── High Contrast ── */
@@ -101,6 +97,23 @@ html.high-contrast {
   --color-fg-tertiary: var(--color-fg-secondary);
   --color-border-default: var(--color-border-strong);
   --color-border-subtle: var(--color-border-default);
+}
+
+/* ── Page Enter Animation ── */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-enter {
+  animation: page-enter var(--duration-page) var(--easing-decelerate) both;
+  animation-delay: calc(var(--stagger, 0) * 40ms);
 }
 
 /* ── No Animations ── */

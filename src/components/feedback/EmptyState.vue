@@ -65,14 +65,20 @@ defineEmits<{
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: var(--space-3xl) var(--space-xl);
-  gap: var(--space-s);
+  padding: var(--space-xl) var(--space-l);
+  gap: var(--space-xs);
 }
 
 .emptystate__icon {
   color: var(--color-fg-tertiary);
-  margin-bottom: var(--space-xs);
-  opacity: 0.5;
+  margin-bottom: var(--space-2xs);
+  width: 36px;
+  height: 36px;
+}
+
+.emptystate__icon :deep(svg) {
+  width: 36px;
+  height: 36px;
 }
 
 .emptystate__title {
@@ -88,21 +94,18 @@ defineEmits<{
 
 .emptystate__action {
   margin-top: var(--space-s);
-  padding: var(--space-s) var(--space-l);
+  padding: var(--space-xs) var(--space-l);
   background: var(--color-brand-primary);
   color: var(--color-fg-on-brand);
   font: var(--text-body-1-strong);
-  border-radius: var(--radius-m);
-  border: none;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--color-brand-primary);
   cursor: pointer;
-  transition:
-    background-color var(--duration-fast) var(--easing-standard),
-    box-shadow var(--duration-fast) var(--easing-standard);
+  transition: background-color var(--duration-fast) var(--easing-standard);
 }
 
 .emptystate__action:hover {
   background: var(--color-brand-hover);
-  box-shadow: var(--shadow-brand);
 }
 
 .emptystate__action:active {

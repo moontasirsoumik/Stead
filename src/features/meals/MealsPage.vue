@@ -2,12 +2,12 @@
 import { ref, computed, onMounted } from 'vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
-import ContentCard from '@/components/layout/ContentCard.vue'
 import SButton from '@/components/ui/SButton.vue'
 import SInput from '@/components/ui/SInput.vue'
 import STextarea from '@/components/ui/STextarea.vue'
 import SSelect from '@/components/ui/SSelect.vue'
 import SIconButton from '@/components/ui/SIconButton.vue'
+import SBadge from '@/components/ui/SBadge.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import ErrorBanner from '@/components/feedback/ErrorBanner.vue'
 import LoadingSkeleton from '@/components/feedback/LoadingSkeleton.vue'
@@ -227,19 +227,20 @@ onMounted(async () => {
       </SIconButton>
       <div class="week-nav__label">
         <span class="week-nav__title">{{ weekLabel }}</span>
-        <SButton v-if="!isCurrentWeek" variant="subtle" size="sm" @click="goToCurrentWeek">This week</SButton>
+        <SBadge v-if="isCurrentWeek" variant="brand" size="sm">Current week</SBadge>
+        <button v-else class="week-nav__reset" @click="goToCurrentWeek">Go to current week</button>
       </div>
       <SIconButton label="Next week" @click="nextWeek">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
       </SIconButton>
     </div>
 
-    <ContentCard v-if="mealsStore.loading && !mealsStore.plans.length" class="page-enter" :style="{ '--stagger': 2 }">
+    <div v-if="mealsStore.loading && !mealsStore.plans.length" class="page-enter" :style="{ '--stagger': 2 }">
       <LoadingSkeleton :lines="8" />
-    </ContentCard>
+    </div>
 
     <!-- No plan for this week -->
-    <ContentCard v-else-if="!activePlan" class="page-enter" :style="{ '--stagger': 2 }">
+    <div v-else-if="!activePlan" class="empty-section page-enter" :style="{ '--stagger': 2 }">
       <EmptyState
         title="No meal plan for this week"
         subtitle="Plan your meals — know what's for dinner before the hunger hits."
@@ -247,7 +248,7 @@ onMounted(async () => {
         action-label="Create meal plan"
         @action="createPlan"
       />
-    </ContentCard>
+    </div>
 
     <!-- Meal Calendar Grid -->
     <template v-else>
@@ -357,6 +358,21 @@ onMounted(async () => {
   letter-spacing: var(--tracking-tight);
 }
 
+.week-nav__reset {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: var(--text-caption);
+  color: var(--color-brand-primary);
+  padding: 0;
+  transition: color var(--duration-fast) var(--easing-standard);
+}
+
+.week-nav__reset:hover {
+  color: var(--color-brand-pressed);
+  text-decoration: underline;
+}
+
 .plan-note-bar {
   display: flex;
   align-items: center;
@@ -388,7 +404,6 @@ onMounted(async () => {
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-l);
   overflow: hidden;
-  box-shadow: var(--shadow-2), var(--shadow-card);
 }
 
 .meal-grid__corner {

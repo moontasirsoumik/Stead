@@ -2,7 +2,6 @@
 import { ref, computed, onMounted } from 'vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
-import ContentCard from '@/components/layout/ContentCard.vue'
 import FilterBar from '@/components/data/FilterBar.vue'
 import SectionHeader from '@/components/data/SectionHeader.vue'
 import SButton from '@/components/ui/SButton.vue'
@@ -158,15 +157,15 @@ onMounted(async () => {
       <SSelect v-model="categoryFilter" :options="categoryOptions" placeholder="Category" />
     </FilterBar>
 
-    <ContentCard v-if="notesStore.loading && !notesStore.items.length" class="page-enter" :style="{ '--stagger': 2 }">
+    <div v-if="notesStore.loading && !notesStore.items.length" class="page-enter" :style="{ '--stagger': 2 }">
       <LoadingSkeleton :lines="5" />
-    </ContentCard>
+    </div>
 
     <template v-else-if="!filteredItems.length">
-      <ContentCard class="page-enter" :style="{ '--stagger': 2 }">
+      <div class="empty-section page-enter" :style="{ '--stagger': 2 }">
         <EmptyState v-if="!notesStore.items.length" title="No notes yet" subtitle="Jot down ideas, recipes, or anything the household needs to remember." icon="empty" action-label="New note" @action="openCreateDrawer" />
         <EmptyState v-else title="No matches" subtitle="Try adjusting your filters or search term." icon="search" />
-      </ContentCard>
+      </div>
     </template>
 
     <template v-else>
@@ -247,35 +246,44 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+/* ── Notes grid ── */
 .notes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: var(--space-l);
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-m);
   margin-bottom: var(--space-l);
 }
 
+/* ── Note card ── */
 .note-card {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
-  padding: var(--space-l);
+  gap: var(--space-s);
+  padding: var(--space-l) var(--space-l);
   background: var(--color-surface-card);
   border-radius: var(--radius-l);
   border: 1px solid var(--color-border-default);
-  box-shadow: var(--shadow-2), var(--shadow-card);
   cursor: pointer;
   transition:
     background-color var(--duration-fast) var(--easing-standard),
-    border-color var(--duration-fast) var(--easing-standard),
-    box-shadow var(--duration-fast) var(--easing-standard);
+    border-color var(--duration-fast) var(--easing-standard);
 }
 
 .note-card:hover {
   background: var(--color-surface-card-hover);
-  box-shadow: var(--shadow-8), var(--shadow-card);
   border-color: var(--color-outline-variant);
 }
 
+.note-card--pinned {
+  border-color: var(--color-brand-primary);
+  background: var(--color-brand-selected);
+}
+
+.note-card--pinned:hover {
+  background: var(--color-surface-card-hover);
+}
+
+/* ── Card header ── */
 .note-card__header {
   display: flex;
   align-items: center;
@@ -284,7 +292,7 @@ onMounted(async () => {
 }
 
 .note-card__title {
-  font: var(--text-body-2);
+  font: var(--text-body-1);
   color: var(--color-fg-primary);
   font-weight: var(--font-weight-medium);
   white-space: nowrap;
@@ -313,18 +321,20 @@ onMounted(async () => {
   color: var(--color-brand-primary);
 }
 
+/* ── Card content ── */
 .note-card__preview {
-  font: var(--text-caption);
+  font: var(--text-body-2);
   color: var(--color-fg-secondary);
   white-space: pre-line;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  line-height: 1.5;
 }
 
 .note-card__date {
-  font: var(--text-caption);
+  font: var(--text-body-2);
   color: var(--color-fg-tertiary);
 }
 
@@ -339,6 +349,7 @@ onMounted(async () => {
   opacity: 1;
 }
 
+/* ── Responsive ── */
 @media (max-width: 640px) {
   .notes-grid {
     grid-template-columns: 1fr;

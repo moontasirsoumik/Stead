@@ -94,30 +94,25 @@ defineEmits<{
   height: var(--height-input);
   background: var(--color-surface-input);
   border: 1px solid var(--color-border-input);
-  border-radius: var(--radius-l);
+  border-radius: var(--radius-m);
   overflow: hidden;
-  box-shadow: var(--shadow-inset);
   transition:
     border-color var(--duration-fast) var(--easing-standard),
-    box-shadow var(--duration-fast) var(--easing-standard),
     background-color var(--duration-fast) var(--easing-standard);
 }
 
 .sinput__wrapper:hover:not(.sinput--disabled .sinput__wrapper) {
   border-color: var(--color-border-input-hover);
-  background: var(--color-surface-input-hover);
 }
 
 .sinput__wrapper:focus-within {
   border-color: var(--color-brand-primary);
-  background: var(--color-surface-card);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand-primary) 24%, transparent);
 }
 
 .sinput__field {
   flex: 1;
   height: 100%;
-  padding: 0 var(--space-l);
+  padding: 0 var(--space-m);
   background: transparent;
   border: none;
   font: var(--text-body-1);
@@ -145,21 +140,17 @@ defineEmits<{
 }
 
 .sinput__prefix {
-  padding-left: var(--space-l);
+  padding-left: var(--space-m);
   padding-right: 0;
 }
 
 .sinput__suffix {
-  padding-right: var(--space-l);
+  padding-right: var(--space-m);
   padding-left: 0;
 }
 
 .sinput--error .sinput__wrapper {
   border-color: var(--color-error);
-}
-
-.sinput--error .sinput__wrapper:focus-within {
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-error) 24%, transparent);
 }
 
 .sinput--disabled {

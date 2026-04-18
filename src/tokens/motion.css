@@ -1,21 +1,21 @@
 /* ============================================================
-   Stead — Motion Tokens
-   Snappy, intentional animation values
+   Stead — Motion Tokens  ·  "Refined Utility"
+   Smooth, controlled animations — crisp and intentional.
    ============================================================ */
 
 :root {
   /* ── Durations ── */
-  --duration-ultra-fast: 50ms;
-  --duration-fast: 80ms;
-  --duration-normal: 150ms;
-  --duration-slow: 250ms;
-  --duration-page: 200ms;
+  --duration-ultra-fast: 60ms;
+  --duration-fast: 100ms;
+  --duration-normal: 180ms;
+  --duration-slow: 280ms;
+  --duration-page: 220ms;
 
   /* ── Easing Curves ── */
   --easing-standard: cubic-bezier(0.25, 0.1, 0.25, 1);
   --easing-decelerate: cubic-bezier(0, 0, 0.2, 1);
   --easing-accelerate: cubic-bezier(0.4, 0, 1, 1);
-  --easing-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --easing-spring: cubic-bezier(0.22, 0.68, 0.35, 1.1);
   --easing-smooth: cubic-bezier(0.4, 0, 0, 1);
 }
 

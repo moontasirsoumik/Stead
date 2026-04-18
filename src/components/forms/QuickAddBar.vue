@@ -55,19 +55,15 @@ function handleSubmit() {
   align-items: center;
   gap: var(--space-s);
   height: var(--height-input);
-  padding: 0 var(--space-m);
-  background: var(--color-surface-card);
-  border: 1px dashed var(--color-border-default);
+  padding: 0 var(--space-s);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-default);
   border-radius: var(--radius-m);
-  transition:
-    border-color var(--duration-fast) var(--easing-standard),
-    box-shadow var(--duration-fast) var(--easing-standard);
+  transition: border-color var(--duration-fast) var(--easing-standard);
 }
 
 .quickadd:focus-within {
   border-color: var(--color-brand-primary);
-  border-style: solid;
-  box-shadow: var(--shadow-2);
 }
 
 .quickadd__input {

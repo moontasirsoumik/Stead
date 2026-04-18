@@ -74,7 +74,7 @@ withDefaults(
 }
 
 .sselect__label {
-  font: var(--text-body-2);
+  font: var(--text-label-md);
   color: var(--color-fg-secondary);
   font-weight: var(--font-weight-medium);
 }
@@ -101,12 +101,9 @@ withDefaults(
   color: var(--color-fg-primary);
   appearance: none;
   cursor: pointer;
-  transition:
-    border-color var(--duration-fast) var(--easing-standard),
-    box-shadow var(--duration-fast) var(--easing-standard);
+  transition: border-color var(--duration-fast) var(--easing-standard);
 }
 
-/* Ensure dropdown options have proper contrast in all themes */
 .sselect__field option {
   background: var(--color-surface-dialog);
   color: var(--color-fg-primary);
@@ -116,12 +113,10 @@ withDefaults(
   color: var(--color-fg-tertiary);
 }
 
-/* Hide placeholder option from the dropdown list */
 .sselect__placeholder-opt {
   display: none;
 }
 
-/* Placeholder state — when no value selected */
 .sselect__field--placeholder,
 .sselect__field:invalid,
 .sselect__field option[value=""][disabled] {
@@ -135,7 +130,6 @@ withDefaults(
 .sselect__field:focus {
   outline: none;
   border-color: var(--color-brand-primary);
-  box-shadow: 0 0 0 1px var(--color-brand-primary);
 }
 
 .sselect__chevron {

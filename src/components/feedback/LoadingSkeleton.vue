@@ -43,19 +43,13 @@ withDefaults(
 .skeleton {
   display: flex;
   flex-direction: column;
-  gap: var(--space-m);
+  gap: var(--space-s);
 }
 
 .skeleton__bone {
   border-radius: var(--radius-s);
-  background: linear-gradient(
-    90deg,
-    var(--color-bg-tertiary) 25%,
-    var(--color-border-subtle) 50%,
-    var(--color-bg-tertiary) 75%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.8s ease-in-out infinite;
+  background: var(--color-bg-tertiary);
+  animation: pulse 1.6s ease-in-out infinite;
 }
 
 .skeleton__bone--circle {
@@ -63,8 +57,8 @@ withDefaults(
   flex-shrink: 0;
 }
 
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 </style>

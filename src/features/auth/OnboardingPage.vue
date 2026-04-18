@@ -89,9 +89,8 @@ async function handleSubmit() {
   max-width: 360px;
   background: var(--color-surface-card);
   border-radius: var(--radius-l);
-  box-shadow: var(--shadow-4);
   padding: var(--space-2xl);
-  border: 1px solid var(--color-border-subtle);
+  border: 1px solid var(--color-border-default);
 }
 
 .auth-header {
@@ -173,6 +172,5 @@ async function handleSubmit() {
 .color-swatch--selected {
   border-color: var(--color-fg-primary);
   transform: scale(1.1);
-  box-shadow: var(--shadow-2);
 }
 </style>

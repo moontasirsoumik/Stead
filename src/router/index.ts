@@ -77,6 +77,13 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/features/tasks/TasksPage.vue'),
       },
 
+      /* Calendar */
+      {
+        path: 'calendar',
+        name: 'calendar',
+        component: () => import('@/features/calendar/CalendarPage.vue'),
+      },
+
       /* Pantry (Shopping + Inventory) */
       {
         path: 'pantry',

@@ -48,27 +48,30 @@ withDefaults(
 
 .stoggle__track {
   position: relative;
-  width: 36px;
-  height: 18px;
-  background: var(--color-border-strong);
-  border-radius: 9px;
-  transition: background-color var(--duration-fast) var(--easing-standard);
+  width: 40px;
+  height: 22px;
+  background: var(--color-surface-container);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-circle);
+  transition:
+    background-color var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard);
   flex-shrink: 0;
 }
 
 .stoggle__track--on {
   background: var(--color-brand-primary);
+  border-color: var(--color-brand-primary);
 }
 
 .stoggle__thumb {
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   background: var(--color-fg-on-brand);
   border-radius: var(--radius-circle);
-  box-shadow: var(--shadow-2);
   transition: transform var(--duration-fast) var(--easing-decelerate);
 }
 
@@ -78,7 +81,7 @@ withDefaults(
 
 .stoggle__input:focus-visible + .stoggle__track {
   outline: 2px solid var(--color-brand-primary);
-  outline-offset: 1px;
+  outline-offset: 2px;
 }
 
 .stoggle__label {

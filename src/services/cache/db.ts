@@ -20,6 +20,7 @@ import type { Contact } from '@/models/contact.model'
 import type { HouseholdDocument } from '@/models/document.model'
 import type { MealPlan, Meal } from '@/models/meal.model'
 import type { ExpenseSplit } from '@/models/expense-split.model'
+import type { CalendarEvent } from '@/models/calendar-event.model'
 
 class SteadDatabase extends Dexie {
   members!: Table<Member, string>
@@ -45,6 +46,7 @@ class SteadDatabase extends Dexie {
   documents!: Table<HouseholdDocument, string>
   meal_plans!: Table<MealPlan, string>
   meals!: Table<Meal, string>
+  calendar_events!: Table<CalendarEvent, string>
 
   constructor() {
     super('stead-db')
@@ -90,6 +92,9 @@ class SteadDatabase extends Dexie {
     })
     this.version(5).stores({
       expense_splits: 'id, expense_id, household_id, member_id, settled',
+    })
+    this.version(6).stores({
+      calendar_events: 'id, household_id, start_date, scope, owner_id',
     })
   }
 }

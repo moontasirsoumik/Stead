@@ -75,18 +75,18 @@ async function handleConfirm() {
 }
 
 .dialog {
-  background: var(--color-surface-dialog);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-28);
-  padding: var(--space-2xl);
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-l);
+  border: 1px solid var(--color-border-default);
+  padding: var(--space-xl);
   max-width: 380px;
   width: 100%;
 }
 
 .dialog__title {
-  font: var(--text-title-2);
+  font: var(--text-title-3);
   color: var(--color-fg-primary);
-  margin-bottom: var(--space-s);
+  margin-bottom: var(--space-xs);
 }
 
 .dialog__message {
@@ -120,7 +120,7 @@ async function handleConfirm() {
 
 .dialog-enter-from .dialog {
   opacity: 0;
-  transform: scale(0.96) translateY(6px);
+  transform: scale(0.98);
 }
 
 .dialog-leave-to {

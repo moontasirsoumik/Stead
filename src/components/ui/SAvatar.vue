@@ -22,8 +22,8 @@ function getInitials(name: string): string {
 
 function hashColor(name: string): string {
   const colors = [
-    '#0F6CBD', '#107C10', '#C4314B', '#D48C00',
-    '#8764B8', '#038387', '#CA5010', '#4F6BED',
+    '#1B5299', '#0D6B0D', '#9B2335', '#8B6914',
+    '#6B4D96', '#026C6F', '#9A3D0C', '#3D56B2',
   ]
   let hash = 0
   for (let i = 0; i < name.length; i++) {
@@ -59,14 +59,14 @@ function hashColor(name: string): string {
   border-radius: var(--radius-circle);
   overflow: hidden;
   flex-shrink: 0;
-  color: var(--color-fg-on-brand);
+  color: var(--color-on-primary-container);
   font-weight: var(--font-weight-medium);
-  background: var(--color-bg-tertiary);
+  background: var(--color-primary-container);
 }
 
-.savatar--sm { width: 22px; height: 22px; font-size: 9px; }
-.savatar--md { width: 26px; height: 26px; font-size: 10px; }
-.savatar--lg { width: 30px; height: 30px; font-size: 11px; }
+.savatar--sm { width: var(--height-control-sm); height: var(--height-control-sm); font: var(--text-label-sm); }
+.savatar--md { width: var(--height-control-md); height: var(--height-control-md); font: var(--text-label-md); }
+.savatar--lg { width: var(--height-control-lg); height: var(--height-control-lg); font: var(--text-label-lg); }
 
 .savatar__img {
   width: 100%;
@@ -76,6 +76,7 @@ function hashColor(name: string): string {
 
 .savatar__initials {
   letter-spacing: var(--tracking-wide);
+  color: #FFFFFF;
 }
 
 .savatar__fallback {

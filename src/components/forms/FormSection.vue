@@ -21,19 +21,16 @@ defineProps<{
 .formsection {
   border: none;
   padding: 0;
-  margin: 0;
+  margin: 0 0 var(--space-xl) 0;
 }
 
 .formsection__header {
-  margin-bottom: var(--space-l);
+  margin-bottom: var(--space-m);
 }
 
 .formsection__title {
-  font: var(--text-body-2);
-  color: var(--color-fg-secondary);
-  font-weight: var(--font-weight-medium);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-caps);
+  font: var(--text-subtitle-1);
+  color: var(--color-fg-primary);
 }
 
 .formsection__desc {

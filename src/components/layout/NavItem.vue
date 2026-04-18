@@ -41,10 +41,12 @@ const materialIcon = computed(() => {
     :to="to"
     :class="['navitem', { 'navitem--active': isActive() }]"
     :aria-current="isActive() ? 'page' : undefined"
-    :title="collapsed ? label : undefined"
+    :title="label"
     @click="$emit('click')"
   >
-    <span class="navitem__icon material-symbols-rounded" aria-hidden="true">{{ materialIcon }}</span>
+    <span class="navitem__pill" aria-hidden="true">
+      <span class="navitem__icon material-symbols-rounded">{{ materialIcon }}</span>
+    </span>
     <span class="navitem__label">{{ label }}</span>
   </RouterLink>
 </template>
@@ -53,32 +55,47 @@ const materialIcon = computed(() => {
 .navitem {
   display: flex;
   align-items: center;
-  gap: var(--space-m);
-  height: 44px;
-  padding: 0 var(--space-m);
-  border-radius: var(--radius-l);
+  justify-content: flex-start;
+  height: 40px;
+  padding-left: 6px;
+  border-radius: var(--radius-m);
   color: var(--color-nav-fg);
   text-decoration: none;
-  white-space: nowrap;
-  overflow: hidden;
   position: relative;
-  transition:
-    background-color var(--duration-fast) var(--easing-standard),
-    color var(--duration-fast) var(--easing-standard);
+  flex-shrink: 0;
+  overflow: hidden;
+  transition: color var(--duration-fast) var(--easing-standard);
+}
+
+.navitem__pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  border-radius: var(--radius-m);
+  transition: background-color var(--duration-fast) var(--easing-standard);
+}
+
+.navitem:hover .navitem__pill {
+  background: var(--color-surface-nav-hover);
 }
 
 .navitem:hover {
-  background: var(--color-surface-nav-hover);
   color: var(--color-nav-fg-hover);
 }
 
-.navitem--active {
-  background: var(--color-surface-nav-active);
-  color: var(--color-nav-fg-active);
+.navitem--active .navitem__pill {
+  background: var(--color-primary-container);
 }
 
-.navitem--active:hover {
-  background: var(--color-surface-nav-active);
+.navitem--active {
+  color: var(--color-on-primary-container);
+}
+
+.navitem--active:hover .navitem__pill {
+  background: var(--color-primary-container);
 }
 
 .navitem:active {
@@ -89,17 +106,16 @@ const materialIcon = computed(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
-  font-size: 22px;
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
 }
 
 .navitem__label {
-  font: var(--text-label-lg);
-}
-
-.navitem--active .navitem__label {
-  font-weight: var(--font-weight-semibold);
+  display: none;
+  font: var(--text-body-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

@@ -2,7 +2,6 @@
 import { ref, computed, onMounted } from 'vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
-import ContentCard from '@/components/layout/ContentCard.vue'
 import FilterBar from '@/components/data/FilterBar.vue'
 import SButton from '@/components/ui/SButton.vue'
 import SBadge from '@/components/ui/SBadge.vue'
@@ -181,11 +180,11 @@ onMounted(async () => {
       <SSelect v-model="categoryFilter" :options="categoryOptions" placeholder="Category" />
     </FilterBar>
 
-    <ContentCard v-if="contactsStore.loading && !contactsStore.items.length" class="page-enter" :style="{ '--stagger': 2 }">
+    <div v-if="contactsStore.loading && !contactsStore.items.length" class="page-enter" :style="{ '--stagger': 2 }">
       <LoadingSkeleton :lines="5" />
-    </ContentCard>
+    </div>
 
-    <ContentCard v-else-if="!filteredItems.length" class="page-enter" :style="{ '--stagger': 2 }">
+    <div v-else-if="!filteredItems.length" class="empty-section page-enter" :style="{ '--stagger': 2 }">
       <EmptyState
         v-if="!contactsStore.items.length"
         title="No contacts saved yet"
@@ -195,49 +194,46 @@ onMounted(async () => {
         @action="openCreateDrawer"
       />
       <EmptyState v-else title="No matches" subtitle="Try adjusting your filters or search term." icon="search" />
-    </ContentCard>
+    </div>
 
-    <div v-else class="contacts-grid">
-      <ContentCard
-        v-for="(contact, ci) in filteredItems"
+    <div v-else class="contact-table page-enter" :style="{ '--stagger': 2 }">
+      <div class="contact-table__header">
+        <span class="contact-table__th">Contact</span>
+        <span class="contact-table__th contact-table__th--center">Category</span>
+        <span class="contact-table__th">Phone</span>
+        <span class="contact-table__th">Email</span>
+        <span class="contact-table__th contact-table__th--right">Actions</span>
+      </div>
+      <div
+        v-for="contact in filteredItems"
         :key="contact.id"
-        class="contact-card page-enter"
-        :style="{ '--stagger': 2 + ci }"
+        class="contact-row"
+        @click="openEditDrawer(contact)"
       >
-        <div class="contact-card__top">
-          <SAvatar :name="contact.name" size="lg" />
-          <div class="contact-card__actions">
-            <SIconButton label="Edit" size="sm" @click="openEditDrawer(contact)">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10.5 1.5L12.5 3.5L4.5 11.5H2.5V9.5L10.5 1.5Z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-            </SIconButton>
-            <SIconButton label="Delete" size="sm" @click="confirmDelete(contact.id)">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 4H12M5 4V2.5H9V4M5.5 6V10.5M8.5 6V10.5M3.5 4L4 11.5H10L10.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-            </SIconButton>
+        <div class="contact-row__name-col">
+          <SAvatar :name="contact.name" size="sm" />
+          <div class="contact-row__info">
+            <span class="contact-row__name">{{ contact.name }}</span>
+            <span v-if="contact.role || contact.company" class="contact-row__role">
+              {{ contact.role }}<template v-if="contact.role && contact.company"> · </template>{{ contact.company }}
+            </span>
           </div>
         </div>
-
-        <h3 class="contact-card__name">{{ contact.name }}</h3>
-        <p v-if="contact.role || contact.company" class="contact-card__role">
-          {{ contact.role }}<template v-if="contact.role && contact.company"> · </template>{{ contact.company }}
-        </p>
-
-        <SBadge :variant="categoryVariant(contact.category)" size="sm" class="contact-card__badge">
-          {{ contact.category }}
-        </SBadge>
-
-        <div class="contact-card__links">
-          <a v-if="contact.phone" :href="`tel:${contact.phone}`" class="contact-link">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5.5 2H3.5C2.95 2 2.5 2.45 2.5 3C2.5 8.25 6.75 12.5 12 12.5C12.55 12.5 13 12.05 13 11.5V9.5L10.5 8.5L9 10C7.5 9.25 5.75 7.5 5 6L6.5 4.5L5.5 2Z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-            <span>{{ contact.phone }}</span>
-          </a>
-          <a v-if="contact.email" :href="`mailto:${contact.email}`" class="contact-link">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="3" width="11" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2" /><path d="M1.5 4.5L7 8L12.5 4.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" /></svg>
-            <span>{{ contact.email }}</span>
-          </a>
+        <div class="contact-row__category">
+          <SBadge :variant="categoryVariant(contact.category)" size="sm">{{ contact.category }}</SBadge>
         </div>
-
-        <p v-if="contact.note" class="contact-card__note">{{ contact.note }}</p>
-      </ContentCard>
+        <div class="contact-row__phone">
+          <a v-if="contact.phone" :href="`tel:${contact.phone}`" class="contact-link" @click.stop>{{ contact.phone }}</a>
+        </div>
+        <div class="contact-row__email">
+          <a v-if="contact.email" :href="`mailto:${contact.email}`" class="contact-link" @click.stop>{{ contact.email }}</a>
+        </div>
+        <div class="contact-row__actions" @click.stop>
+          <SIconButton label="Delete" size="sm" @click="confirmDelete(contact.id)">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 3L9 9M9 3L3 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
+          </SIconButton>
+        </div>
+      </div>
     </div>
 
     <FormDrawer
@@ -273,66 +269,96 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.contacts-grid {
+.contact-table {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-l);
+  overflow: hidden;
+}
+
+.contact-table__header {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: var(--space-l);
+  grid-template-columns: 1fr 100px 140px 200px 48px;
+  align-items: center;
+  padding: var(--space-s) var(--space-l);
+  background: var(--color-surface-container-low);
+  border-bottom: 1px solid var(--color-border-default);
+  gap: var(--space-m);
 }
 
-.contact-card {
+.contact-table__th {
+  font: var(--text-label-sm);
+  color: var(--color-fg-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+}
+
+.contact-table__th--center { text-align: center; }
+.contact-table__th--right { text-align: right; }
+
+.contact-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 140px 200px 48px;
+  align-items: center;
+  min-height: var(--height-row-min);
+  padding: 0 var(--space-l);
+  gap: var(--space-m);
+  border-bottom: 1px solid var(--color-border-subtle);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--easing-standard);
+}
+
+.contact-row:last-child { border-bottom: none; }
+.contact-row:hover { background: var(--color-bg-tertiary); }
+
+.contact-row__name-col {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  min-width: 0;
+}
+
+.contact-row__info {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
+  gap: 1px;
+  min-width: 0;
 }
 
-.contact-card__top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: var(--space-s);
-}
-
-.contact-card__actions {
-  display: flex;
-  gap: var(--space-2xs);
-  opacity: 0;
-  transition: opacity var(--duration-fast) var(--easing-standard);
-}
-
-.contact-card:hover .contact-card__actions {
-  opacity: 1;
-}
-
-.contact-card__name {
-  font: var(--text-title-3);
-  color: var(--color-fg-primary);
-  letter-spacing: var(--tracking-tight);
-}
-
-.contact-card__role {
+.contact-row__name {
   font: var(--text-body-2);
-  color: var(--color-fg-secondary);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-fg-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.contact-card__badge {
-  align-self: flex-start;
-  margin-top: var(--space-2xs);
+.contact-row__role {
+  font: var(--text-caption);
+  color: var(--color-fg-tertiary);
 }
 
-.contact-card__links {
+.contact-row__category {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  margin-top: var(--space-s);
+  align-items: center;
+  justify-content: center;
+}
+
+.contact-row__phone,
+.contact-row__email {
+  min-width: 0;
 }
 
 .contact-link {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-xs);
   font: var(--text-caption);
   color: var(--color-fg-brand);
   text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
   transition: color var(--duration-fast) var(--easing-standard);
 }
 
@@ -340,26 +366,17 @@ onMounted(async () => {
   color: var(--color-fg-primary);
 }
 
-.contact-link svg {
-  flex-shrink: 0;
-  color: var(--color-fg-tertiary);
-}
-
-.contact-card__note {
-  font: var(--text-caption);
-  color: var(--color-fg-tertiary);
-  margin-top: var(--space-xs);
-  padding-top: var(--space-xs);
-  border-top: 1px solid var(--color-border-subtle);
+.contact-row__actions {
+  display: flex;
+  justify-content: flex-end;
 }
 
 @media (max-width: 640px) {
-  .contacts-grid {
-    grid-template-columns: 1fr;
+  .contact-table__header { display: none; }
+  .contact-row {
+    grid-template-columns: 1fr auto auto;
+    padding: var(--space-s) var(--space-l);
   }
-
-  .contact-card__actions {
-    opacity: 1;
-  }
+  .contact-row__phone, .contact-row__email { display: none; }
 }
 </style>

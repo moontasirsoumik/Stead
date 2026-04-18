@@ -28,9 +28,9 @@ defineProps<{
 .filterbar {
   display: flex;
   align-items: center;
-  gap: var(--space-m);
+  gap: var(--space-s);
   flex-wrap: wrap;
-  margin-bottom: var(--space-l);
+  margin-bottom: var(--space-m);
 }
 
 .filterbar__search {

@@ -33,13 +33,13 @@ withDefaults(
 
 .sbadge--sm {
   padding: 0 var(--space-s);
-  height: 24px;
+  height: 22px;
   font: var(--text-label-sm);
 }
 
 .sbadge--md {
   padding: 0 var(--space-m);
-  height: 28px;
+  height: 26px;
   font: var(--text-label-sm);
 }
 

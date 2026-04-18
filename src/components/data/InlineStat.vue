@@ -22,19 +22,16 @@ defineProps<{
   display: flex;
   flex-direction: column;
   gap: var(--space-2xs);
-  padding: var(--space-m) var(--space-l);
+  padding: var(--space-l);
 }
 
 .inlinestat__label {
   font: var(--text-caption);
-  color: var(--color-fg-tertiary);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-caps);
-  font-weight: var(--font-weight-medium);
+  color: var(--color-fg-secondary);
 }
 
 .inlinestat__value {
-  font: var(--text-title-2);
+  font: var(--text-body-1-strong);
   color: var(--color-fg-primary);
   letter-spacing: var(--tracking-tight);
 }

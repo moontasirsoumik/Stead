@@ -37,10 +37,10 @@ defineEmits<{
   display: flex;
   align-items: center;
   gap: var(--space-s);
-  padding: var(--space-s) var(--space-l);
+  padding: var(--space-l);
   background: var(--color-error-bg);
   border-radius: var(--radius-m);
-  border-left: 2px solid var(--color-error);
+  border-left: 3px solid var(--color-error);
   margin-bottom: var(--space-l);
 }
 
@@ -61,15 +61,16 @@ defineEmits<{
   font-weight: var(--font-weight-medium);
   color: var(--color-error);
   background: transparent;
-  border: none;
+  border: 1px solid var(--color-error);
   cursor: pointer;
-  padding: var(--space-xs) var(--space-s);
+  padding: var(--space-2xs) var(--space-s);
   border-radius: var(--radius-s);
   white-space: nowrap;
   transition: background-color var(--duration-fast) var(--easing-standard);
 }
 
 .errorbanner__retry:hover {
-  background: rgba(220, 38, 38, 0.08);
+  background: var(--color-error);
+  color: var(--color-fg-on-brand);
 }
 </style>

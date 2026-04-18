@@ -2,10 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
-import ContentCard from '@/components/layout/ContentCard.vue'
 import FilterBar from '@/components/data/FilterBar.vue'
-import DataList from '@/components/data/DataList.vue'
-import InlineStat from '@/components/data/InlineStat.vue'
 import SButton from '@/components/ui/SButton.vue'
 import SIconButton from '@/components/ui/SIconButton.vue'
 import SBadge from '@/components/ui/SBadge.vue'
@@ -13,7 +10,6 @@ import SSelect from '@/components/ui/SSelect.vue'
 import SInput from '@/components/ui/SInput.vue'
 import STextarea from '@/components/ui/STextarea.vue'
 import SToggle from '@/components/ui/SToggle.vue'
-import StatusBadge from '@/components/feedback/StatusBadge.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import ErrorBanner from '@/components/feedback/ErrorBanner.vue'
 import LoadingSkeleton from '@/components/feedback/LoadingSkeleton.vue'
@@ -245,10 +241,19 @@ onMounted(async () => {
 
     <PantryTabs />
 
-    <div class="stats-row page-enter" :style="{ '--stagger': 1 }">
-      <InlineStat label="Total Items" :value="inventoryStore.items.length" />
-      <InlineStat label="Low Stock" :value="inventoryStore.lowStockItems.length" :trend="inventoryStore.lowStockItems.length > 0 ? 'down' : 'neutral'" />
-      <InlineStat label="Restock Needed" :value="inventoryStore.restockNeeded.length" :trend="inventoryStore.restockNeeded.length > 0 ? 'down' : 'neutral'" />
+    <div class="stats-bar page-enter" :style="{ '--stagger': 1 }">
+      <div class="stats-bar__cell">
+        <span class="stats-bar__label">Total Items</span>
+        <span class="stats-bar__value">{{ inventoryStore.items.length }}</span>
+      </div>
+      <div class="stats-bar__cell">
+        <span class="stats-bar__label">Low Stock</span>
+        <span class="stats-bar__value">{{ inventoryStore.lowStockItems.length }}</span>
+      </div>
+      <div class="stats-bar__cell">
+        <span class="stats-bar__label">Restock Needed</span>
+        <span class="stats-bar__value">{{ inventoryStore.restockNeeded.length }}</span>
+      </div>
     </div>
 
     <ErrorBanner v-if="inventoryStore.error" :message="inventoryStore.error" @retry="authStore.householdId && inventoryStore.fetchItems(authStore.householdId)" />
@@ -259,40 +264,44 @@ onMounted(async () => {
       <SSelect v-model="locationFilter" :options="locationOptions" placeholder="Location" />
     </FilterBar>
 
-    <ContentCard v-if="inventoryStore.loading && !inventoryStore.items.length" class="page-enter" :style="{ '--stagger': 3 }">
+    <div v-if="inventoryStore.loading && !inventoryStore.items.length" class="page-enter" :style="{ '--stagger': 3 }">
       <LoadingSkeleton :lines="5" />
-    </ContentCard>
+    </div>
 
-    <ContentCard v-else-if="!filteredItems.length" class="page-enter" :style="{ '--stagger': 3 }">
+    <div v-else-if="!filteredItems.length" class="empty-section page-enter" :style="{ '--stagger': 3 }">
       <EmptyState v-if="!inventoryStore.items.length" title="No items tracked" subtitle="Add items to keep track of household stock levels." icon="empty" action-label="Add item" @action="openCreateDrawer" />
       <EmptyState v-else title="No matches" subtitle="Try adjusting your filters or search term." icon="search" />
-    </ContentCard>
+    </div>
 
-    <ContentCard v-else class="page-enter" :style="{ '--stagger': 3 }">
-      <DataList dividers>
-        <div v-for="item in filteredItems" :key="item.id" class="inv-row" role="listitem" @click="openEditDrawer(item)">
-          <span class="inv-row__name">{{ item.name }}</span>
-          <div class="inv-row__meta">
-            <StatusBadge :variant="stockVariant(item.stock_status)">{{ stockLabel(item.stock_status) }}</StatusBadge>
-            <SBadge v-if="item.category" size="sm">{{ item.category }}</SBadge>
-            <span v-if="item.location" class="inv-row__location">{{ item.location }}</span>
-            <span class="inv-row__target">{{ targetLabel(item.target_level) }}</span>
-            <SBadge v-if="item.restock_needed" variant="warning" size="sm">Restock</SBadge>
-          </div>
-          <div class="inv-row__end">
-            <span v-if="item.last_checked_date" class="inv-row__checked">{{ formatDate(item.last_checked_date) }}</span>
-            <div class="inv-row__actions" @click.stop>
-              <SButton v-if="item.stock_status === 'out' || item.stock_status === 'almost_finished' || item.stock_status === 'low'" variant="subtle" size="sm" @click="addToShoppingList(item)">+ Shopping</SButton>
-              <SButton v-if="item.stock_status !== 'out'" variant="subtle" size="sm" @click="quickStockUpdate(item.id, 'out')">Out</SButton>
-              <SButton v-if="item.stock_status !== 'enough'" variant="subtle" size="sm" @click="quickStockUpdate(item.id, 'enough')">Stocked</SButton>
-              <SIconButton label="Delete" size="sm" @click="confirmDelete(item.id)">
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 3L9 9M9 3L3 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
-              </SIconButton>
-            </div>
-          </div>
+    <div v-else class="inv-table page-enter" :style="{ '--stagger': 3 }">
+      <div class="inv-table__header">
+        <span class="inv-table__th">Item</span>
+        <span class="inv-table__th inv-table__th--center">Stock</span>
+        <span class="inv-table__th inv-table__th--center">Category</span>
+        <span class="inv-table__th inv-table__th--center">Location</span>
+        <span class="inv-table__th inv-table__th--center">Target</span>
+        <span class="inv-table__th inv-table__th--right">Last checked</span>
+      </div>
+      <div
+        v-for="item in filteredItems"
+        :key="item.id"
+        class="inv-row"
+        @click="openEditDrawer(item)"
+      >
+        <div class="inv-row__name">{{ item.name }}</div>
+        <div class="inv-row__stock">
+          <SBadge :variant="stockVariant(item.stock_status)" size="sm">{{ stockLabel(item.stock_status) }}</SBadge>
         </div>
-      </DataList>
-    </ContentCard>
+        <div class="inv-row__category">
+          <SBadge v-if="item.category" size="sm">{{ item.category }}</SBadge>
+        </div>
+        <div class="inv-row__location">
+          <span v-if="item.location">{{ item.location }}</span>
+        </div>
+        <div class="inv-row__target">{{ targetLabel(item.target_level) }}</div>
+        <div class="inv-row__checked">{{ item.last_checked_date ? formatDate(item.last_checked_date) : '—' }}</div>
+      </div>
+    </div>
 
     <FormDrawer :open="drawerOpen" :title="editingItem ? 'Edit Item' : 'Add Item'" :submit-label="editingItem ? 'Update' : 'Add'" :loading="drawerLoading" @close="drawerOpen = false" @submit="handleSubmit">
       <FormSection>
@@ -312,95 +321,118 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.stats-row {
+/* ── Stats bar ── */
+.stats-bar {
   display: flex;
   align-items: stretch;
+  background: var(--color-surface-container-low);
   border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-l);
-  background: var(--color-surface-card);
-  box-shadow: var(--shadow-2), var(--shadow-card);
+  border-radius: var(--radius-m);
   margin-bottom: var(--space-l);
   overflow: hidden;
 }
-
-.stats-row > * {
+.stats-bar__cell {
   flex: 1;
-  border-right: 1px solid var(--color-border-subtle);
+  padding: var(--space-m) var(--space-l);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  border-right: 1px solid var(--color-border-default);
+}
+.stats-bar__cell:last-child { border-right: none; }
+.stats-bar__label {
+  font: var(--text-caption);
+  color: var(--color-fg-secondary);
+}
+.stats-bar__value {
+  font: var(--text-body-1-strong);
+  color: var(--color-fg-primary);
 }
 
-.stats-row > *:last-child {
-  border-right: none;
+/* ── Data table ── */
+.inv-table {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-l);
+  overflow: hidden;
 }
+
+.inv-table__header {
+  display: grid;
+  grid-template-columns: 1fr 120px 100px 100px 80px 100px;
+  align-items: center;
+  padding: var(--space-s) var(--space-l);
+  background: var(--color-surface-container-low);
+  border-bottom: 1px solid var(--color-border-default);
+  gap: var(--space-m);
+}
+
+.inv-table__th {
+  font: var(--text-label-sm);
+  color: var(--color-fg-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+}
+
+.inv-table__th--center { text-align: center; }
+.inv-table__th--right { text-align: right; }
 
 .inv-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 120px 100px 100px 80px 100px;
   align-items: center;
-  gap: var(--space-m);
   min-height: var(--height-row-min);
-  padding: var(--space-xs) var(--space-l);
+  padding: 0 var(--space-l);
+  gap: var(--space-m);
+  border-bottom: 1px solid var(--color-border-subtle);
   cursor: pointer;
   transition: background var(--duration-fast) var(--easing-standard);
 }
 
-.inv-row:hover {
-  background: var(--color-bg-tertiary);
-}
+.inv-row:last-child { border-bottom: none; }
+.inv-row:hover { background: var(--color-bg-tertiary); }
 
 .inv-row__name {
   font: var(--text-body-2);
-  color: var(--color-fg-primary);
   font-weight: var(--font-weight-medium);
+  color: var(--color-fg-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  min-width: 0;
-  flex-shrink: 1;
 }
 
-.inv-row__meta {
+.inv-row__stock,
+.inv-row__category {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
-  flex-shrink: 0;
+  justify-content: center;
 }
 
-.inv-row__location,
+.inv-row__location {
+  font: var(--text-caption);
+  color: var(--color-fg-tertiary);
+  text-align: center;
+}
+
 .inv-row__target {
   font: var(--text-caption);
   color: var(--color-fg-tertiary);
-  white-space: nowrap;
-}
-
-.inv-row__end {
-  display: flex;
-  align-items: center;
-  gap: var(--space-s);
-  flex-shrink: 0;
-  margin-left: auto;
+  text-align: center;
 }
 
 .inv-row__checked {
   font: var(--text-caption);
   color: var(--color-fg-tertiary);
-  white-space: nowrap;
-}
-
-.inv-row__actions {
-  display: flex;
-  gap: var(--space-2xs);
-  opacity: 0;
-  transition: opacity var(--duration-fast) var(--easing-standard);
-}
-
-.inv-row:hover .inv-row__actions {
-  opacity: 1;
+  text-align: right;
 }
 
 @media (max-width: 640px) {
-  .stats-row { flex-direction: column; }
-  .stats-row > * { border-right: none; border-bottom: 1px solid var(--color-border-subtle); }
-  .stats-row > *:last-child { border-bottom: none; }
-  .inv-row { flex-wrap: wrap; }
-  .inv-row__actions { opacity: 1; }
+  .inv-table__header { display: none; }
+  .inv-row {
+    grid-template-columns: 1fr auto auto;
+    padding: var(--space-s) var(--space-l);
+  }
+  .inv-row__category, .inv-row__location, .inv-row__target, .inv-row__checked { display: none; }
 }
 </style>

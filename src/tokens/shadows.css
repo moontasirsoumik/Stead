@@ -1,53 +1,52 @@
 /* ============================================================
-   Stead — Shadow Tokens
-   Subtle elevation for Material 3-inspired surfaces.
+   Stead — Shadow Tokens  ·  "Refined Utility"
+   Flat design — all shadows disabled. Tokens preserved for
+   backward compatibility; every value resolves to none.
    ============================================================ */
 
 :root {
-  --shadow-2: 0 1px 2px rgba(18, 25, 15, 0.06), 0 1px 3px rgba(18, 25, 15, 0.08);
-  --shadow-4: 0 2px 6px rgba(18, 25, 15, 0.08), 0 1px 2px rgba(18, 25, 15, 0.06);
-  --shadow-8: 0 6px 18px rgba(18, 25, 15, 0.10), 0 2px 6px rgba(18, 25, 15, 0.06);
-  --shadow-16: 0 12px 28px rgba(18, 25, 15, 0.14), 0 4px 10px rgba(18, 25, 15, 0.08);
-  --shadow-28: 0 20px 56px rgba(18, 25, 15, 0.18), 0 8px 18px rgba(18, 25, 15, 0.10);
-  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  --shadow-brand: 0 8px 20px rgba(73, 102, 46, 0.18), 0 2px 6px rgba(73, 102, 46, 0.10);
-  --shadow-card: 0 0 0 1px rgba(22, 29, 19, 0.04);
+  --shadow-2: none;
+  --shadow-4: none;
+  --shadow-8: none;
+  --shadow-16: none;
+  --shadow-28: none;
+  --shadow-inset: none;
+  --shadow-brand: none;
+  --shadow-card: none;
 }
 
-/* ── Personal scope shadow accent (teal) — light ── */
 :root[data-scope='personal'] {
-  --shadow-brand: 0 8px 20px rgba(46, 107, 94, 0.18), 0 2px 6px rgba(46, 107, 94, 0.10);
+  --shadow-brand: none;
 }
 
 :root[data-theme='dark'] {
-  --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.22), 0 1px 3px rgba(0, 0, 0, 0.26);
-  --shadow-4: 0 2px 6px rgba(0, 0, 0, 0.26), 0 1px 2px rgba(0, 0, 0, 0.18);
-  --shadow-8: 0 6px 18px rgba(0, 0, 0, 0.34), 0 2px 6px rgba(0, 0, 0, 0.22);
-  --shadow-16: 0 12px 28px rgba(0, 0, 0, 0.42), 0 4px 10px rgba(0, 0, 0, 0.26);
-  --shadow-28: 0 20px 56px rgba(0, 0, 0, 0.52), 0 8px 18px rgba(0, 0, 0, 0.32);
-  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  --shadow-brand: 0 10px 26px rgba(170, 209, 138, 0.16), 0 2px 8px rgba(170, 209, 138, 0.08);
-  --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-2: none;
+  --shadow-4: none;
+  --shadow-8: none;
+  --shadow-16: none;
+  --shadow-28: none;
+  --shadow-inset: none;
+  --shadow-brand: none;
+  --shadow-card: none;
 }
 
-/* ── Personal scope shadow accent (teal) — dark ── */
 :root[data-theme='dark'][data-scope='personal'] {
-  --shadow-brand: 0 10px 26px rgba(138, 209, 191, 0.16), 0 2px 8px rgba(138, 209, 191, 0.08);
+  --shadow-brand: none;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.22), 0 1px 3px rgba(0, 0, 0, 0.26);
-    --shadow-4: 0 2px 6px rgba(0, 0, 0, 0.26), 0 1px 2px rgba(0, 0, 0, 0.18);
-    --shadow-8: 0 6px 18px rgba(0, 0, 0, 0.34), 0 2px 6px rgba(0, 0, 0, 0.22);
-    --shadow-16: 0 12px 28px rgba(0, 0, 0, 0.42), 0 4px 10px rgba(0, 0, 0, 0.26);
-    --shadow-28: 0 20px 56px rgba(0, 0, 0, 0.52), 0 8px 18px rgba(0, 0, 0, 0.32);
-    --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-    --shadow-brand: 0 10px 26px rgba(170, 209, 138, 0.16), 0 2px 8px rgba(170, 209, 138, 0.08);
-    --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.04);
+    --shadow-2: none;
+    --shadow-4: none;
+    --shadow-8: none;
+    --shadow-16: none;
+    --shadow-28: none;
+    --shadow-inset: none;
+    --shadow-brand: none;
+    --shadow-card: none;
   }
 
   :root:not([data-theme='light'])[data-scope='personal'] {
-    --shadow-brand: 0 10px 26px rgba(138, 209, 191, 0.16), 0 2px 8px rgba(138, 209, 191, 0.08);
+    --shadow-brand: none;
   }
 }

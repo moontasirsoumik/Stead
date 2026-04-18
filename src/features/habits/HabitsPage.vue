@@ -2,7 +2,6 @@
 import { ref, computed, onMounted } from 'vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
-import ContentCard from '@/components/layout/ContentCard.vue'
 import SButton from '@/components/ui/SButton.vue'
 import SIconButton from '@/components/ui/SIconButton.vue'
 import SBadge from '@/components/ui/SBadge.vue'
@@ -177,30 +176,30 @@ onMounted(async () => {
     <ErrorBanner v-if="habitsStore.error" :message="habitsStore.error" @retry="() => { if (authStore.householdId) { habitsStore.fetchHabits(authStore.householdId!); habitsStore.fetchLogs(authStore.householdId!) } }" />
 
     <!-- Stats -->
-    <div class="stats-row page-enter" :style="{ '--stagger': 1 }">
-      <ContentCard class="stat-card">
-        <span class="stat-value">{{ habitsStore.activeHabits.length }}</span>
-        <span class="stat-label">Active habits</span>
-      </ContentCard>
-      <ContentCard class="stat-card">
-        <span class="stat-value">{{ weekCompletionRate }}%</span>
-        <span class="stat-label">This week</span>
-      </ContentCard>
+    <div class="stats-bar page-enter" :style="{ '--stagger': 1 }">
+      <div class="stats-bar__cell">
+        <span class="stats-bar__label">Active habits</span>
+        <span class="stats-bar__value">{{ habitsStore.activeHabits.length }}</span>
+      </div>
+      <div class="stats-bar__cell">
+        <span class="stats-bar__label">This week</span>
+        <span class="stats-bar__value">{{ weekCompletionRate }}%</span>
+      </div>
     </div>
 
-    <ContentCard v-if="habitsStore.loading && !habitsStore.items.length" class="page-enter" :style="{ '--stagger': 2 }">
+    <div v-if="habitsStore.loading && !habitsStore.items.length" class="page-enter" :style="{ '--stagger': 2 }">
       <LoadingSkeleton :lines="5" />
-    </ContentCard>
+    </div>
 
     <template v-else-if="!habitsStore.activeHabits.length">
-      <ContentCard class="page-enter" :style="{ '--stagger': 2 }">
+      <div class="empty-section page-enter" :style="{ '--stagger': 2 }">
         <EmptyState title="No habits yet" subtitle="Build your first daily habit — small steps lead to big changes." icon="empty" action-label="Create habit" @action="openCreateDrawer" />
-      </ContentCard>
+      </div>
     </template>
 
     <template v-else>
       <!-- Weekly grid -->
-      <ContentCard class="habits-grid-card page-enter" :style="{ '--stagger': 2 }">
+      <div class="habits-grid-wrap page-enter" :style="{ '--stagger': 2 }">
         <div class="habits-grid">
           <!-- Header row -->
           <div class="habits-grid__header">
@@ -248,7 +247,7 @@ onMounted(async () => {
             </div>
           </div>
         </div>
-      </ContentCard>
+      </div>
 
       <!-- Streaks -->
       <div v-if="habitStreaks.length" class="streaks-section page-enter" :style="{ '--stagger': 3 }">
@@ -257,7 +256,7 @@ onMounted(async () => {
           <div v-for="s in habitStreaks" :key="s.name" class="streak-item">
             <span class="habit-dot" :style="{ background: s.color || 'var(--color-brand-primary)' }" />
             <span class="streak-item__name">{{ s.name }}</span>
-            <span class="streak-item__count">{{ s.streak }} day{{ s.streak !== 1 ? 's' : '' }} 🔥</span>
+            <span class="streak-item__count">{{ s.streak }} day{{ s.streak !== 1 ? 's' : '' }} <span class="material-symbols-rounded streak-fire">local_fire_department</span></span>
           </div>
         </div>
       </div>
@@ -282,35 +281,39 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.stats-row {
+.stats-bar {
   display: flex;
-  gap: var(--space-m);
+  align-items: stretch;
+  background: var(--color-surface-container-low);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-m);
   margin-bottom: var(--space-l);
+  overflow: hidden;
 }
-
-.stat-card {
+.stats-bar__cell {
   flex: 1;
+  padding: var(--space-m) var(--space-l);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: var(--space-l);
+  gap: var(--space-2xs);
+  border-right: 1px solid var(--color-border-default);
 }
-
-.stat-value {
-  font: var(--text-title-2);
-  color: var(--color-fg-primary);
-  font-weight: var(--font-weight-semibold);
-}
-
-.stat-label {
+.stats-bar__cell:last-child { border-right: none; }
+.stats-bar__label {
   font: var(--text-caption);
-  color: var(--color-fg-tertiary);
-  margin-top: var(--space-2xs);
+  color: var(--color-fg-secondary);
+}
+.stats-bar__value {
+  font: var(--text-body-1-strong);
+  color: var(--color-fg-primary);
 }
 
-.habits-grid-card {
+.habits-grid-wrap {
   margin-bottom: var(--space-l);
   overflow-x: auto;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-m);
+  padding: var(--space-m);
 }
 
 .habits-grid {
@@ -460,11 +463,21 @@ onMounted(async () => {
   font: var(--text-body-2);
   color: var(--color-fg-secondary);
   font-weight: var(--font-weight-medium);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+
+.streak-fire {
+  font-size: 16px;
+  color: var(--color-status-error);
 }
 
 @media (max-width: 640px) {
-  .stats-row {
+  .stats-bar {
     flex-direction: column;
   }
+  .stats-bar__cell { border-right: none; border-bottom: 1px solid var(--color-border-default); }
+  .stats-bar__cell:last-child { border-bottom: none; }
 }
 </style>

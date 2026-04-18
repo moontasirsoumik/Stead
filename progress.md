@@ -1,7 +1,7 @@
 # Stead — Implementation Progress Tracker
 
-> **Last updated:** 2026-04-17
-> **Current Phase:** P27 — Settings Customization (complete)
+> **Last updated:** 2026-04-18
+> **Current Phase:** P29 — Calendar Feature (complete)
 
 ---
 
@@ -37,6 +37,12 @@
 | P25 | Meal Planning | ✅ Done | 2026-04-16 | 2026-04-16 | Model, schema, store, page, route |
 | P26 | Chore Rotation | ✅ Done | 2026-04-16 | 2026-04-16 | Rotation fields added to tasks model + schema + migration |
 | P27 | Settings Customization | ✅ Done | 2026-04-16 | 2026-04-16 | 11 settings groups, 30+ preferences, accent colors, font scaling, compact mode |
+| P28 | Full UI Redesign | ✅ Done | 2026-04-17 | 2026-04-17 | Flat design, icon rail, dense layouts, Plus Jakarta Sans, no shadows |
+| P28b | UI Refinement Round 1 | ✅ Done | 2026-04-17 | 2026-04-17 | Font size bumps, softer radii, grid alignment on expenses/income/tasks/reminders, dashboard uniformity |
+| P28c | UI Refinement Round 2 | ✅ Done | 2026-04-17 | 2026-04-17 | Unified chip design, column-aligned tables (expenses/bills/savings), avatar contrast fix, notes card sizing, settings widgets redesign, meals week picker |
+| P28d | UI Refinement Round 3 | ✅ Done | 2026-04-17 | 2026-04-17 | Universal grid table standardization (all list pages), expandable sidebar, account dropdown, always-visible actions, dashboard bordered tables |
+| P28e | UI Fixes Round 4 | ✅ Done | 2026-04-18 | 2026-04-18 | Reminders layout fix, sidebar scope toggle removal, mobile nav changes (sidebar-only), emoji→Material Symbols replacement |
+| P29 | Calendar Feature | ✅ Done | 2026-04-18 | 2026-04-18 | Full calendar page with month grid, aggregates tasks/reminders/bills, standalone event CRUD, day detail panel, DB migration applied |
 
 ---
 

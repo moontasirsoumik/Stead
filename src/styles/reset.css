@@ -1,6 +1,6 @@
 /* ============================================================
-   Stead — CSS Reset
-   Modern reset for consistent cross-browser rendering
+   Stead — CSS Reset  ·  "Refined Utility"
+   Modern reset for consistent cross-browser rendering.
    ============================================================ */
 
 *,
@@ -83,7 +83,7 @@ table {
   border-radius: var(--radius-s);
 }
 
-/* Scrollbar styling */
+/* ── Scrollbar (WebKit) ── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -95,7 +95,17 @@ table {
 
 ::-webkit-scrollbar-thumb {
   background: var(--color-border-default);
-  border-radius: 3px;
+  border-radius: var(--radius-circle);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-strong);
+}
+
+/* ── Scrollbar (Firefox) ── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-default) transparent;
 }
 
 ::-webkit-scrollbar-thumb:hover {

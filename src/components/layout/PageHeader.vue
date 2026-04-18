@@ -22,8 +22,8 @@ defineProps<{
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--space-xl);
-  margin-bottom: var(--space-xl);
+  gap: var(--space-l);
+  margin-bottom: 12px;
 }
 
 .pageheader__text {
@@ -33,7 +33,7 @@ defineProps<{
 }
 
 .pageheader__title {
-  font: var(--text-title-1);
+  font: var(--text-title-2);
   color: var(--color-fg-primary);
   letter-spacing: var(--tracking-tight);
 }

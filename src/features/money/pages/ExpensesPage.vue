@@ -2,12 +2,10 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
-import ContentCard from '@/components/layout/ContentCard.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import ErrorBanner from '@/components/feedback/ErrorBanner.vue'
 import LoadingSkeleton from '@/components/feedback/LoadingSkeleton.vue'
 import FilterBar from '@/components/data/FilterBar.vue'
-import SectionHeader from '@/components/data/SectionHeader.vue'
 import SButton from '@/components/ui/SButton.vue'
 import SSelect from '@/components/ui/SSelect.vue'
 import SInput from '@/components/ui/SInput.vue'
@@ -133,6 +131,14 @@ const filteredGroups = computed(() => {
 })
 
 const hasExpenses = computed(() => Object.keys(filteredGroups.value).length > 0)
+
+const flatExpenses = computed(() => {
+  const all: Expense[] = []
+  for (const expenses of Object.values(filteredGroups.value)) {
+    all.push(...expenses)
+  }
+  return all.sort((a, b) => b.date.localeCompare(a.date))
+})
 
 const summaryStats = computed(() => [
   {
@@ -301,40 +307,40 @@ onMounted(async () => {
       <LoadingSkeleton :lines="5" />
     </div>
 
-    <div v-else-if="hasExpenses" class="expense-groups">
+    <div v-else-if="hasExpenses" class="expense-table">
+      <div class="expense-table__header">
+        <span class="expense-table__th">Description</span>
+        <span class="expense-table__th expense-table__th--center">Date</span>
+        <span class="expense-table__th expense-table__th--center">Category</span>
+        <span class="expense-table__th expense-table__th--center">Paid by</span>
+        <span class="expense-table__th expense-table__th--right">Amount</span>
+      </div>
       <div
-        v-for="(expenses, date, idx) in filteredGroups"
-        :key="date"
-        class="expense-group page-enter"
-        :style="{ '--stagger': 4 + Number(idx) }"
+        v-for="expense in flatExpenses"
+        :key="expense.id"
+        class="expense-row"
+        @click="openEdit(expense)"
       >
-        <SectionHeader :title="formatDate(String(date))" :count="expenses.length" />
-
-        <div class="expense-list">
-          <div
-            v-for="expense in expenses"
-            :key="expense.id"
-            class="expense-row"
-            @click="openEdit(expense)"
-          >
-            <div class="expense-row__left">
-              <SBadge variant="brand" size="sm">
-                {{ expense.category }}
-              </SBadge>
-              <span class="expense-row__desc">{{ expense.description }}</span>
-              <span v-if="expense.subcategory" class="expense-row__sub">{{ expense.subcategory }}</span>
-            </div>
-            <div class="expense-row__right">
-              <SAvatar :name="getMemberName(expense.paid_by)" :color="getMemberColor(expense.paid_by)" size="sm" />
-              <SBadge v-if="expense.shared" variant="info" size="sm">Shared</SBadge>
-              <span class="expense-row__amount">{{ formatCents(expense.amount) }}</span>
-            </div>
-          </div>
+        <div class="expense-row__name">
+          <span class="expense-row__desc">{{ expense.description }}</span>
+          <span v-if="expense.subcategory" class="expense-row__sub">{{ expense.subcategory }}</span>
+        </div>
+        <div class="expense-row__date">
+          <SBadge variant="default" size="sm">{{ formatDate(expense.date) }}</SBadge>
+        </div>
+        <div class="expense-row__category">
+          <SBadge variant="brand" size="sm">{{ expense.category }}</SBadge>
+        </div>
+        <div class="expense-row__payer">
+          <SAvatar :name="getMemberName(expense.paid_by)" :color="getMemberColor(expense.paid_by)" size="sm" />
+        </div>
+        <div class="expense-row__amount">
+          {{ formatCents(expense.amount) }}
         </div>
       </div>
     </div>
 
-    <ContentCard v-else class="page-enter" :style="{ '--stagger': 4 }">
+    <div v-else class="empty-section page-enter" :style="{ '--stagger': 4 }">
       <EmptyState
         title="No expenses to show"
         :subtitle="search || categoryFilter ? 'Try adjusting your filters' : 'Start tracking your spending to see it here'"
@@ -342,7 +348,7 @@ onMounted(async () => {
         action-label="Add Expense"
         @action="openAdd"
       />
-    </ContentCard>
+    </div>
 
     <FormDrawer
       :open="drawerOpen"
@@ -453,25 +459,38 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.expense-groups {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-l);
-}
-
-.expense-list {
+.expense-table {
   display: flex;
   flex-direction: column;
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-l);
-  background: var(--color-surface-card);
-  box-shadow: var(--shadow-2), var(--shadow-card);
+  overflow: hidden;
 }
 
-.expense-row {
-  display: flex;
+.expense-table__header {
+  display: grid;
+  grid-template-columns: 1fr 120px 120px 60px 110px;
   align-items: center;
-  justify-content: space-between;
+  padding: var(--space-s) var(--space-l);
+  background: var(--color-surface-container-low);
+  border-bottom: 1px solid var(--color-border-default);
+  gap: var(--space-m);
+}
+
+.expense-table__th {
+  font: var(--text-label-sm);
+  color: var(--color-fg-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+}
+
+.expense-table__th--center { text-align: center; }
+.expense-table__th--right { text-align: right; }
+
+.expense-row {
+  display: grid;
+  grid-template-columns: 1fr 120px 120px 60px 110px;
+  align-items: center;
   min-height: var(--height-row-min);
   padding: 0 var(--space-l);
   gap: var(--space-m);
@@ -480,18 +499,13 @@ onMounted(async () => {
   transition: background var(--duration-fast) var(--easing-standard);
 }
 
-.expense-row:last-child {
-  border-bottom: none;
-}
+.expense-row:last-child { border-bottom: none; }
+.expense-row:hover { background: var(--color-bg-tertiary); }
 
-.expense-row:hover {
-  background: var(--color-bg-tertiary);
-}
-
-.expense-row__left {
+.expense-row__name {
   display: flex;
   align-items: center;
-  gap: var(--space-m);
+  gap: var(--space-s);
   min-width: 0;
 }
 
@@ -510,33 +524,35 @@ onMounted(async () => {
   white-space: nowrap;
 }
 
-.expense-row__right {
+.expense-row__date,
+.expense-row__category {
   display: flex;
   align-items: center;
-  gap: var(--space-m);
-  flex-shrink: 0;
+  justify-content: center;
+}
+
+.expense-row__payer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .expense-row__amount {
   font: var(--text-body-2);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
   font-family: var(--font-mono);
   color: var(--color-fg-primary);
   white-space: nowrap;
-  min-width: 56px;
   text-align: right;
 }
 
 @media (max-width: 640px) {
+  .expense-table__header { display: none; }
   .expense-row {
-    flex-wrap: wrap;
-    padding: var(--space-xs) var(--space-l);
+    grid-template-columns: 1fr auto auto auto;
+    padding: var(--space-s) var(--space-l);
   }
-
-  .expense-row__right {
-    width: 100%;
-    justify-content: flex-end;
-  }
+  .expense-row__date { display: none; }
 }
 
 /* ── Split breakdown ───────────────────────────────────── */
@@ -627,7 +643,6 @@ onMounted(async () => {
 .split-row__editor:focus {
   background: var(--color-surface-card);
   border-color: var(--color-brand-primary);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-brand-primary) 20%, transparent);
 }
 
 .split-row__editor::-webkit-outer-spin-button,

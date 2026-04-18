@@ -22,9 +22,7 @@ withDefaults(
   background: var(--color-surface-card);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-l);
-  box-shadow: var(--shadow-2), var(--shadow-card);
   transition:
-    box-shadow var(--duration-fast) var(--easing-standard),
     border-color var(--duration-fast) var(--easing-standard),
     background-color var(--duration-fast) var(--easing-standard);
 }
@@ -36,7 +34,6 @@ withDefaults(
 
 .contentcard--hoverable:hover {
   background: var(--color-surface-card-hover);
-  box-shadow: var(--shadow-8), var(--shadow-card);
   border-color: var(--color-outline-variant);
 }
 </style>

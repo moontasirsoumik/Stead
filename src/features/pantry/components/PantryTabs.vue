@@ -115,6 +115,7 @@ watch(activeTab, () => {
 
 .pantry-tab:hover {
   color: var(--color-fg-primary);
+  background: var(--color-surface-nav-hover);
 }
 
 .pantry-tab--active {

@@ -22,12 +22,12 @@ defineProps<{
   gap: var(--space-s);
   padding-bottom: var(--space-s);
   margin-bottom: var(--space-m);
+  border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .sectionheader__title {
-  font: var(--text-body-2);
-  color: var(--color-fg-secondary);
-  font-weight: var(--font-weight-medium);
+  font: var(--text-label-lg);
+  color: var(--color-fg-tertiary);
   text-transform: uppercase;
   letter-spacing: var(--tracking-caps);
 }

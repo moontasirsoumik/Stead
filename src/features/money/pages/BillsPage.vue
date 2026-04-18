@@ -2,11 +2,9 @@
 import { ref, computed, onMounted } from 'vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
-import ContentCard from '@/components/layout/ContentCard.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import ErrorBanner from '@/components/feedback/ErrorBanner.vue'
 import LoadingSkeleton from '@/components/feedback/LoadingSkeleton.vue'
-import StatusBadge from '@/components/feedback/StatusBadge.vue'
 import SButton from '@/components/ui/SButton.vue'
 import SInput from '@/components/ui/SInput.vue'
 import SSelect from '@/components/ui/SSelect.vue'
@@ -203,7 +201,14 @@ onMounted(async () => {
       <LoadingSkeleton :lines="5" />
     </div>
 
-    <div v-else-if="billsStore.items.length" class="bills-list">
+    <div v-else-if="billsStore.items.length" class="bills-table">
+      <div class="bills-table__header">
+        <span class="bills-table__th">Name</span>
+        <span class="bills-table__th bills-table__th--center">Status</span>
+        <span class="bills-table__th bills-table__th--center">Schedule</span>
+        <span class="bills-table__th bills-table__th--center">Auto-pay</span>
+        <span class="bills-table__th bills-table__th--right">Amount</span>
+      </div>
       <div
         v-for="(bill, idx) in billsStore.items"
         :key="bill.id"
@@ -211,41 +216,24 @@ onMounted(async () => {
         :style="{ '--stagger': 3 + idx }"
         @click="openEdit(bill)"
       >
-        <div class="bill-row__left">
-          <StatusBadge :variant="statusVariant(bill.status)">
-            {{ bill.status }}
-          </StatusBadge>
-          <span class="bill-row__name">{{ bill.name }}</span>
-          <span class="bill-row__meta-text">
-            Day {{ bill.due_day }} · {{ bill.frequency }}
-          </span>
+        <div class="bill-row__name">
+          <span class="bill-row__title">{{ bill.name }}</span>
+          <span class="bill-row__meta">Day {{ bill.due_day }}</span>
+        </div>
+        <div class="bill-row__status">
+          <SBadge :variant="statusVariant(bill.status)" size="sm">{{ bill.status }}</SBadge>
+        </div>
+        <div class="bill-row__freq">
+          <SBadge variant="default" size="sm">{{ bill.frequency }}</SBadge>
+        </div>
+        <div class="bill-row__autopay">
           <SBadge v-if="bill.auto_pay" variant="info" size="sm">Auto-pay</SBadge>
         </div>
-        <div class="bill-row__right">
-          <div class="bill-row__actions">
-            <SButton
-              v-if="bill.status === 'upcoming' || bill.status === 'overdue'"
-              variant="subtle"
-              size="sm"
-              @click.stop="markPaid(bill)"
-            >
-              Paid
-            </SButton>
-            <SButton
-              v-if="bill.status === 'upcoming'"
-              variant="subtle"
-              size="sm"
-              @click.stop="skipBill(bill)"
-            >
-              Skip
-            </SButton>
-          </div>
-          <span class="bill-row__amount">{{ formatCents(bill.amount) }}</span>
-        </div>
+        <div class="bill-row__amount">{{ formatCents(bill.amount) }}</div>
       </div>
     </div>
 
-    <ContentCard v-else class="page-enter" :style="{ '--stagger': 3 }">
+    <div v-else class="empty-section page-enter" :style="{ '--stagger': 3 }">
       <EmptyState
         title="No bills set up"
         subtitle="Add your recurring bills to stay on top of payments"
@@ -253,7 +241,7 @@ onMounted(async () => {
         action-label="Add Bill"
         @action="openAdd"
       />
-    </ContentCard>
+    </div>
 
     <FormDrawer
       :open="drawerOpen"
@@ -316,19 +304,38 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.bills-list {
+.bills-table {
   display: flex;
   flex-direction: column;
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-l);
-  background: var(--color-surface-card);
-  box-shadow: var(--shadow-2), var(--shadow-card);
+  overflow: hidden;
 }
 
-.bill-row {
-  display: flex;
+.bills-table__header {
+  display: grid;
+  grid-template-columns: 1fr 100px 100px 100px 110px;
   align-items: center;
-  justify-content: space-between;
+  padding: var(--space-s) var(--space-l);
+  background: var(--color-surface-container-low);
+  border-bottom: 1px solid var(--color-border-default);
+  gap: var(--space-m);
+}
+
+.bills-table__th {
+  font: var(--text-label-sm);
+  color: var(--color-fg-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+}
+
+.bills-table__th--center { text-align: center; }
+.bills-table__th--right { text-align: right; }
+
+.bill-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 100px 100px 110px;
+  align-items: center;
   min-height: var(--height-row-min);
   padding: 0 var(--space-l);
   gap: var(--space-m);
@@ -337,22 +344,17 @@ onMounted(async () => {
   transition: background var(--duration-fast) var(--easing-standard);
 }
 
-.bill-row:last-child {
-  border-bottom: none;
-}
+.bill-row:last-child { border-bottom: none; }
+.bill-row:hover { background: var(--color-bg-tertiary); }
 
-.bill-row:hover {
-  background: var(--color-bg-tertiary);
-}
-
-.bill-row__left {
+.bill-row__name {
   display: flex;
-  align-items: center;
-  gap: var(--space-m);
+  align-items: baseline;
+  gap: var(--space-s);
   min-width: 0;
 }
 
-.bill-row__name {
+.bill-row__title {
   font: var(--text-body-2);
   color: var(--color-fg-primary);
   font-weight: var(--font-weight-medium);
@@ -361,47 +363,35 @@ onMounted(async () => {
   text-overflow: ellipsis;
 }
 
-.bill-row__meta-text {
+.bill-row__meta {
   font: var(--text-caption);
   color: var(--color-fg-tertiary);
   white-space: nowrap;
 }
 
-.bill-row__right {
+.bill-row__status,
+.bill-row__freq,
+.bill-row__autopay {
   display: flex;
   align-items: center;
-  gap: var(--space-m);
-  flex-shrink: 0;
-}
-
-.bill-row__actions {
-  display: flex;
-  gap: var(--space-2xs);
-  opacity: 0;
-  transition: opacity var(--duration-fast) var(--easing-standard);
-}
-
-.bill-row:hover .bill-row__actions {
-  opacity: 1;
+  justify-content: center;
 }
 
 .bill-row__amount {
   font: var(--text-body-2);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
   font-family: var(--font-mono);
   color: var(--color-fg-primary);
   white-space: nowrap;
-  min-width: 56px;
   text-align: right;
 }
 
 @media (max-width: 640px) {
+  .bills-table__header { display: none; }
   .bill-row {
-    flex-wrap: wrap;
-    padding: var(--space-xs) var(--space-l);
+    grid-template-columns: 1fr auto auto auto;
+    padding: var(--space-s) var(--space-l);
   }
-  .bill-row__actions {
-    opacity: 1;
-  }
+  .bill-row__freq { display: none; }
 }
 </style>

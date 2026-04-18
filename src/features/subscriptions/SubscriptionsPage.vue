@@ -2,7 +2,6 @@
 import { ref, computed, onMounted } from 'vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
-import ContentCard from '@/components/layout/ContentCard.vue'
 import FilterBar from '@/components/data/FilterBar.vue'
 import SButton from '@/components/ui/SButton.vue'
 import SIconButton from '@/components/ui/SIconButton.vue'
@@ -183,71 +182,61 @@ onMounted(async () => {
     <ErrorBanner v-if="subscriptionsStore.error" :message="subscriptionsStore.error" @retry="authStore.householdId && subscriptionsStore.fetchSubscriptions(authStore.householdId)" />
 
     <!-- Monthly total -->
-    <div class="stats-row page-enter" :style="{ '--stagger': 1 }">
-      <ContentCard class="stat-card stat-card--highlight">
-        <span class="stat-value">{{ formatCents(subscriptionsStore.monthlyTotal) }}</span>
-        <span class="stat-label">Monthly total</span>
-      </ContentCard>
-      <ContentCard class="stat-card">
-        <span class="stat-value">{{ subscriptionsStore.activeSubscriptions.length }}</span>
-        <span class="stat-label">Active subscriptions</span>
-      </ContentCard>
+    <div class="stats-bar page-enter" :style="{ '--stagger': 1 }">
+      <div class="stats-bar__cell">
+        <span class="stats-bar__label">Monthly total</span>
+        <span class="stats-bar__value">{{ formatCents(subscriptionsStore.monthlyTotal) }}</span>
+      </div>
+      <div class="stats-bar__cell">
+        <span class="stats-bar__label">Active subscriptions</span>
+        <span class="stats-bar__value">{{ subscriptionsStore.activeSubscriptions.length }}</span>
+      </div>
     </div>
 
     <FilterBar v-model:search="search" show-search class="page-enter" :style="{ '--stagger': 2 }">
       <SSelect v-model="statusFilter" :options="statusOptions" placeholder="Status" />
     </FilterBar>
 
-    <ContentCard v-if="subscriptionsStore.loading && !subscriptionsStore.items.length" class="page-enter" :style="{ '--stagger': 3 }">
+    <div v-if="subscriptionsStore.loading && !subscriptionsStore.items.length" class="page-enter" :style="{ '--stagger': 3 }">
       <LoadingSkeleton :lines="5" />
-    </ContentCard>
+    </div>
 
     <template v-else-if="!filteredItems.length">
-      <ContentCard class="page-enter" :style="{ '--stagger': 3 }">
+      <div class="empty-section page-enter" :style="{ '--stagger': 3 }">
         <EmptyState v-if="!subscriptionsStore.items.length" title="No subscriptions tracked yet" subtitle="Add your first subscription to see your monthly costs at a glance." icon="empty" action-label="Add subscription" @action="openCreateDrawer" />
         <EmptyState v-else title="No matches" subtitle="Try adjusting your filters or search term." icon="search" />
-      </ContentCard>
+      </div>
     </template>
 
     <template v-else>
-      <div class="sub-list page-enter" :style="{ '--stagger': 3 }">
+      <div class="sub-table page-enter" :style="{ '--stagger': 3 }">
+        <div class="sub-table__header">
+          <span class="sub-table__th">Name</span>
+          <span class="sub-table__th sub-table__th--center">Status</span>
+          <span class="sub-table__th sub-table__th--center">Frequency</span>
+          <span class="sub-table__th sub-table__th--center">Category</span>
+          <span class="sub-table__th sub-table__th--right">Amount</span>
+          <span class="sub-table__th sub-table__th--right">Next billing</span>
+        </div>
         <div
           v-for="sub in filteredItems"
           :key="sub.id"
-          class="sub-card"
-          :class="{ 'sub-card--inactive': sub.status !== 'active' }"
+          class="sub-row"
+          :class="{ 'sub-row--inactive': sub.status !== 'active' }"
           @click="openEditDrawer(sub)"
         >
-          <div class="sub-card__main">
-            <div class="sub-card__info">
-              <span class="sub-card__name">{{ sub.name }}</span>
-              <div class="sub-card__meta">
-                <SBadge :variant="statusVariant(sub.status)" size="sm">{{ sub.status }}</SBadge>
-                <SBadge size="sm">{{ frequencyLabel(sub.frequency) }}</SBadge>
-                <span v-if="sub.category" class="sub-card__category">{{ sub.category }}</span>
-              </div>
-            </div>
-            <div class="sub-card__right">
-              <span class="sub-card__amount">{{ formatCents(sub.amount) }}</span>
-              <span v-if="sub.next_billing_date" class="sub-card__next-date">
-                Next: {{ formatDate(sub.next_billing_date) }}
-              </span>
-            </div>
+          <div class="sub-row__name">{{ sub.name }}</div>
+          <div class="sub-row__status">
+            <SBadge :variant="statusVariant(sub.status)" size="sm">{{ sub.status }}</SBadge>
           </div>
-          <div class="sub-card__actions" @click.stop>
-            <SIconButton v-if="sub.status === 'active'" label="Pause" size="sm" @click="pauseSubscription(sub)">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 2V10M8 2V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
-            </SIconButton>
-            <SIconButton v-if="sub.status === 'paused'" label="Resume" size="sm" @click="resumeSubscription(sub)">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 2L10 6L3 10V2Z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-            </SIconButton>
-            <SIconButton v-if="sub.status !== 'cancelled'" label="Cancel" size="sm" @click="cancelSubscription(sub)">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 3L9 9M9 3L3 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
-            </SIconButton>
-            <SIconButton label="Delete" size="sm" @click="confirmDelete(sub.id)">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 3H10M4 3V2H8V3M5 5V9M7 5V9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" /></svg>
-            </SIconButton>
+          <div class="sub-row__freq">
+            <SBadge size="sm">{{ frequencyLabel(sub.frequency) }}</SBadge>
           </div>
+          <div class="sub-row__category">
+            <span v-if="sub.category" class="sub-row__cat-text">{{ sub.category }}</span>
+          </div>
+          <div class="sub-row__amount">{{ formatCents(sub.amount) }}</div>
+          <div class="sub-row__next">{{ sub.next_billing_date ? formatDate(sub.next_billing_date) : '—' }}</div>
         </div>
       </div>
     </template>
@@ -270,147 +259,124 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.stats-row {
+.stats-bar {
   display: flex;
-  gap: var(--space-m);
-  margin-bottom: var(--space-l);
-}
-
-.stat-card {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: var(--space-l);
-}
-
-.stat-value {
-  font: var(--text-title-2);
-  color: var(--color-fg-primary);
-  font-weight: var(--font-weight-semibold);
-}
-
-.stat-label {
-  font: var(--text-caption);
-  color: var(--color-fg-tertiary);
-  margin-top: var(--space-2xs);
-}
-
-.sub-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-l);
-  margin-bottom: var(--space-l);
-}
-
-.sub-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-l);
-  background: var(--color-surface-card);
-  border-radius: var(--radius-l);
+  align-items: stretch;
+  background: var(--color-surface-container-low);
   border: 1px solid var(--color-border-default);
-  box-shadow: var(--shadow-2), var(--shadow-card);
-  cursor: pointer;
-  transition:
-    background-color var(--duration-fast) var(--easing-standard),
-    border-color var(--duration-fast) var(--easing-standard),
-    box-shadow var(--duration-fast) var(--easing-standard),
-    opacity var(--duration-fast) var(--easing-standard);
+  border-radius: var(--radius-m);
+  margin-bottom: var(--space-l);
+  overflow: hidden;
 }
-
-.sub-card:hover {
-  background: var(--color-surface-card-hover);
-  box-shadow: var(--shadow-8), var(--shadow-card);
-  border-color: var(--color-outline-variant);
-}
-
-.sub-card--inactive {
-  opacity: 0.55;
-}
-
-.sub-card__main {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.stats-bar__cell {
   flex: 1;
-  min-width: 0;
-  gap: var(--space-m);
-}
-
-.sub-card__info {
+  padding: var(--space-m) var(--space-l);
   display: flex;
   flex-direction: column;
   gap: var(--space-2xs);
-  min-width: 0;
+  border-right: 1px solid var(--color-border-default);
+}
+.stats-bar__cell:last-child { border-right: none; }
+.stats-bar__label {
+  font: var(--text-caption);
+  color: var(--color-fg-secondary);
+}
+.stats-bar__value {
+  font: var(--text-body-1-strong);
+  color: var(--color-fg-primary);
 }
 
-.sub-card__name {
+.sub-table {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-l);
+  overflow: hidden;
+}
+
+.sub-table__header {
+  display: grid;
+  grid-template-columns: 1fr 80px 90px 100px 100px 100px;
+  align-items: center;
+  padding: var(--space-s) var(--space-l);
+  background: var(--color-surface-container-low);
+  border-bottom: 1px solid var(--color-border-default);
+  gap: var(--space-m);
+}
+
+.sub-table__th {
+  font: var(--text-label-sm);
+  color: var(--color-fg-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+}
+
+.sub-table__th--center { text-align: center; }
+.sub-table__th--right { text-align: right; }
+
+.sub-row {
+  display: grid;
+  grid-template-columns: 1fr 80px 90px 100px 100px 100px;
+  align-items: center;
+  min-height: var(--height-row-min);
+  padding: 0 var(--space-l);
+  gap: var(--space-m);
+  border-bottom: 1px solid var(--color-border-subtle);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--easing-standard);
+}
+
+.sub-row:last-child { border-bottom: none; }
+.sub-row:hover { background: var(--color-bg-tertiary); }
+.sub-row--inactive { opacity: 0.6; }
+
+.sub-row__name {
   font: var(--text-body-2);
-  color: var(--color-fg-primary);
   font-weight: var(--font-weight-medium);
+  color: var(--color-fg-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.sub-card__meta {
+.sub-row__status,
+.sub-row__freq {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
-  flex-wrap: wrap;
+  justify-content: center;
 }
 
-.sub-card__category {
+.sub-row__category {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sub-row__cat-text {
   font: var(--text-caption);
   color: var(--color-fg-tertiary);
 }
 
-.sub-card__right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: var(--space-2xs);
-  flex-shrink: 0;
-}
-
-.sub-card__amount {
-  font: var(--text-body-1);
-  color: var(--color-fg-primary);
+.sub-row__amount {
+  font: var(--text-body-2);
   font-weight: var(--font-weight-semibold);
+  font-family: var(--font-mono);
+  color: var(--color-fg-primary);
+  text-align: right;
 }
 
-.sub-card__next-date {
+.sub-row__next {
   font: var(--text-caption);
   color: var(--color-fg-tertiary);
-}
-
-.sub-card__actions {
-  display: flex;
-  gap: var(--space-2xs);
-  margin-left: var(--space-m);
-  opacity: 0;
-  transition: opacity var(--duration-fast) var(--easing-standard);
-}
-
-.sub-card:hover .sub-card__actions {
-  opacity: 1;
+  text-align: right;
 }
 
 @media (max-width: 640px) {
-  .stats-row {
-    flex-direction: column;
+  .sub-table__header { display: none; }
+  .sub-row {
+    grid-template-columns: 1fr auto auto auto;
+    padding: var(--space-s) var(--space-l);
   }
-  .sub-card__main {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .sub-card__right {
-    align-items: flex-start;
-  }
-  .sub-card__actions {
-    opacity: 1;
-  }
+  .sub-row__freq, .sub-row__category, .sub-row__next { display: none; }
 }
 </style>

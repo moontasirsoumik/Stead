@@ -64,11 +64,11 @@ withDefaults(
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 15px;
-  height: 15px;
-  border: 1.5px solid var(--color-border-strong);
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--color-border-input);
   border-radius: var(--radius-s);
-  background: var(--color-surface-input);
+  background: transparent;
   transition:
     background-color var(--duration-fast) var(--easing-standard),
     border-color var(--duration-fast) var(--easing-standard);
@@ -85,7 +85,7 @@ withDefaults(
 
 .scheckbox__input:focus-visible + .scheckbox__box {
   outline: 2px solid var(--color-brand-primary);
-  outline-offset: 1px;
+  outline-offset: 2px;
 }
 
 .scheckbox__check {

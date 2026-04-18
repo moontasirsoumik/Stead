@@ -2,11 +2,9 @@
 import { ref, computed, onMounted } from 'vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
-import ContentCard from '@/components/layout/ContentCard.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import ErrorBanner from '@/components/feedback/ErrorBanner.vue'
 import LoadingSkeleton from '@/components/feedback/LoadingSkeleton.vue'
-import StatusBadge from '@/components/feedback/StatusBadge.vue'
 import SButton from '@/components/ui/SButton.vue'
 import SBadge from '@/components/ui/SBadge.vue'
 import SInput from '@/components/ui/SInput.vue'
@@ -242,59 +240,46 @@ onMounted(async () => {
       <LoadingSkeleton :lines="5" />
     </div>
 
-    <div v-else-if="scopedGoals.length" class="goals-grid">
-      <ContentCard
+    <div v-else-if="scopedGoals.length" class="goals-table">
+      <div class="goals-table__header">
+        <span class="goals-table__th">Goal</span>
+        <span class="goals-table__th goals-table__th--center">Priority</span>
+        <span class="goals-table__th goals-table__th--center">Status</span>
+        <span class="goals-table__th goals-table__th--center">Progress</span>
+        <span class="goals-table__th goals-table__th--right">Saved</span>
+        <span class="goals-table__th goals-table__th--right">Target</span>
+        <span class="goals-table__th goals-table__th--right">Date</span>
+      </div>
+      <div
         v-for="(goal, idx) in scopedGoals"
         :key="goal.id"
-        padding="md"
-        class="goal-card page-enter"
+        class="goal-block page-enter"
         :style="{ '--stagger': 3 + idx }"
       >
-        <div class="goal-card__header">
-          <span class="goal-card__name">{{ goal.name }}</span>
-          <div class="goal-card__badges">
+        <div class="goal-row" @click="openEditGoal(goal)">
+          <div class="goal-row__name">{{ goal.name }}</div>
+          <div class="goal-row__priority">
             <SBadge :variant="priorityVariant(goal.priority)" size="sm">{{ goal.priority }}</SBadge>
-            <StatusBadge :variant="statusVariant(goal.status)">{{ goal.status }}</StatusBadge>
           </div>
+          <div class="goal-row__status">
+            <SBadge :variant="statusVariant(goal.status)" size="sm">{{ goal.status }}</SBadge>
+          </div>
+          <div class="goal-row__progress">
+            <div class="goal-bar">
+              <div class="goal-bar__fill" :style="{ width: `${savingsStore.goalProgress(goal.id)}%` }" />
+            </div>
+            <span class="goal-row__percent">{{ Math.round(savingsStore.goalProgress(goal.id)) }}%</span>
+          </div>
+          <div class="goal-row__saved">{{ formatCents(goal.current_amount) }}</div>
+          <div class="goal-row__target">{{ formatCents(goal.target_amount) }}</div>
+          <div class="goal-row__deadline">{{ goal.deadline ? formatDate(goal.deadline) : '—' }}</div>
         </div>
-
-        <div class="goal-card__amounts">
-          <span class="goal-card__current">{{ formatCents(goal.current_amount) }}</span>
-          <span class="goal-card__target">of {{ formatCents(goal.target_amount) }}</span>
+        <div class="goal-actions">
+          <SButton variant="subtle" size="sm" @click.stop="openAddContribution(goal.id)">+ Contrib</SButton>
+          <SButton variant="subtle" size="sm" @click.stop="toggleExpand(goal.id)">{{ expandedGoalId === goal.id ? 'Hide' : 'History' }}</SButton>
         </div>
-
-        <div class="goal-card__bar">
-          <div
-            class="goal-card__fill"
-            :style="{ width: `${savingsStore.goalProgress(goal.id)}%` }"
-          />
-        </div>
-
-        <div class="goal-card__footer">
-          <span v-if="goal.deadline" class="goal-card__deadline">
-            Deadline: {{ formatDate(goal.deadline) }}
-          </span>
-          <span class="goal-card__percent">{{ Math.round(savingsStore.goalProgress(goal.id)) }}%</span>
-        </div>
-
-        <div class="goal-card__actions">
-          <SButton variant="subtle" size="sm" @click.stop="openAddContribution(goal.id)">
-            Add Contribution
-          </SButton>
-          <SButton variant="subtle" size="sm" @click.stop="toggleExpand(goal.id)">
-            {{ expandedGoalId === goal.id ? 'Hide' : 'Show' }} History
-          </SButton>
-          <SButton variant="subtle" size="sm" @click.stop="openEditGoal(goal)">
-            Edit
-          </SButton>
-        </div>
-
-        <div v-if="expandedGoalId === goal.id" class="goal-card__contributions">
-          <div
-            v-for="contrib in (savingsStore.contributions[goal.id] ?? [])"
-            :key="contrib.id"
-            class="contrib-row"
-          >
+        <div v-if="expandedGoalId === goal.id" class="goal-contribs">
+          <div v-for="contrib in (savingsStore.contributions[goal.id] ?? [])" :key="contrib.id" class="contrib-row">
             <div class="contrib-row__left">
               <SAvatar :name="getMemberName(contrib.contributed_by)" :color="getMemberColor(contrib.contributed_by)" size="sm" />
               <div class="contrib-row__details">
@@ -304,14 +289,12 @@ onMounted(async () => {
             </div>
             <span v-if="contrib.note" class="contrib-row__note">{{ contrib.note }}</span>
           </div>
-          <p v-if="!(savingsStore.contributions[goal.id]?.length)" class="goal-card__no-contribs">
-            No contributions yet
-          </p>
+          <p v-if="!(savingsStore.contributions[goal.id]?.length)" class="goal-no-contribs">No contributions yet</p>
         </div>
-      </ContentCard>
+      </div>
     </div>
 
-    <ContentCard v-else class="page-enter" :style="{ '--stagger': 3 }">
+    <div v-else class="empty-section page-enter" :style="{ '--stagger': 3 }">
       <EmptyState
         title="No savings goals"
         subtitle="Set a goal and watch your progress grow"
@@ -319,7 +302,7 @@ onMounted(async () => {
         action-label="Create Goal"
         @action="openAddGoal"
       />
-    </ContentCard>
+    </div>
 
     <!-- Goal Drawer -->
     <FormDrawer
@@ -392,109 +375,150 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.goals-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: var(--space-l);
-}
-
-.goal-card {
+.goals-table {
   display: flex;
   flex-direction: column;
-  gap: var(--space-s);
-}
-
-.goal-card__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-s);
-}
-
-.goal-card__name {
-  font: var(--text-body-1);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-fg-primary);
-}
-
-.goal-card__badges {
-  display: flex;
-  gap: var(--space-xs);
-  flex-shrink: 0;
-}
-
-.goal-card__amounts {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-xs);
-}
-
-.goal-card__current {
-  font: var(--text-title-2);
-  color: var(--color-fg-primary);
-  letter-spacing: var(--tracking-tight);
-}
-
-.goal-card__target {
-  font: var(--text-caption);
-  color: var(--color-fg-tertiary);
-}
-
-.goal-card__bar {
-  height: 4px;
-  background: var(--color-bg-tertiary);
-  border-radius: var(--radius-s);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-l);
   overflow: hidden;
 }
 
-.goal-card__fill {
+.goals-table__header {
+  display: grid;
+  grid-template-columns: 1fr 80px 80px 180px 100px 100px 100px;
+  align-items: center;
+  padding: var(--space-s) var(--space-l);
+  background: var(--color-surface-container-low);
+  border-bottom: 1px solid var(--color-border-default);
+  gap: var(--space-m);
+}
+
+.goals-table__th {
+  font: var(--text-label-sm);
+  color: var(--color-fg-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+}
+
+.goals-table__th--center { text-align: center; }
+.goals-table__th--right { text-align: right; }
+
+.goal-block {
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.goal-block:last-child { border-bottom: none; }
+
+.goal-row {
+  display: grid;
+  grid-template-columns: 1fr 80px 80px 180px 100px 100px 100px;
+  align-items: center;
+  min-height: var(--height-row-min);
+  padding: 0 var(--space-l);
+  gap: var(--space-m);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--easing-standard);
+}
+
+.goal-row:hover { background: var(--color-bg-tertiary); }
+
+.goal-row__name {
+  font: var(--text-body-2);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-fg-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.goal-row__priority,
+.goal-row__status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.goal-row__progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+}
+
+.goal-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-circle);
+  overflow: hidden;
+}
+
+.goal-bar__fill {
   height: 100%;
   background: var(--color-brand-primary);
-  border-radius: var(--radius-s);
+  border-radius: var(--radius-circle);
   transition: width var(--duration-normal) var(--easing-standard);
 }
 
-.goal-card__footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.goal-card__deadline {
-  font: var(--text-caption);
-  color: var(--color-fg-tertiary);
-}
-
-.goal-card__percent {
+.goal-row__percent {
   font: var(--text-caption);
   color: var(--color-fg-secondary);
   font-weight: var(--font-weight-medium);
+  min-width: 32px;
+  text-align: right;
 }
 
-.goal-card__actions {
+.goal-row__saved {
+  font: var(--text-body-2);
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-fg-primary);
+  white-space: nowrap;
+  text-align: right;
+}
+
+.goal-row__target {
+  font: var(--text-caption);
+  font-family: var(--font-mono);
+  color: var(--color-fg-tertiary);
+  white-space: nowrap;
+  text-align: right;
+}
+
+.goal-row__deadline {
+  font: var(--text-caption);
+  color: var(--color-fg-tertiary);
+  white-space: nowrap;
+  text-align: right;
+}
+
+.goal-actions {
   display: flex;
-  gap: var(--space-xs);
-  padding-top: var(--space-s);
+  gap: var(--space-2xs);
+  padding: var(--space-2xs) var(--space-l);
   border-top: 1px solid var(--color-border-subtle);
 }
 
-.goal-card__contributions {
-  padding-top: var(--space-s);
+.goal-contribs {
+  padding: var(--space-xs) var(--space-l) var(--space-s);
   border-top: 1px solid var(--color-border-subtle);
+}
+
+.goal-no-contribs {
+  font: var(--text-caption);
+  color: var(--color-fg-tertiary);
+  padding: var(--space-xs) 0;
 }
 
 .contrib-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-xs) 0;
+  padding: var(--space-2xs) 0;
   gap: var(--space-m);
   border-bottom: 1px solid var(--color-border-subtle);
 }
 
-.contrib-row:last-child {
-  border-bottom: none;
-}
+.contrib-row:last-child { border-bottom: none; }
 
 .contrib-row__left {
   display: flex;
@@ -505,11 +529,13 @@ onMounted(async () => {
 .contrib-row__details {
   display: flex;
   flex-direction: column;
+  gap: 1px;
 }
 
 .contrib-row__amount {
   font: var(--text-body-2);
   font-weight: var(--font-weight-medium);
+  font-family: var(--font-mono);
   color: var(--color-fg-primary);
 }
 
@@ -521,17 +547,16 @@ onMounted(async () => {
 .contrib-row__note {
   font: var(--text-caption);
   color: var(--color-fg-secondary);
-  text-align: right;
-  flex-shrink: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.goal-card__no-contribs {
-  font: var(--text-caption);
-  color: var(--color-fg-tertiary);
-  text-align: center;
-  padding: var(--space-l) 0;
+@media (max-width: 768px) {
+  .goals-table__header { display: none; }
+  .goal-row {
+    grid-template-columns: 1fr auto auto;
+    padding: var(--space-s) var(--space-l);
+  }
+  .goal-row__progress { display: none; }
+  .goal-row__target { display: none; }
+  .goal-row__deadline { display: none; }
 }
 </style>

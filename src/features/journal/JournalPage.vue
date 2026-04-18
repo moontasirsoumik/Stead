@@ -2,7 +2,6 @@
 import { ref, computed, onMounted } from 'vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
-import ContentCard from '@/components/layout/ContentCard.vue'
 import SButton from '@/components/ui/SButton.vue'
 import SIconButton from '@/components/ui/SIconButton.vue'
 import SBadge from '@/components/ui/SBadge.vue'
@@ -41,19 +40,19 @@ const deletingEntryId = ref<string | null>(null)
 
 const moodOptions = [
   { value: '', label: 'No mood' },
-  { value: 'great', label: '😄 Great' },
-  { value: 'good', label: '🙂 Good' },
-  { value: 'okay', label: '😐 Okay' },
-  { value: 'bad', label: '😕 Bad' },
-  { value: 'terrible', label: '😢 Terrible' },
+  { value: 'great', label: 'Great' },
+  { value: 'good', label: 'Good' },
+  { value: 'okay', label: 'Okay' },
+  { value: 'bad', label: 'Bad' },
+  { value: 'terrible', label: 'Terrible' },
 ]
 
-const moodEmoji: Record<string, string> = {
-  great: '😄',
-  good: '🙂',
-  okay: '😐',
-  bad: '😕',
-  terrible: '😢',
+const moodIcon: Record<string, string> = {
+  great: 'sentiment_very_satisfied',
+  good: 'sentiment_satisfied',
+  okay: 'sentiment_neutral',
+  bad: 'sentiment_dissatisfied',
+  terrible: 'sentiment_very_dissatisfied',
 }
 
 const todayString = computed(() => new Date().toISOString().slice(0, 10))
@@ -172,7 +171,7 @@ onMounted(async () => {
     <ErrorBanner v-if="journalStore.error" :message="journalStore.error" @retry="authStore.householdId && journalStore.fetchEntries(authStore.householdId)" />
 
     <!-- Quick-write CTA -->
-    <ContentCard v-if="!hasTodayEntry && !journalStore.loading" class="today-cta page-enter" :style="{ '--stagger': 1 }">
+    <div v-if="!hasTodayEntry && !journalStore.loading" class="today-cta page-enter" :style="{ '--stagger': 1 }">
       <div class="today-cta__inner">
         <div class="today-cta__text">
           <span class="today-cta__title">How's your day going?</span>
@@ -180,16 +179,16 @@ onMounted(async () => {
         </div>
         <SButton @click="openCreateDrawer(true)">Write today's entry</SButton>
       </div>
-    </ContentCard>
+    </div>
 
-    <ContentCard v-if="journalStore.loading && !journalStore.items.length" class="page-enter journal-card-spaced" :style="{ '--stagger': 2 }">
+    <div v-if="journalStore.loading && !journalStore.items.length" class="page-enter" :style="{ '--stagger': 2 }">
       <LoadingSkeleton :lines="5" />
-    </ContentCard>
+    </div>
 
     <template v-else-if="!journalStore.items.length">
-      <ContentCard class="page-enter journal-card-spaced" :style="{ '--stagger': 2 }">
+      <div class="empty-section page-enter" :style="{ '--stagger': 2 }">
         <EmptyState title="Your journal awaits" subtitle="Capture today's thoughts — even a few words can make a difference." icon="empty" action-label="Write first entry" @action="openCreateDrawer(true)" />
-      </ContentCard>
+      </div>
     </template>
 
     <template v-else>
@@ -209,7 +208,7 @@ onMounted(async () => {
           >
             <div class="journal-entry__date-col">
               <span class="journal-entry__date">{{ formatEntryDate(entry.entry_date) }}</span>
-              <span v-if="entry.mood" class="journal-entry__mood">{{ moodEmoji[entry.mood] }}</span>
+              <span v-if="entry.mood" class="journal-entry__mood material-symbols-rounded">{{ moodIcon[entry.mood] }}</span>
             </div>
             <div class="journal-entry__line" />
             <div class="journal-entry__body">
@@ -268,10 +267,9 @@ onMounted(async () => {
 
 .today-cta {
   margin-bottom: var(--space-l);
-}
-
-.journal-card-spaced {
-  margin-bottom: var(--space-l);
+  padding: var(--space-m) var(--space-l);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-m);
 }
 
 .journal-month {
@@ -299,16 +297,13 @@ onMounted(async () => {
   background: var(--color-surface-card);
   border-radius: var(--radius-l);
   border: 1px solid var(--color-border-default);
-  box-shadow: var(--shadow-2), var(--shadow-card);
   transition:
     background-color var(--duration-fast) var(--easing-standard),
-    border-color var(--duration-fast) var(--easing-standard),
-    box-shadow var(--duration-fast) var(--easing-standard);
+    border-color var(--duration-fast) var(--easing-standard);
 }
 
 .journal-entry:hover {
   background: var(--color-surface-card-hover);
-  box-shadow: var(--shadow-8), var(--shadow-card);
   border-color: var(--color-outline-variant);
 }
 
@@ -331,6 +326,7 @@ onMounted(async () => {
 .journal-entry__mood {
   font-size: 1.5rem;
   line-height: 1;
+  color: var(--color-fg-secondary);
 }
 
 .journal-entry__line {

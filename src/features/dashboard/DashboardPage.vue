@@ -3,8 +3,6 @@ import { computed, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
-import ContentCard from '@/components/layout/ContentCard.vue'
-import InlineStat from '@/components/data/InlineStat.vue'
 import SBadge from '@/components/ui/SBadge.vue'
 import LoadingSkeleton from '@/components/feedback/LoadingSkeleton.vue'
 import { useAuthStore } from '@/stores/auth.store'
@@ -195,420 +193,324 @@ onMounted(() => {
 
 <template>
   <PageContainer>
-    <PageHeader
-      :title="greeting"
-      :subtitle="householdName"
-      class="page-enter"
-      :style="{ '--stagger': 0 }"
-    />
+    <PageHeader :title="greeting" :subtitle="householdName" />
 
-    <!-- Stats row — 4 individual cards instead of a monolithic bar -->
-    <div class="stats-row page-enter" :style="{ '--stagger': 1 }">
-      <div class="stat-card">
-        <InlineStat
-          label="Monthly spending"
-          :value="formatCents(expenses.currentMonthTotal)"
-        />
+    <!-- Stats row — compact bar with vertical dividers -->
+    <div class="stats-row">
+      <div class="stat-cell">
+        <span class="stat-cell__label">Monthly spending</span>
+        <span class="stat-cell__value">{{ formatCents(expenses.currentMonthTotal) }}</span>
       </div>
-      <div class="stat-card">
-        <InlineStat
-          label="Monthly income"
-          :value="formatCents(income.currentMonthTotal)"
-        />
+      <div class="stat-cell">
+        <span class="stat-cell__label">Monthly income</span>
+        <span class="stat-cell__value">{{ formatCents(income.currentMonthTotal) }}</span>
       </div>
-      <div class="stat-card">
-        <InlineStat
-          label="Upcoming bills"
-          :value="String(bills.upcomingBills.length)"
-        />
+      <div class="stat-cell">
+        <span class="stat-cell__label">Upcoming bills</span>
+        <span class="stat-cell__value">{{ bills.upcomingBills.length }}</span>
       </div>
-      <div class="stat-card">
-        <InlineStat
-          label="Tasks due"
-          :value="String(tasks.overdueTasks.length + tasks.dueToday.length)"
-        />
+      <div class="stat-cell">
+        <span class="stat-cell__label">Tasks due</span>
+        <span class="stat-cell__value">{{ tasks.overdueTasks.length + tasks.dueToday.length }}</span>
       </div>
     </div>
 
-    <!-- Bento grid — asymmetric card sizes -->
-    <div class="bento">
-      <!-- Row 1: Tasks (wide) + Bills (narrow) -->
-      <ContentCard padding="md" class="bento__card bento--wide page-enter" :style="{ '--stagger': 2 }">
-        <div class="widget__header">
-          <h3 class="widget__title">Tasks Due</h3>
-          <RouterLink to="/tasks" class="widget__link">View All</RouterLink>
+    <!-- Tasks Due -->
+    <section class="dash-section">
+      <div class="dash-section__header">
+        <h3 class="dash-section__title">Tasks Due ({{ tasksDue.length }})</h3>
+        <RouterLink to="/tasks" class="dash-section__link">View all</RouterLink>
+      </div>
+      <LoadingSkeleton v-if="tasks.loading" :lines="3" />
+      <div v-else-if="tasksDue.length" class="dash-table">
+        <div v-for="task in tasksDue" :key="task.id" class="dash-row">
+          <span class="dash-row__name">{{ task.title }}</span>
+          <span class="dash-row__badge"><SBadge :variant="priorityVariant(task.priority)" size="sm">{{ task.priority }}</SBadge></span>
+          <span class="dash-row__trailing">{{ task.due_date ? formatRelativeDate(task.due_date) : '' }}</span>
+          <span class="dash-row__amount"></span>
         </div>
-        <LoadingSkeleton v-if="tasks.loading" :lines="3" />
-        <template v-else-if="tasksDue.length">
-          <ul class="widget__list">
-            <li v-for="task in tasksDue" :key="task.id" class="widget__item">
-              <div class="widget__item-main">
-                <span class="widget__item-title">{{ task.title }}</span>
-                <SBadge :variant="priorityVariant(task.priority)" size="sm">{{ task.priority }}</SBadge>
-              </div>
-              <span v-if="task.due_date" class="widget__item-meta">{{ formatRelativeDate(task.due_date) }}</span>
-            </li>
-          </ul>
-        </template>
-        <div v-else class="widget__empty">
-          <p class="widget__empty-text">All caught up — no tasks due</p>
-        </div>
-      </ContentCard>
+      </div>
+      <p v-else class="dash-empty">All caught up — no tasks due</p>
+    </section>
 
-      <!-- Bills (household only) -->
-      <ContentCard v-if="!app.isPersonal" padding="md" class="bento__card page-enter" :style="{ '--stagger': 3 }">
-        <div class="widget__header">
-          <h3 class="widget__title">Upcoming Bills</h3>
-          <RouterLink to="/money/bills" class="widget__link">View All</RouterLink>
+    <!-- Upcoming Bills (household only) -->
+    <section v-if="!app.isPersonal" class="dash-section">
+      <div class="dash-section__header">
+        <h3 class="dash-section__title">Upcoming Bills ({{ nextBills.length }})</h3>
+        <RouterLink to="/money/bills" class="dash-section__link">View all</RouterLink>
+      </div>
+      <LoadingSkeleton v-if="bills.loading" :lines="3" />
+      <div v-else-if="nextBills.length" class="dash-table">
+        <div v-for="bill in nextBills" :key="bill.id" class="dash-row">
+          <span class="dash-row__name">{{ bill.name }}</span>
+          <span class="dash-row__badge"><SBadge :variant="bill.status === 'overdue' ? 'error' : 'info'" size="sm">{{ bill.status }}</SBadge></span>
+          <span class="dash-row__trailing">Due day {{ bill.due_day }}</span>
+          <span class="dash-row__amount">{{ formatCents(bill.amount) }}</span>
         </div>
-        <LoadingSkeleton v-if="bills.loading" :lines="3" />
-        <template v-else-if="nextBills.length">
-          <ul class="widget__list">
-            <li v-for="bill in nextBills" :key="bill.id" class="widget__item">
-              <div class="widget__item-main">
-                <span class="widget__item-title">{{ bill.name }}</span>
-                <span class="widget__item-amount">{{ formatCents(bill.amount) }}</span>
-              </div>
-              <div class="widget__item-sub">
-                <span class="widget__item-meta">Due day {{ bill.due_day }}</span>
-                <SBadge :variant="bill.status === 'overdue' ? 'error' : 'info'" size="sm">{{ bill.status }}</SBadge>
-              </div>
-            </li>
-          </ul>
-        </template>
-        <div v-else class="widget__empty">
-          <p class="widget__empty-text">No upcoming bills</p>
-        </div>
-      </ContentCard>
+      </div>
+      <p v-else class="dash-empty">No upcoming bills</p>
+    </section>
 
-      <!-- Row 2: Expenses + Savings + Inventory — 3 equal -->
-      <ContentCard padding="md" class="bento__card page-enter" :style="{ '--stagger': 4 }">
-        <div class="widget__header">
-          <h3 class="widget__title">Recent Expenses</h3>
-          <RouterLink to="/money/expenses" class="widget__link">View All</RouterLink>
+    <!-- Recent Expenses -->
+    <section class="dash-section">
+      <div class="dash-section__header">
+        <h3 class="dash-section__title">Recent Expenses ({{ recentExpenses.length }})</h3>
+        <RouterLink to="/money/expenses" class="dash-section__link">View all</RouterLink>
+      </div>
+      <LoadingSkeleton v-if="expenses.loading" :lines="3" />
+      <div v-else-if="recentExpenses.length" class="dash-table">
+        <div v-for="exp in recentExpenses" :key="exp.id" class="dash-row">
+          <span class="dash-row__name">{{ truncate(exp.description, 30) }}</span>
+          <span class="dash-row__badge"><SBadge variant="default" size="sm">{{ exp.category }}</SBadge></span>
+          <span class="dash-row__trailing">{{ formatRelativeDate(exp.date) }}</span>
+          <span class="dash-row__amount">{{ formatCents(exp.amount) }}</span>
         </div>
-        <LoadingSkeleton v-if="expenses.loading" :lines="3" />
-        <template v-else-if="recentExpenses.length">
-          <ul class="widget__list">
-            <li v-for="exp in recentExpenses" :key="exp.id" class="widget__item">
-              <div class="widget__item-main">
-                <span class="widget__item-title">{{ exp.description }}</span>
-                <span class="widget__item-amount">{{ formatCents(exp.amount) }}</span>
-              </div>
-              <div class="widget__item-sub">
-                <SBadge variant="default" size="sm">{{ exp.category }}</SBadge>
-                <span class="widget__item-meta">{{ formatRelativeDate(exp.date) }}</span>
-              </div>
-            </li>
-          </ul>
-        </template>
-        <div v-else class="widget__empty">
-          <p class="widget__empty-text">No expenses yet</p>
-        </div>
-      </ContentCard>
+      </div>
+      <p v-else class="dash-empty">No expenses yet</p>
+    </section>
 
-      <ContentCard padding="md" class="bento__card page-enter" :style="{ '--stagger': 5 }">
-        <div class="widget__header">
-          <h3 class="widget__title">Savings Progress</h3>
-          <RouterLink to="/money/savings" class="widget__link">View All</RouterLink>
+    <!-- Reminders (household only) -->
+    <section v-if="!app.isPersonal" class="dash-section">
+      <div class="dash-section__header">
+        <h3 class="dash-section__title">Reminders ({{ upcomingReminders.length }})</h3>
+        <RouterLink to="/reminders" class="dash-section__link">View all</RouterLink>
+      </div>
+      <LoadingSkeleton v-if="reminders.loading" :lines="3" />
+      <div v-else-if="upcomingReminders.length" class="dash-table">
+        <div v-for="rem in upcomingReminders" :key="rem.id" class="dash-row">
+          <span class="dash-row__name">{{ rem.title }}</span>
+          <span class="dash-row__badge">
+            <SBadge
+              :variant="rem.status === 'active' && rem.due_date && new Date(rem.due_date) < new Date(new Date().toDateString()) ? 'error' : 'info'"
+              size="sm"
+            >
+              {{ rem.status === 'active' && rem.due_date && new Date(rem.due_date) < new Date(new Date().toDateString()) ? 'overdue' : rem.status }}
+            </SBadge>
+          </span>
+          <span class="dash-row__trailing">{{ rem.due_date ? formatRelativeDate(rem.due_date) : '' }}</span>
+          <span class="dash-row__amount"></span>
+        </div>
+      </div>
+      <p v-else class="dash-empty">No reminders</p>
+    </section>
+
+    <!-- Maintenance (household only) -->
+    <section v-if="!app.isPersonal" class="dash-section">
+      <div class="dash-section__header">
+        <h3 class="dash-section__title">Maintenance ({{ maintenanceAlerts.length }})</h3>
+        <RouterLink to="/tasks" class="dash-section__link">View all</RouterLink>
+      </div>
+      <LoadingSkeleton v-if="tasks.loading" :lines="3" />
+      <div v-else-if="maintenanceAlerts.length" class="dash-table">
+        <div v-for="item in maintenanceAlerts" :key="item.id" class="dash-row">
+          <span class="dash-row__name">{{ item.title }}</span>
+          <span class="dash-row__badge">
+            <SBadge :variant="item.status === 'overdue' || (item.due_date && new Date(item.due_date) < new Date(new Date().toDateString())) ? 'error' : 'default'" size="sm">
+              {{ item.status === 'not_started' ? 'upcoming' : item.status }}
+            </SBadge>
+          </span>
+          <span class="dash-row__trailing">{{ item.due_date ? formatRelativeDate(item.due_date) : '' }}</span>
+          <span class="dash-row__amount"></span>
+        </div>
+      </div>
+      <p v-else class="dash-empty">No maintenance due</p>
+    </section>
+
+    <!-- Pinned Notes -->
+    <!-- Two-column bottom area -->
+    <div class="dash-grid">
+      <!-- Savings Progress -->
+      <section class="dash-section">
+        <div class="dash-section__header">
+          <h3 class="dash-section__title">Savings Progress</h3>
+          <RouterLink to="/money/savings" class="dash-section__link">View all</RouterLink>
         </div>
         <LoadingSkeleton v-if="savings.loading" :lines="3" />
-        <template v-else-if="activeGoals.length">
-          <ul class="widget__list widget__list--goals">
-            <li v-for="goal in activeGoals" :key="goal.id" class="widget__goal">
-              <div class="widget__item-main">
-                <span class="widget__item-title">{{ goal.name }}</span>
-                <span class="widget__item-meta">{{ goalPercent(goal.current_amount, goal.target_amount) }}%</span>
-              </div>
-              <div class="progress-bar">
-                <div
-                  class="progress-bar__fill"
-                  :style="{ width: goalPercent(goal.current_amount, goal.target_amount) + '%' }"
-                />
-              </div>
-              <span class="widget__item-meta">{{ formatCents(goal.current_amount) }} / {{ formatCents(goal.target_amount) }}</span>
-            </li>
-          </ul>
-        </template>
-        <div v-else class="widget__empty">
-          <p class="widget__empty-text">No savings goals</p>
+        <div v-else-if="activeGoals.length" class="dash-table">
+          <div v-for="goal in activeGoals" :key="goal.id" class="goal-row">
+            <div class="goal-row__ring">
+              <svg viewBox="0 0 40 40" class="goal-row__svg">
+                <circle cx="20" cy="20" r="16" fill="none" stroke="var(--color-bg-tertiary)" stroke-width="3" />
+                <circle cx="20" cy="20" r="16" fill="none" stroke="var(--color-brand-primary)" stroke-width="3"
+                  stroke-linecap="round" stroke-dasharray="100.53" :stroke-dashoffset="100.53 - (100.53 * goalPercent(goal.current_amount, goal.target_amount) / 100)"
+                  transform="rotate(-90 20 20)" />
+              </svg>
+              <span class="goal-row__pct">{{ goalPercent(goal.current_amount, goal.target_amount) }}</span>
+            </div>
+            <div class="goal-row__info">
+              <span class="goal-row__name">{{ goal.name }}</span>
+              <span class="goal-row__amounts">{{ formatCents(goal.current_amount) }} / {{ formatCents(goal.target_amount) }}</span>
+            </div>
+          </div>
         </div>
-      </ContentCard>
+        <p v-else class="dash-empty">No savings goals</p>
+      </section>
 
-      <!-- Low Stock (household only) -->
-      <ContentCard v-if="!app.isPersonal" padding="md" class="bento__card page-enter" :style="{ '--stagger': 6 }">
-        <div class="widget__header">
-          <h3 class="widget__title">Low Stock</h3>
-          <RouterLink to="/pantry/inventory" class="widget__link">View All</RouterLink>
-        </div>
-        <LoadingSkeleton v-if="inventory.loading" :lines="3" />
-        <template v-else-if="lowStock.length">
-          <ul class="widget__list">
-            <li v-for="item in lowStock" :key="item.id" class="widget__item">
-              <div class="widget__item-main">
-                <span class="widget__item-title">{{ item.name }}</span>
-                <SBadge :variant="stockVariant(item.stock_status)" size="sm">{{ stockLabel(item.stock_status) }}</SBadge>
-              </div>
-            </li>
-          </ul>
-        </template>
-        <div v-else class="widget__empty">
-          <p class="widget__empty-text">Everything stocked</p>
-        </div>
-      </ContentCard>
-
-      <!-- Row 3: Shopping (wide) + Reminders (household only) -->
-      <ContentCard v-if="!app.isPersonal" padding="md" class="bento__card bento--wide page-enter" :style="{ '--stagger': 7 }">
-        <div class="widget__header">
-          <h3 class="widget__title">Shopping List</h3>
-          <RouterLink to="/pantry/shopping" class="widget__link">View All</RouterLink>
-        </div>
-        <LoadingSkeleton v-if="shopping.loading" :lines="3" />
-        <template v-else-if="neededItems.length">
-          <p class="widget__count">{{ shopping.neededCount }} item{{ shopping.neededCount === 1 ? '' : 's' }} needed</p>
-          <ul class="widget__list">
-            <li v-for="item in neededItems" :key="item.id" class="widget__item">
-              <div class="widget__item-main">
-                <span class="widget__item-title">{{ item.name }}</span>
-                <span v-if="item.quantity > 1" class="widget__item-meta">×{{ item.quantity }}</span>
-              </div>
-            </li>
-          </ul>
-        </template>
-        <div v-else class="widget__empty">
-          <p class="widget__empty-text">Shopping list is empty</p>
-        </div>
-      </ContentCard>
-
-      <ContentCard v-if="!app.isPersonal" padding="md" class="bento__card page-enter" :style="{ '--stagger': 8 }">
-        <div class="widget__header">
-          <h3 class="widget__title">Reminders</h3>
-          <RouterLink to="/reminders" class="widget__link">View All</RouterLink>
-        </div>
-        <LoadingSkeleton v-if="reminders.loading" :lines="3" />
-        <template v-else-if="upcomingReminders.length">
-          <ul class="widget__list">
-            <li v-for="rem in upcomingReminders" :key="rem.id" class="widget__item">
-              <div class="widget__item-main">
-                <span class="widget__item-title">{{ rem.title }}</span>
-                <SBadge
-                  :variant="rem.status === 'active' && rem.due_date && new Date(rem.due_date) < new Date(new Date().toDateString()) ? 'error' : 'info'"
-                  size="sm"
-                >
-                  {{ rem.status === 'active' && rem.due_date && new Date(rem.due_date) < new Date(new Date().toDateString()) ? 'overdue' : rem.status }}
-                </SBadge>
-              </div>
-              <span v-if="rem.due_date" class="widget__item-meta">{{ formatRelativeDate(rem.due_date) }}</span>
-            </li>
-          </ul>
-        </template>
-        <div v-else class="widget__empty">
-          <p class="widget__empty-text">No reminders</p>
-        </div>
-      </ContentCard>
-
-      <!-- Row 4: Notes + Maintenance (wide) -->
-      <ContentCard padding="md" class="bento__card page-enter" :style="{ '--stagger': 9 }">
-        <div class="widget__header">
-          <h3 class="widget__title">Pinned Notes</h3>
-          <RouterLink to="/notes" class="widget__link">View All</RouterLink>
+      <!-- Pinned Notes -->
+      <section class="dash-section">
+        <div class="dash-section__header">
+          <h3 class="dash-section__title">Pinned Notes ({{ pinned.length }})</h3>
+          <RouterLink to="/notes" class="dash-section__link">View all</RouterLink>
         </div>
         <LoadingSkeleton v-if="notes.loading" :lines="3" />
-        <template v-else-if="pinned.length">
-          <ul class="widget__list widget__list--notes">
-            <li v-for="note in pinned" :key="note.id" class="widget__note">
-              <span class="widget__note-title">{{ note.title }}</span>
-              <p class="widget__note-preview">{{ truncate(note.content, 100) }}</p>
-            </li>
-          </ul>
-        </template>
-        <div v-else class="widget__empty">
-          <p class="widget__empty-text">Pin a note to see it here</p>
+        <div v-else-if="pinned.length" class="dash-table">
+          <div v-for="note in pinned" :key="note.id" class="dash-row dash-row--compact note-row">
+            <span class="dash-row__name dash-row__name--bold">{{ note.title }}</span>
+            <span class="note-row__preview">{{ truncate(note.content, 40) }}</span>
+          </div>
         </div>
-      </ContentCard>
-
-      <!-- Maintenance (household only) -->
-      <ContentCard v-if="!app.isPersonal" padding="md" class="bento__card bento--wide page-enter" :style="{ '--stagger': 10 }">
-        <div class="widget__header">
-          <h3 class="widget__title">Maintenance</h3>
-          <RouterLink to="/tasks" class="widget__link">View All</RouterLink>
-        </div>
-        <LoadingSkeleton v-if="tasks.loading" :lines="3" />
-        <template v-else-if="maintenanceAlerts.length">
-          <ul class="widget__list">
-            <li v-for="item in maintenanceAlerts" :key="item.id" class="widget__item">
-              <div class="widget__item-main">
-                <span class="widget__item-title">{{ item.title }}</span>
-                <SBadge :variant="item.status === 'overdue' || (item.due_date && new Date(item.due_date) < new Date(new Date().toDateString())) ? 'error' : 'default'" size="sm">
-                  {{ item.status === 'not_started' ? 'upcoming' : item.status }}
-                </SBadge>
-              </div>
-              <span v-if="item.due_date" class="widget__item-meta">{{ formatRelativeDate(item.due_date) }}</span>
-            </li>
-          </ul>
-        </template>
-        <div v-else class="widget__empty">
-          <p class="widget__empty-text">No maintenance due</p>
-        </div>
-      </ContentCard>
+        <p v-else class="dash-empty">Pin a note to see it here</p>
+      </section>
     </div>
 
-    <!-- Personal scope widgets (only when personal) -->
+    <!-- Low Stock + Shopping row -->
+    <div v-if="!app.isPersonal" class="dash-grid">
+      <section class="dash-section">
+        <div class="dash-section__header">
+          <h3 class="dash-section__title">Low Stock</h3>
+          <RouterLink to="/pantry/inventory" class="dash-section__link">View all</RouterLink>
+        </div>
+        <LoadingSkeleton v-if="inventory.loading" :lines="2" />
+        <div v-else-if="lowStock.length" class="dash-table">
+          <div v-for="item in lowStock" :key="item.id" class="dash-row dash-row--compact">
+            <span class="dash-row__name">{{ item.name }}</span>
+            <span class="dash-row__badge"><SBadge :variant="stockVariant(item.stock_status)" size="sm">{{ stockLabel(item.stock_status) }}</SBadge></span>
+          </div>
+        </div>
+        <p v-else class="dash-empty">Everything stocked</p>
+      </section>
+
+      <section class="dash-section">
+        <div class="dash-section__header">
+          <h3 class="dash-section__title">Shopping List ({{ shopping.neededCount }})</h3>
+          <RouterLink to="/pantry/shopping" class="dash-section__link">View all</RouterLink>
+        </div>
+        <LoadingSkeleton v-if="shopping.loading" :lines="2" />
+        <div v-else-if="neededItems.length" class="dash-table">
+          <div v-for="item in neededItems" :key="item.id" class="dash-row dash-row--compact">
+            <span class="dash-row__name">{{ item.name }}</span>
+            <span v-if="item.quantity > 1" class="dash-row__trailing">×{{ item.quantity }}</span>
+          </div>
+        </div>
+        <p v-else class="dash-empty">Shopping list is empty</p>
+      </section>
+    </div>
+
+    <!-- Personal scope widgets -->
     <template v-if="app.isPersonal">
-      <div class="bento">
-        <ContentCard padding="md" class="bento__card page-enter" :style="{ '--stagger': 11 }">
-          <div class="widget__header">
-            <h3 class="widget__title">Wishlist</h3>
-            <RouterLink to="/wishlist" class="widget__link">View All</RouterLink>
+      <section class="dash-section">
+        <div class="dash-section__header">
+          <h3 class="dash-section__title">Wishlist ({{ wishlistItems.length }})</h3>
+          <RouterLink to="/wishlist" class="dash-section__link">View all</RouterLink>
+        </div>
+        <div v-if="wishlistItems.length" class="dash-table">
+          <div v-for="item in wishlistItems" :key="item.id" class="dash-row">
+            <span class="dash-row__name">{{ item.name }}</span>
+            <span class="dash-row__badge"><SBadge :variant="item.priority === 'high' ? 'error' : item.priority === 'medium' ? 'warning' : 'default'" size="sm">{{ item.priority }}</SBadge></span>
+            <span class="dash-row__trailing"></span>
+            <span class="dash-row__amount">{{ formatCents(item.price) }}</span>
           </div>
-          <template v-if="wishlistItems.length">
-            <ul class="widget__list">
-              <li v-for="item in wishlistItems" :key="item.id" class="widget__item">
-                <div class="widget__item-main">
-                  <span class="widget__item-title">{{ item.name }}</span>
-                  <span class="widget__item-amount">{{ formatCents(item.price) }}</span>
-                </div>
-                <SBadge :variant="item.priority === 'high' ? 'error' : item.priority === 'medium' ? 'warning' : 'default'" size="sm">{{ item.priority }}</SBadge>
-              </li>
-            </ul>
-          </template>
-          <div v-else class="widget__empty">
-            <p class="widget__empty-text">Your wishlist is empty — start dreaming!</p>
-          </div>
-        </ContentCard>
+        </div>
+        <p v-else class="dash-empty">Your wishlist is empty — start dreaming!</p>
+      </section>
 
-        <ContentCard padding="md" class="bento__card page-enter" :style="{ '--stagger': 12 }">
-          <div class="widget__header">
-            <h3 class="widget__title">Subscriptions</h3>
-            <RouterLink to="/subscriptions" class="widget__link">View All</RouterLink>
+      <section class="dash-section">
+        <div class="dash-section__header">
+          <h3 class="dash-section__title">Subscriptions</h3>
+          <RouterLink to="/subscriptions" class="dash-section__link">View all</RouterLink>
+        </div>
+        <template v-if="activeSubscriptions.length">
+          <p class="dash-section__count">{{ formatCents(subscriptions.monthlyTotal) }}/mo</p>
+          <div class="dash-table">
+            <div v-for="sub in activeSubscriptions" :key="sub.id" class="dash-row">
+              <span class="dash-row__name">{{ sub.name }}</span>
+              <span class="dash-row__badge"><SBadge variant="info" size="sm">{{ sub.frequency }}</SBadge></span>
+              <span class="dash-row__trailing"></span>
+              <span class="dash-row__amount">{{ formatCents(sub.amount) }}</span>
+            </div>
           </div>
-          <template v-if="activeSubscriptions.length">
-            <p class="widget__count">{{ formatCents(subscriptions.monthlyTotal) }}/mo</p>
-            <ul class="widget__list">
-              <li v-for="sub in activeSubscriptions" :key="sub.id" class="widget__item">
-                <div class="widget__item-main">
-                  <span class="widget__item-title">{{ sub.name }}</span>
-                  <span class="widget__item-amount">{{ formatCents(sub.amount) }}</span>
-                </div>
-                <SBadge variant="info" size="sm">{{ sub.frequency }}</SBadge>
-              </li>
-            </ul>
-          </template>
-          <div v-else class="widget__empty">
-            <p class="widget__empty-text">No subscriptions tracked</p>
-          </div>
-        </ContentCard>
+        </template>
+        <p v-else class="dash-empty">No subscriptions tracked</p>
+      </section>
 
-        <ContentCard padding="md" class="bento__card page-enter" :style="{ '--stagger': 13 }">
-          <div class="widget__header">
-            <h3 class="widget__title">Habits Today</h3>
-            <RouterLink to="/habits" class="widget__link">View All</RouterLink>
+      <section class="dash-section">
+        <div class="dash-section__header">
+          <h3 class="dash-section__title">Habits Today</h3>
+          <RouterLink to="/habits" class="dash-section__link">View all</RouterLink>
+        </div>
+        <div v-if="activeHabits.length" class="dash-table">
+          <div v-for="habit in activeHabits" :key="habit.id" class="dash-row">
+            <span class="dash-row__name">{{ habit.name }}</span>
+            <span class="dash-row__badge"><SBadge variant="default" size="sm">{{ habit.frequency }}</SBadge></span>
+            <span class="dash-row__trailing"></span>
+            <span class="dash-row__amount"></span>
           </div>
-          <template v-if="activeHabits.length">
-            <ul class="widget__list">
-              <li v-for="habit in activeHabits" :key="habit.id" class="widget__item">
-                <div class="widget__item-main">
-                  <span class="widget__item-title">{{ habit.name }}</span>
-                  <SBadge variant="default" size="sm">{{ habit.frequency }}</SBadge>
-                </div>
-              </li>
-            </ul>
-          </template>
-          <div v-else class="widget__empty">
-            <p class="widget__empty-text">No habits yet — build your first one!</p>
-          </div>
-        </ContentCard>
-      </div>
+        </div>
+        <p v-else class="dash-empty">No habits yet — build your first one!</p>
+      </section>
     </template>
   </PageContainer>
 </template>
 
 <style scoped>
-/* ── Stats row: 4 separate cards ── */
+/* ── Stats row: compact bar with vertical dividers ── */
 .stats-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-l);
-  margin-bottom: var(--space-xl);
-}
-
-.stat-card {
-  background: var(--color-surface-card);
+  display: flex;
+  align-items: stretch;
+  background: var(--color-surface-container-low);
   border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-l);
-  box-shadow: var(--shadow-2), var(--shadow-card);
+  border-radius: var(--radius-m);
+  margin-bottom: var(--space-xl);
   overflow: hidden;
 }
 
-/* ── Bento grid: 3-column base with wide cards spanning 2 ── */
-.bento {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-l);
+.stat-cell {
+  flex: 1;
+  padding: var(--space-m) var(--space-l);
+  border-right: 1px solid var(--color-border-default);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.bento--wide {
-  grid-column: span 2;
+.stat-cell:last-child {
+  border-right: none;
 }
 
-.section-title {
-  font: var(--text-title-3);
+.stat-cell__label {
+  font: var(--text-caption);
+  color: var(--color-fg-tertiary);
+}
+
+.stat-cell__value {
+  font: var(--text-body-1);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-fg-primary);
-  margin: var(--space-xl) 0 var(--space-l);
 }
 
-/* ── Responsive ── */
-@media (max-width: 1200px) {
-  .stats-row {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .bento {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .bento--wide {
-    grid-column: span 2;
-  }
+/* ── Section headers ── */
+.dash-section {
+  margin-bottom: var(--space-xl);
 }
 
-@media (max-width: 768px) {
-  .stats-row {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .bento {
-    grid-template-columns: 1fr;
-  }
-
-  .bento--wide {
-    grid-column: span 1;
-  }
-}
-
-@media (max-width: 480px) {
-  .stats-row {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* ── Widget internals ── */
-.widget__header {
+.dash-section__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--space-m);
+  padding-bottom: var(--space-s);
+  border-bottom: 1px solid var(--color-border-default);
+  margin-bottom: var(--space-s);
 }
 
-.widget__title {
-  font: var(--text-caption);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-fg-tertiary);
+.dash-section__title {
+  font: var(--text-label-md);
   text-transform: uppercase;
   letter-spacing: var(--tracking-caps);
+  color: var(--color-fg-tertiary);
+  margin: 0;
 }
 
-.widget__link {
+.dash-section__link {
   font: var(--text-caption);
   color: var(--color-brand-primary);
   text-decoration: none;
@@ -616,52 +518,41 @@ onMounted(() => {
   transition: color var(--duration-fast) var(--easing-standard);
 }
 
-.widget__link:hover {
+.dash-section__link:hover {
   color: var(--color-brand-pressed);
   text-decoration: underline;
 }
 
-.widget__count {
+.dash-section__count {
   font: var(--text-caption);
   color: var(--color-fg-secondary);
-  margin-bottom: var(--space-s);
+  margin-bottom: var(--space-xs);
 }
 
-.widget__list {
+/* ── Uniform table rows — grid for alignment ── */
+.dash-table {
   display: flex;
   flex-direction: column;
-  list-style: none;
-  margin: 0;
-  padding: 0;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-m);
+  overflow: hidden;
 }
 
-.widget__item {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: var(--space-s) 0;
-  border-bottom: 1px solid var(--color-border-subtle);
-  min-height: 32px;
-  justify-content: center;
-}
-
-.widget__item:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.widget__item:first-child {
-  padding-top: 0;
-}
-
-.widget__item-main {
-  display: flex;
+.dash-row {
+  display: grid;
+  grid-template-columns: minmax(100px, 1fr) 110px 90px 90px;
   align-items: center;
-  justify-content: space-between;
+  min-height: 40px;
+  padding: var(--space-xs) var(--space-l);
+  border-bottom: 1px solid var(--color-border-subtle);
   gap: var(--space-s);
 }
 
-.widget__item-title {
+.dash-row:last-child {
+  border-bottom: none;
+}
+
+.dash-row__name {
   font: var(--text-body-2);
   color: var(--color-fg-primary);
   overflow: hidden;
@@ -670,94 +561,200 @@ onMounted(() => {
   min-width: 0;
 }
 
-.widget__item-amount {
+.dash-row__name--bold {
+  font-weight: var(--font-weight-medium);
+}
+
+.dash-row__amount {
   font: var(--text-body-2);
   color: var(--color-fg-primary);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
   font-family: var(--font-mono);
+  white-space: nowrap;
+  text-align: right;
+}
+
+.dash-row__badge {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.dash-row__trailing {
+  font: var(--text-caption);
+  color: var(--color-fg-tertiary);
+  white-space: nowrap;
+  text-align: right;
+}
+
+.dash-empty {
+  font: var(--text-body-2);
+  color: var(--color-fg-tertiary);
+  padding: var(--space-l) 0;
+  margin: 0;
+}
+
+/* ── Two-column grid ── */
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
+  gap: var(--space-l);
+  margin-bottom: var(--space-xl);
+}
+
+/* ── Compact two-column rows (Low Stock, Shopping, Notes) ── */
+.dash-row--compact {
+  grid-template-columns: 1fr auto;
+}
+
+/* ── Note row inside dash-table ── */
+.note-row {
+  cursor: pointer;
+}
+
+.note-row__preview {
+  font: var(--text-caption);
+  color: var(--color-fg-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Savings goal rows inside dash-table ── */
+.goal-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-m);
+  padding: var(--space-s) var(--space-l);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.goal-row:last-child {
+  border-bottom: none;
+}
+
+.goal-row__ring {
+  position: relative;
+  width: 36px;
+  height: 36px;
   flex-shrink: 0;
 }
 
-.widget__item-sub {
+.goal-row__svg {
+  width: 36px;
+  height: 36px;
+  display: block;
+}
+
+.goal-row__pct {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: var(--text-caption);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-fg-primary);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  line-height: 1;
+}
+
+.goal-row__info {
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-s);
 }
 
-.widget__item-meta {
-  font: var(--text-caption);
-  color: var(--color-fg-tertiary);
-  flex-shrink: 0;
-}
-
-.widget__empty {
-  padding: var(--space-xl) 0;
-  text-align: center;
-}
-
-.widget__empty-text {
+.goal-row__name {
   font: var(--text-body-2);
-  color: var(--color-fg-tertiary);
-}
-
-.widget__goal {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  padding: var(--space-s) 0;
-  border-bottom: 1px solid var(--color-border-subtle);
-}
-
-.widget__goal:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.widget__goal:first-child {
-  padding-top: 0;
-}
-
-.progress-bar {
-  height: 4px;
-  width: 100%;
-  background: var(--color-bg-tertiary);
-  border-radius: var(--radius-s);
-  overflow: hidden;
-}
-
-.progress-bar__fill {
-  height: 100%;
-  background: var(--color-brand-primary);
-  border-radius: var(--radius-s);
-  transition: width var(--duration-normal) var(--easing-standard);
-}
-
-.widget__note {
-  padding: var(--space-s) 0;
-  border-bottom: 1px solid var(--color-border-subtle);
-}
-
-.widget__note:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.widget__note:first-child {
-  padding-top: 0;
-}
-
-.widget__note-title {
-  font: var(--text-body-2);
-  font-weight: var(--font-weight-medium);
   color: var(--color-fg-primary);
-  display: block;
-  margin-bottom: 2px;
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.widget__note-preview {
+.goal-row__amounts {
   font: var(--text-caption);
-  color: var(--color-fg-secondary);
-  line-height: 1.5;
+  color: var(--color-fg-tertiary);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .stat-cell {
+    border-right: none;
+  }
+
+  .stat-cell:nth-child(odd) {
+    border-right: 1px solid var(--color-border-default);
+  }
+
+  .stat-cell:nth-child(1),
+  .stat-cell:nth-child(2) {
+    border-bottom: 1px solid var(--color-border-default);
+  }
+
+  .dash-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dash-row {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    min-height: auto;
+    padding: var(--space-s) var(--space-m);
+    row-gap: var(--space-2xs);
+  }
+
+  .dash-row__name {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .dash-row__amount {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .dash-row__badge {
+    grid-column: 1;
+    grid-row: 2;
+    justify-content: flex-start;
+  }
+
+  .dash-row__trailing {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-cell {
+    border-right: none;
+  }
+
+  .stat-cell:nth-child(odd) {
+    border-right: none;
+  }
+
+  .stat-cell:not(:last-child) {
+    border-bottom: 1px solid var(--color-border-default);
+  }
 }
 </style>

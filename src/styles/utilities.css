@@ -1,6 +1,6 @@
 /* ============================================================
-   Stead — Utility Classes
-   Minimal, token-based utility helpers
+   Stead — Utility Classes  ·  "Refined Utility"
+   Minimal, token-based utility helpers.
    ============================================================ */
 
 /* ── Visibility ── */
@@ -16,16 +16,21 @@
   border: 0;
 }
 
-/* ── Text ── */
+/* ── Typography ── */
 .text-display { font: var(--text-display); }
 .text-title-1 { font: var(--text-title-1); }
 .text-title-2 { font: var(--text-title-2); }
 .text-title-3 { font: var(--text-title-3); }
+.text-subtitle-1 { font: var(--text-subtitle-1); }
 .text-body-1 { font: var(--text-body-1); }
 .text-body-1-strong { font: var(--text-body-1-strong); }
 .text-body-2 { font: var(--text-body-2); }
 .text-caption { font: var(--text-caption); }
+.text-label-lg { font: var(--text-label-lg); }
+.text-label-md { font: var(--text-label-md); }
+.text-label-sm { font: var(--text-label-sm); }
 
+/* ── Color ── */
 .text-secondary { color: var(--color-fg-secondary); }
 .text-tertiary { color: var(--color-fg-tertiary); }
 .text-muted { color: var(--color-fg-muted); }
@@ -34,6 +39,7 @@
 .text-warning { color: var(--color-warning); }
 .text-error { color: var(--color-error); }
 
+/* ── Truncation ── */
 .truncate {
   overflow: hidden;
   text-overflow: ellipsis;

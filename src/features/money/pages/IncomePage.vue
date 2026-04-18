@@ -2,7 +2,6 @@
 import { ref, computed, onMounted } from 'vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
-import ContentCard from '@/components/layout/ContentCard.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import ErrorBanner from '@/components/feedback/ErrorBanner.vue'
 import LoadingSkeleton from '@/components/feedback/LoadingSkeleton.vue'
@@ -183,7 +182,15 @@ onMounted(async () => {
       <LoadingSkeleton :lines="5" />
     </div>
 
-    <div v-else-if="scopedSorted.length" class="income-list">
+    <div v-else-if="scopedSorted.length" class="income-table">
+      <div class="income-table__header">
+        <span class="income-table__th">Source</span>
+        <span class="income-table__th income-table__th--center">Category</span>
+        <span class="income-table__th income-table__th--center">Date</span>
+        <span class="income-table__th income-table__th--center">Received by</span>
+        <span class="income-table__th income-table__th--center">Recurring</span>
+        <span class="income-table__th income-table__th--right">Amount</span>
+      </div>
       <div
         v-for="(item, idx) in scopedSorted"
         :key="item.id"
@@ -191,20 +198,22 @@ onMounted(async () => {
         :style="{ '--stagger': 3 + idx }"
         @click="openEdit(item)"
       >
-        <div class="income-row__left">
+        <div class="income-row__source">{{ item.source }}</div>
+        <div class="income-row__category">
           <SBadge variant="success" size="sm">{{ item.category }}</SBadge>
-          <span class="income-row__source">{{ item.source }}</span>
-          <span class="income-row__date">{{ formatDate(item.date) }}</span>
         </div>
-        <div class="income-row__right">
+        <div class="income-row__date">{{ formatDate(item.date) }}</div>
+        <div class="income-row__payer">
           <SAvatar :name="getMemberName(item.received_by)" :color="getMemberColor(item.received_by)" size="sm" />
-          <SBadge v-if="item.recurring" variant="info" size="sm">Recurring</SBadge>
-          <span class="income-row__amount">{{ formatCents(item.amount) }}</span>
         </div>
+        <div class="income-row__recurring">
+          <SBadge v-if="item.recurring" variant="info" size="sm">Recurring</SBadge>
+        </div>
+        <div class="income-row__amount">{{ formatCents(item.amount) }}</div>
       </div>
     </div>
 
-    <ContentCard v-else class="page-enter" :style="{ '--stagger': 3 }">
+    <div v-else class="empty-section page-enter" :style="{ '--stagger': 3 }">
       <EmptyState
         title="No income recorded"
         subtitle="Add income entries to track your household earnings"
@@ -212,7 +221,7 @@ onMounted(async () => {
         action-label="Add Income"
         @action="openAdd"
       />
-    </ContentCard>
+    </div>
 
     <FormDrawer
       :open="drawerOpen"
@@ -268,19 +277,38 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.income-list {
+.income-table {
   display: flex;
   flex-direction: column;
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-l);
-  background: var(--color-surface-card);
-  box-shadow: var(--shadow-2), var(--shadow-card);
+  overflow: hidden;
 }
 
-.income-row {
-  display: flex;
+.income-table__header {
+  display: grid;
+  grid-template-columns: 1fr 100px 100px 60px 90px 110px;
   align-items: center;
-  justify-content: space-between;
+  padding: var(--space-s) var(--space-l);
+  background: var(--color-surface-container-low);
+  border-bottom: 1px solid var(--color-border-default);
+  gap: var(--space-m);
+}
+
+.income-table__th {
+  font: var(--text-label-sm);
+  color: var(--color-fg-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+}
+
+.income-table__th--center { text-align: center; }
+.income-table__th--right { text-align: right; }
+
+.income-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 100px 60px 90px 110px;
+  align-items: center;
   min-height: var(--height-row-min);
   padding: 0 var(--space-l);
   gap: var(--space-m);
@@ -289,20 +317,8 @@ onMounted(async () => {
   transition: background var(--duration-fast) var(--easing-standard);
 }
 
-.income-row:last-child {
-  border-bottom: none;
-}
-
-.income-row:hover {
-  background: var(--color-bg-tertiary);
-}
-
-.income-row__left {
-  display: flex;
-  align-items: center;
-  gap: var(--space-m);
-  min-width: 0;
-}
+.income-row:last-child { border-bottom: none; }
+.income-row:hover { background: var(--color-bg-tertiary); }
 
 .income-row__source {
   font: var(--text-body-2);
@@ -313,38 +329,37 @@ onMounted(async () => {
   text-overflow: ellipsis;
 }
 
+.income-row__category,
+.income-row__payer,
+.income-row__recurring {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .income-row__date {
   font: var(--text-caption);
   color: var(--color-fg-tertiary);
   white-space: nowrap;
-}
-
-.income-row__right {
-  display: flex;
-  align-items: center;
-  gap: var(--space-m);
-  flex-shrink: 0;
+  text-align: center;
 }
 
 .income-row__amount {
   font: var(--text-body-2);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
   font-family: var(--font-mono);
   color: var(--color-success);
   white-space: nowrap;
-  min-width: 56px;
   text-align: right;
 }
 
 @media (max-width: 640px) {
+  .income-table__header { display: none; }
   .income-row {
-    flex-wrap: wrap;
-    padding: var(--space-xs) var(--space-l);
+    grid-template-columns: 1fr auto auto auto;
+    padding: var(--space-s) var(--space-l);
   }
-
-  .income-row__right {
-    width: 100%;
-    justify-content: flex-end;
-  }
+  .income-row__date,
+  .income-row__recurring { display: none; }
 }
 </style>

@@ -65,34 +65,31 @@ function select(value: string) {
   display: inline-flex;
   align-items: center;
   gap: var(--space-xs);
-  height: var(--height-input);
-  padding: 0 var(--space-m);
+  height: var(--height-sm);
+  padding: 0 var(--space-s);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-m);
   background: var(--color-bg-primary);
   font: var(--text-body-2);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   color: var(--color-fg-secondary);
   cursor: pointer;
-  transition:
-    border-color var(--duration-fast) var(--easing-standard),
-    box-shadow var(--duration-fast) var(--easing-standard);
+  transition: border-color var(--duration-fast) var(--easing-standard);
 }
 
 .sortmenu__trigger:hover {
   border-color: var(--color-border-strong);
-  box-shadow: var(--shadow-2);
 }
 
 .sortmenu__dropdown {
   position: absolute;
-  top: calc(100% + var(--space-xs));
+  top: calc(100% + var(--space-2xs));
   right: 0;
   min-width: 180px;
-  background: var(--color-surface-dialog);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-default);
   border-radius: var(--radius-m);
-  box-shadow: var(--shadow-8);
-  padding: var(--space-xs);
+  padding: var(--space-2xs);
   z-index: 50;
 }
 
@@ -101,7 +98,7 @@ function select(value: string) {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: var(--space-xs) var(--space-m);
+  padding: var(--space-xs) var(--space-s);
   border-radius: var(--radius-s);
   font: var(--text-body-2);
   color: var(--color-fg-primary);
@@ -126,7 +123,6 @@ function select(value: string) {
   z-index: 40;
 }
 
-/* Transition */
 .dropdown-enter-active {
   transition: opacity var(--duration-fast) var(--easing-decelerate),
     transform var(--duration-fast) var(--easing-decelerate);

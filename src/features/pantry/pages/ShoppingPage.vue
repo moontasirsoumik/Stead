@@ -2,11 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
-import ContentCard from '@/components/layout/ContentCard.vue'
 import FilterBar from '@/components/data/FilterBar.vue'
-import SectionHeader from '@/components/data/SectionHeader.vue'
-import DataList from '@/components/data/DataList.vue'
-import InlineStat from '@/components/data/InlineStat.vue'
 import SButton from '@/components/ui/SButton.vue'
 import SIconButton from '@/components/ui/SIconButton.vue'
 import SBadge from '@/components/ui/SBadge.vue'
@@ -14,7 +10,6 @@ import SSelect from '@/components/ui/SSelect.vue'
 import SInput from '@/components/ui/SInput.vue'
 import STextarea from '@/components/ui/STextarea.vue'
 import SAvatar from '@/components/ui/SAvatar.vue'
-import StatusBadge from '@/components/feedback/StatusBadge.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import ErrorBanner from '@/components/feedback/ErrorBanner.vue'
 import LoadingSkeleton from '@/components/feedback/LoadingSkeleton.vue'
@@ -245,9 +240,15 @@ onMounted(async () => {
 
     <PantryTabs />
 
-    <div class="stats-row page-enter" :style="{ '--stagger': 1 }">
-      <InlineStat label="Needed" :value="shoppingStore.neededCount" />
-      <InlineStat label="In Cart" :value="shoppingStore.inCartCount" />
+    <div class="stats-bar page-enter" :style="{ '--stagger': 1 }">
+      <div class="stats-bar__cell">
+        <span class="stats-bar__label">Needed</span>
+        <span class="stats-bar__value">{{ shoppingStore.neededCount }}</span>
+      </div>
+      <div class="stats-bar__cell">
+        <span class="stats-bar__label">In Cart</span>
+        <span class="stats-bar__value">{{ shoppingStore.inCartCount }}</span>
+      </div>
     </div>
 
     <ErrorBanner v-if="shoppingStore.error" :message="shoppingStore.error" @retry="authStore.householdId && shoppingStore.fetchItems(authStore.householdId)" />
@@ -264,45 +265,50 @@ onMounted(async () => {
       </template>
     </FilterBar>
 
-    <ContentCard v-if="shoppingStore.loading && !shoppingStore.items.length" class="page-enter" :style="{ '--stagger': 3 }">
+    <div v-if="shoppingStore.loading && !shoppingStore.items.length" class="page-enter" :style="{ '--stagger': 3 }">
       <LoadingSkeleton :lines="5" />
-    </ContentCard>
+    </div>
 
-    <ContentCard v-else-if="!filteredItems.length" class="page-enter" :style="{ '--stagger': 3 }">
+    <div v-else-if="!filteredItems.length" class="empty-section page-enter" :style="{ '--stagger': 3 }">
       <EmptyState v-if="!shoppingStore.items.length" title="Shopping list is empty" subtitle="Add items you need to pick up." icon="empty" action-label="Add item" @action="openCreateDrawer" />
       <EmptyState v-else title="No matches" subtitle="Try adjusting your filters or search term." icon="search" />
-    </ContentCard>
+    </div>
 
-    <template v-else>
-      <div v-for="([category, items], ci) in groupedByCategory" :key="category" class="page-enter" :style="{ '--stagger': 3 + ci }">
-        <SectionHeader :title="category" :count="items.length" />
-        <ContentCard>
-          <DataList dividers>
-            <div v-for="item in items" :key="item.id" class="shop-row" role="listitem">
-              <button class="shop-row__status-btn" @click.stop="shoppingStore.toggleStatus(item.id)" :title="'Toggle status'">
-                <StatusBadge :variant="statusVariant(item.status)">{{ statusLabel(item.status) }}</StatusBadge>
-              </button>
-              <span class="shop-row__name">{{ item.name }}</span>
-              <span v-if="item.quantity > 1 || item.unit" class="shop-row__qty">
-                {{ item.quantity }}<template v-if="item.unit"> {{ item.unit }}</template>
-              </span>
-              <div class="shop-row__end">
-                <SBadge v-if="item.priority !== 'medium'" :variant="priorityVariant(item.priority)" size="sm">{{ item.priority }}</SBadge>
-                <SAvatar v-if="getMemberName(item.assigned_to)" :name="getMemberName(item.assigned_to)!" size="sm" />
-                <div class="shop-row__actions" @click.stop>
-                  <SIconButton label="Edit" size="sm" @click="openEditDrawer(item)">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10 2L12 4L5 11H3V9L10 2Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
-                  </SIconButton>
-                  <SIconButton label="Delete" size="sm" @click="confirmDelete(item.id)">
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 3L9 9M9 3L3 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
-                  </SIconButton>
-                </div>
-              </div>
-            </div>
-          </DataList>
-        </ContentCard>
+    <div v-else class="shop-table page-enter" :style="{ '--stagger': 3 }">
+      <div class="shop-table__header">
+        <span class="shop-table__th">Item</span>
+        <span class="shop-table__th shop-table__th--center">Status</span>
+        <span class="shop-table__th shop-table__th--center">Category</span>
+        <span class="shop-table__th shop-table__th--center">Priority</span>
+        <span class="shop-table__th shop-table__th--center">Qty</span>
+        <span class="shop-table__th shop-table__th--center">Assignee</span>
       </div>
-    </template>
+      <div
+        v-for="item in filteredItems"
+        :key="item.id"
+        class="shop-row"
+        @click="openEditDrawer(item)"
+      >
+        <div class="shop-row__name">{{ item.name }}</div>
+        <div class="shop-row__status" @click.stop>
+          <button class="shop-row__status-btn" @click="shoppingStore.toggleStatus(item.id)">
+            <SBadge :variant="statusVariant(item.status)" size="sm">{{ statusLabel(item.status) }}</SBadge>
+          </button>
+        </div>
+        <div class="shop-row__category">
+          <SBadge v-if="item.category" size="sm">{{ item.category }}</SBadge>
+        </div>
+        <div class="shop-row__priority">
+          <SBadge v-if="item.priority !== 'medium'" :variant="priorityVariant(item.priority)" size="sm">{{ item.priority }}</SBadge>
+        </div>
+        <div class="shop-row__qty">
+          <span v-if="item.quantity > 1 || item.unit">{{ item.quantity }}<template v-if="item.unit"> {{ item.unit }}</template></span>
+        </div>
+        <div class="shop-row__assignee">
+          <SAvatar v-if="getMemberName(item.assigned_to)" :name="getMemberName(item.assigned_to)!" size="sm" />
+        </div>
+      </div>
+    </div>
 
     <FormDrawer :open="drawerOpen" :title="editingItem ? 'Edit Item' : 'Add Item'" :submit-label="editingItem ? 'Update' : 'Add'" :loading="drawerLoading" @close="drawerOpen = false" @submit="handleSubmit">
       <FormSection>
@@ -325,43 +331,101 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.stats-row {
+/* ── Stats bar ── */
+.stats-bar {
   display: flex;
   align-items: stretch;
+  background: var(--color-surface-container-low);
   border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-l);
-  background: var(--color-surface-card);
-  box-shadow: var(--shadow-2), var(--shadow-card);
+  border-radius: var(--radius-m);
   margin-bottom: var(--space-l);
   overflow: hidden;
 }
-
-.stats-row > * {
+.stats-bar__cell {
   flex: 1;
-  border-right: 1px solid var(--color-border-subtle);
+  padding: var(--space-m) var(--space-l);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  border-right: 1px solid var(--color-border-default);
+}
+.stats-bar__cell:last-child { border-right: none; }
+.stats-bar__label {
+  font: var(--text-caption);
+  color: var(--color-fg-secondary);
+}
+.stats-bar__value {
+  font: var(--text-body-1-strong);
+  color: var(--color-fg-primary);
 }
 
-.stats-row > *:last-child {
-  border-right: none;
+/* ── Data table ── */
+.shop-table {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-l);
+  overflow: hidden;
 }
 
+.shop-table__header {
+  display: grid;
+  grid-template-columns: 1fr 90px 100px 80px 60px 60px;
+  align-items: center;
+  padding: var(--space-s) var(--space-l);
+  background: var(--color-surface-container-low);
+  border-bottom: 1px solid var(--color-border-default);
+  gap: var(--space-m);
+}
+
+.shop-table__th {
+  font: var(--text-label-sm);
+  color: var(--color-fg-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+}
+
+.shop-table__th--center { text-align: center; }
+
+/* ── Quick add ── */
 .quick-add {
   display: flex;
   gap: var(--space-xs);
   align-items: center;
 }
 
+/* ── Shopping row ── */
 .shop-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 90px 100px 80px 60px 60px;
   align-items: center;
-  gap: var(--space-m);
   min-height: var(--height-row-min);
-  padding: var(--space-xs) var(--space-l);
+  padding: 0 var(--space-l);
+  gap: var(--space-m);
+  border-bottom: 1px solid var(--color-border-subtle);
+  cursor: pointer;
   transition: background var(--duration-fast) var(--easing-standard);
 }
 
-.shop-row:hover {
-  background: var(--color-bg-tertiary);
+.shop-row:last-child { border-bottom: none; }
+.shop-row:hover { background: var(--color-bg-tertiary); }
+
+.shop-row__name {
+  font: var(--text-body-2);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-fg-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shop-row__status,
+.shop-row__category,
+.shop-row__priority,
+.shop-row__assignee {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .shop-row__status-btn {
@@ -369,51 +433,20 @@ onMounted(async () => {
   border: none;
   cursor: pointer;
   padding: 0;
-  flex-shrink: 0;
-}
-
-.shop-row__name {
-  font: var(--text-body-2);
-  color: var(--color-fg-primary);
-  font-weight: var(--font-weight-medium);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
-  flex-shrink: 1;
 }
 
 .shop-row__qty {
   font: var(--text-caption);
   color: var(--color-fg-tertiary);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.shop-row__end {
-  display: flex;
-  align-items: center;
-  gap: var(--space-s);
-  flex-shrink: 0;
-  margin-left: auto;
-}
-
-.shop-row__actions {
-  display: flex;
-  gap: var(--space-2xs);
-  opacity: 0;
-  transition: opacity var(--duration-fast) var(--easing-standard);
-}
-
-.shop-row:hover .shop-row__actions {
-  opacity: 1;
+  text-align: center;
 }
 
 @media (max-width: 640px) {
-  .stats-row { flex-direction: column; }
-  .stats-row > * { border-right: none; border-bottom: 1px solid var(--color-border-subtle); }
-  .stats-row > *:last-child { border-bottom: none; }
-  .shop-row { flex-wrap: wrap; }
-  .shop-row__actions { opacity: 1; }
+  .shop-table__header { display: none; }
+  .shop-row {
+    grid-template-columns: 1fr auto auto auto;
+    padding: var(--space-s) var(--space-l);
+  }
+  .shop-row__category, .shop-row__priority, .shop-row__qty { display: none; }
 }
 </style>

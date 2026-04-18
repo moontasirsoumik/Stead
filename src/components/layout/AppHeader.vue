@@ -44,9 +44,7 @@ defineEmits<{
   justify-content: space-between;
   height: var(--height-header);
   padding: 0 var(--space-l);
-  background: rgba(255, 255, 255, 0.80);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--color-bg-primary);
   border-bottom: 1px solid var(--color-border-default);
 }
 
@@ -70,6 +68,7 @@ defineEmits<{
   display: flex;
   align-items: center;
   gap: var(--space-s);
+  text-decoration: none;
 }
 
 .header__logo {
@@ -82,7 +81,7 @@ defineEmits<{
   color: var(--color-fg-on-brand);
   font-weight: 700;
   font-size: 13px;
-  border-radius: var(--radius-m);
+  border-radius: var(--radius-s);
 }
 
 .header__title {
@@ -102,6 +101,8 @@ defineEmits<{
   align-items: center;
   padding: var(--space-2xs);
   border-radius: var(--radius-circle);
+  border: none;
+  background: transparent;
   cursor: pointer;
   transition: background-color var(--duration-fast) var(--easing-standard);
 }

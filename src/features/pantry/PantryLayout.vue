@@ -11,5 +11,6 @@
 .pantry-layout {
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 </style>

@@ -2,10 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
-import ContentCard from '@/components/layout/ContentCard.vue'
 import FilterBar from '@/components/data/FilterBar.vue'
-import DataList from '@/components/data/DataList.vue'
-import SectionHeader from '@/components/data/SectionHeader.vue'
 import SButton from '@/components/ui/SButton.vue'
 import SBadge from '@/components/ui/SBadge.vue'
 import SInput from '@/components/ui/SInput.vue'
@@ -218,11 +215,11 @@ onMounted(async () => {
       <SSelect v-model="typeFilter" :options="typeFilterOptions" placeholder="Type" />
     </FilterBar>
 
-    <ContentCard v-if="documentsStore.loading && !documentsStore.items.length" class="page-enter" :style="{ '--stagger': 3 }">
+    <div v-if="documentsStore.loading && !documentsStore.items.length" class="page-enter" :style="{ '--stagger': 3 }">
       <LoadingSkeleton :lines="5" />
-    </ContentCard>
+    </div>
 
-    <ContentCard v-else-if="!filteredItems.length" class="page-enter" :style="{ '--stagger': 3 }">
+    <div v-else-if="!filteredItems.length" class="empty-section page-enter" :style="{ '--stagger': 3 }">
       <EmptyState
         v-if="!documentsStore.items.length"
         title="No documents tracked"
@@ -232,47 +229,41 @@ onMounted(async () => {
         @action="openCreateDrawer"
       />
       <EmptyState v-else title="No matches" subtitle="Try adjusting your filters or search term." icon="search" />
-    </ContentCard>
+    </div>
 
-    <ContentCard v-else class="page-enter" :style="{ '--stagger': 3 }">
-      <DataList dividers>
-        <div v-for="doc in filteredItems" :key="doc.id" class="doc-row" role="listitem" @click="openEditDrawer(doc)">
-          <div class="doc-row__icon">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M6 2H12L16 6V16C16 17.1 15.1 18 14 18H6C4.9 18 4 17.1 4 16V4C4 2.9 4.9 2 6 2Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /><path d="M12 2V6H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
-          </div>
-
-          <div class="doc-row__body">
-            <span class="doc-row__title">{{ doc.title }}</span>
-            <span v-if="doc.issuer" class="doc-row__issuer">{{ doc.issuer }}</span>
-          </div>
-
-          <div class="doc-row__meta">
-            <SBadge :variant="docTypeVariant(doc.doc_type)" size="sm">{{ doc.doc_type }}</SBadge>
-            <SBadge v-if="expiryStatus(doc) === 'expired'" variant="error" size="sm">Expired</SBadge>
-            <SBadge v-else-if="expiryStatus(doc) === 'expiring'" variant="warning" size="sm">Expiring soon</SBadge>
-          </div>
-
-          <div class="doc-row__dates">
-            <span v-if="doc.issue_date" class="doc-row__date">
-              <span class="doc-row__date-label">Issued</span>
-              {{ formatDate(doc.issue_date) }}
-            </span>
-            <span v-if="doc.expiry_date" class="doc-row__date">
-              <span class="doc-row__date-label">Expires</span>
-              {{ formatDate(doc.expiry_date) }}
-            </span>
-          </div>
-
-          <span v-if="doc.reference_number" class="doc-row__ref">#{{ doc.reference_number }}</span>
-
-          <div class="doc-row__actions" @click.stop>
-            <SIconButton label="Delete" size="sm" @click="confirmDelete(doc.id)">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 4H12M5 4V2.5H9V4M5.5 6V10.5M8.5 6V10.5M3.5 4L4 11.5H10L10.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-            </SIconButton>
-          </div>
+    <div v-else class="doc-table page-enter" :style="{ '--stagger': 3 }">
+      <div class="doc-table__header">
+        <span class="doc-table__th">Document</span>
+        <span class="doc-table__th doc-table__th--center">Type</span>
+        <span class="doc-table__th doc-table__th--center">Status</span>
+        <span class="doc-table__th doc-table__th--right">Issued</span>
+        <span class="doc-table__th doc-table__th--right">Expires</span>
+        <span class="doc-table__th doc-table__th--right">Ref #</span>
+        <span class="doc-table__th doc-table__th--right">Actions</span>
+      </div>
+      <div v-for="doc in filteredItems" :key="doc.id" class="doc-row" role="listitem" @click="openEditDrawer(doc)">
+        <div class="doc-row__name-col">
+          <span class="doc-row__title">{{ doc.title }}</span>
+          <span v-if="doc.issuer" class="doc-row__issuer">{{ doc.issuer }}</span>
         </div>
-      </DataList>
-    </ContentCard>
+        <div class="doc-row__type">
+          <SBadge :variant="docTypeVariant(doc.doc_type)" size="sm">{{ doc.doc_type }}</SBadge>
+        </div>
+        <div class="doc-row__status">
+          <SBadge v-if="expiryStatus(doc) === 'expired'" variant="error" size="sm">Expired</SBadge>
+          <SBadge v-else-if="expiryStatus(doc) === 'expiring'" variant="warning" size="sm">Expiring</SBadge>
+          <SBadge v-else-if="expiryStatus(doc) === 'ok'" variant="success" size="sm">Valid</SBadge>
+        </div>
+        <div class="doc-row__date">{{ doc.issue_date ? formatDate(doc.issue_date) : '—' }}</div>
+        <div class="doc-row__date">{{ doc.expiry_date ? formatDate(doc.expiry_date) : '—' }}</div>
+        <div class="doc-row__ref">{{ doc.reference_number ? '#' + doc.reference_number : '' }}</div>
+        <div class="doc-row__actions" @click.stop>
+          <SIconButton label="Delete" size="sm" @click="confirmDelete(doc.id)">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 4H12M5 4V2.5H9V4M5.5 6V10.5M8.5 6V10.5M3.5 4L4 11.5H10L10.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </SIconButton>
+        </div>
+      </div>
+    </div>
 
     <FormDrawer
       :open="drawerOpen"
@@ -354,31 +345,54 @@ onMounted(async () => {
   margin-left: var(--space-xs);
 }
 
-.doc-row {
+.doc-table {
   display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-l);
+  overflow: hidden;
+}
+
+.doc-table__header {
+  display: grid;
+  grid-template-columns: 1fr 90px 80px 90px 90px 80px 48px;
   align-items: center;
+  padding: var(--space-s) var(--space-l);
+  background: var(--color-surface-container-low);
+  border-bottom: 1px solid var(--color-border-default);
   gap: var(--space-m);
+}
+
+.doc-table__th {
+  font: var(--text-label-sm);
+  color: var(--color-fg-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+}
+
+.doc-table__th--center { text-align: center; }
+.doc-table__th--right { text-align: right; }
+
+.doc-row {
+  display: grid;
+  grid-template-columns: 1fr 90px 80px 90px 90px 80px 48px;
+  align-items: center;
   min-height: var(--height-row-min);
-  padding: var(--space-xs) var(--space-l);
+  padding: 0 var(--space-l);
+  gap: var(--space-m);
+  border-bottom: 1px solid var(--color-border-subtle);
   cursor: pointer;
   transition: background var(--duration-fast) var(--easing-standard);
 }
 
-.doc-row:hover {
-  background: var(--color-bg-tertiary);
-}
+.doc-row:last-child { border-bottom: none; }
+.doc-row:hover { background: var(--color-bg-tertiary); }
 
-.doc-row__icon {
-  flex-shrink: 0;
-  color: var(--color-fg-tertiary);
-}
-
-.doc-row__body {
+.doc-row__name-col {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   min-width: 0;
-  flex: 1;
 }
 
 .doc-row__title {
@@ -395,63 +409,39 @@ onMounted(async () => {
   color: var(--color-fg-tertiary);
 }
 
-.doc-row__meta {
+.doc-row__type,
+.doc-row__status {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
-  flex-shrink: 0;
-}
-
-.doc-row__dates {
-  display: flex;
-  gap: var(--space-m);
-  flex-shrink: 0;
+  justify-content: center;
 }
 
 .doc-row__date {
-  display: flex;
-  flex-direction: column;
   font: var(--text-caption);
-  color: var(--color-fg-secondary);
-  white-space: nowrap;
-}
-
-.doc-row__date-label {
-  font: var(--text-label-sm);
   color: var(--color-fg-tertiary);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-caps);
+  text-align: right;
+  white-space: nowrap;
 }
 
 .doc-row__ref {
   font: var(--text-caption);
+  font-family: var(--font-mono);
   color: var(--color-fg-tertiary);
+  text-align: right;
   white-space: nowrap;
-  flex-shrink: 0;
 }
 
 .doc-row__actions {
-  flex-shrink: 0;
-  opacity: 0;
-  transition: opacity var(--duration-fast) var(--easing-standard);
-}
-
-.doc-row:hover .doc-row__actions {
-  opacity: 1;
+  display: flex;
+  justify-content: flex-end;
 }
 
 @media (max-width: 640px) {
+  .doc-table__header { display: none; }
   .doc-row {
-    flex-wrap: wrap;
+    grid-template-columns: 1fr auto auto auto;
+    padding: var(--space-s) var(--space-l);
   }
-
-  .doc-row__dates {
-    width: 100%;
-    padding-left: calc(20px + var(--space-m));
-  }
-
-  .doc-row__actions {
-    opacity: 1;
-  }
+  .doc-row__date, .doc-row__ref { display: none; }
 }
 </style>

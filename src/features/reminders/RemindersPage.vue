@@ -2,17 +2,13 @@
 import { ref, computed, onMounted } from 'vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
-import ContentCard from '@/components/layout/ContentCard.vue'
 import FilterBar from '@/components/data/FilterBar.vue'
-import DataList from '@/components/data/DataList.vue'
-import InlineStat from '@/components/data/InlineStat.vue'
 import SButton from '@/components/ui/SButton.vue'
 import SBadge from '@/components/ui/SBadge.vue'
 import SSelect from '@/components/ui/SSelect.vue'
 import SInput from '@/components/ui/SInput.vue'
 import STextarea from '@/components/ui/STextarea.vue'
 import SAvatar from '@/components/ui/SAvatar.vue'
-import StatusBadge from '@/components/feedback/StatusBadge.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import ErrorBanner from '@/components/feedback/ErrorBanner.vue'
 import LoadingSkeleton from '@/components/feedback/LoadingSkeleton.vue'
@@ -189,10 +185,19 @@ onMounted(async () => {
       </template>
     </PageHeader>
 
-    <div class="stats-row page-enter" :style="{ '--stagger': 1 }">
-      <InlineStat label="Active" :value="remindersStore.activeReminders.length" />
-      <InlineStat label="Overdue" :value="remindersStore.overdueReminders.length" :trend="remindersStore.overdueReminders.length > 0 ? 'down' : 'neutral'" />
-      <InlineStat label="This Week" :value="remindersStore.upcomingReminders.length" />
+    <div class="stats-bar page-enter" :style="{ '--stagger': 1 }">
+      <div class="stats-bar__cell">
+        <span class="stats-bar__label">Active</span>
+        <span class="stats-bar__value">{{ remindersStore.activeReminders.length }}</span>
+      </div>
+      <div class="stats-bar__cell">
+        <span class="stats-bar__label">Overdue</span>
+        <span class="stats-bar__value">{{ remindersStore.overdueReminders.length }}</span>
+      </div>
+      <div class="stats-bar__cell">
+        <span class="stats-bar__label">This Week</span>
+        <span class="stats-bar__value">{{ remindersStore.upcomingReminders.length }}</span>
+      </div>
     </div>
 
     <ErrorBanner v-if="remindersStore.error" :message="remindersStore.error" @retry="authStore.householdId && remindersStore.fetchReminders(authStore.householdId)" />
@@ -201,36 +206,48 @@ onMounted(async () => {
       <SSelect v-model="statusFilter" :options="statusOptions" placeholder="Status" />
     </FilterBar>
 
-    <ContentCard v-if="remindersStore.loading && !remindersStore.items.length" class="page-enter" :style="{ '--stagger': 3 }">
+    <div v-if="remindersStore.loading && !remindersStore.items.length" class="page-enter" :style="{ '--stagger': 3 }">
       <LoadingSkeleton :lines="5" />
-    </ContentCard>
+    </div>
 
-    <ContentCard v-else-if="!filteredItems.length" class="page-enter" :style="{ '--stagger': 3 }">
+    <div v-else-if="!filteredItems.length" class="empty-section page-enter" :style="{ '--stagger': 3 }">
       <EmptyState v-if="!remindersStore.items.length" title="No reminders" subtitle="Set reminders for important dates and recurring events." icon="empty" action-label="Add reminder" @action="openCreateDrawer" />
       <EmptyState v-else title="No matches" subtitle="Try adjusting your filters or search term." icon="search" />
-    </ContentCard>
+    </div>
 
-    <ContentCard v-else class="page-enter" :style="{ '--stagger': 3 }">
-      <DataList dividers>
-        <div v-for="reminder in sortedItems" :key="reminder.id" :class="['reminder-row', { 'reminder-row--overdue': isOverdue(reminder) }]" role="listitem" @click="openEditDrawer(reminder)">
+    <div v-else class="reminder-table page-enter" :style="{ '--stagger': 3 }">
+      <div class="reminder-table__header">
+        <span class="reminder-table__th">Reminder</span>
+        <span class="reminder-table__th reminder-table__th--center">Status</span>
+        <span class="reminder-table__th reminder-table__th--center">Type</span>
+        <span class="reminder-table__th reminder-table__th--right">Due</span>
+        <span class="reminder-table__th reminder-table__th--center">Assigned</span>
+        <span class="reminder-table__th reminder-table__th--right">Actions</span>
+      </div>
+      <div v-for="reminder in sortedItems" :key="reminder.id" :class="['reminder-row', { 'reminder-row--overdue': isOverdue(reminder) }]" role="listitem" @click="openEditDrawer(reminder)">
+        <div class="reminder-row__title-col">
           <span class="reminder-row__title">{{ reminder.title }}</span>
-          <div class="reminder-row__meta">
-            <StatusBadge :variant="statusVariant(reminder)">{{ statusLabel(reminder) }}</StatusBadge>
-            <SBadge v-if="reminder.type" size="sm">{{ reminder.type }}</SBadge>
-          </div>
-          <span v-if="reminder.due_date" class="reminder-row__due">{{ formatRelativeDate(reminder.due_date) }}</span>
-          <div class="reminder-row__end">
-            <SAvatar v-if="getMemberName(reminder.assigned_to)" :name="getMemberName(reminder.assigned_to)!" size="sm" />
-            <div class="reminder-row__actions" @click.stop>
-              <SButton v-if="reminder.status === 'active'" variant="subtle" size="sm" @click="remindersStore.markDone(reminder.id)">Done</SButton>
-              <SButton v-if="reminder.status === 'active'" variant="subtle" size="sm" @click="remindersStore.snooze(reminder.id)">Snooze</SButton>
-              <SButton v-if="reminder.status === 'active' || reminder.status === 'snoozed'" variant="subtle" size="sm" @click="remindersStore.dismiss(reminder.id)">Dismiss</SButton>
-              <SButton variant="danger" size="sm" @click="confirmDelete(reminder.id)">Delete</SButton>
-            </div>
-          </div>
         </div>
-      </DataList>
-    </ContentCard>
+        <div class="reminder-row__status">
+          <SBadge :variant="statusVariant(reminder)" size="sm">{{ statusLabel(reminder) }}</SBadge>
+        </div>
+        <div class="reminder-row__type">
+          <SBadge v-if="reminder.type" size="sm">{{ reminder.type }}</SBadge>
+        </div>
+        <div class="reminder-row__due">
+          <span v-if="reminder.due_date">{{ formatRelativeDate(reminder.due_date) }}</span>
+        </div>
+        <div class="reminder-row__assignee">
+          <SAvatar v-if="getMemberName(reminder.assigned_to)" :name="getMemberName(reminder.assigned_to)!" size="sm" />
+        </div>
+        <div class="reminder-row__actions" @click.stop>
+          <SButton v-if="reminder.status === 'active'" variant="subtle" size="sm" @click="remindersStore.markDone(reminder.id)">Done</SButton>
+          <SButton v-if="reminder.status === 'active'" variant="subtle" size="sm" @click="remindersStore.snooze(reminder.id)">Snooze</SButton>
+          <SButton v-if="reminder.status === 'active' || reminder.status === 'snoozed'" variant="subtle" size="sm" @click="remindersStore.dismiss(reminder.id)">Dismiss</SButton>
+          <SButton variant="danger" size="sm" @click="confirmDelete(reminder.id)">Delete</SButton>
+        </div>
+      </div>
+    </div>
 
     <FormDrawer :open="drawerOpen" :title="editingReminder ? 'Edit Reminder' : 'Add Reminder'" :submit-label="editingReminder ? 'Update' : 'Create'" :loading="drawerLoading" @close="drawerOpen = false" @submit="handleSubmit">
       <FormSection>
@@ -248,39 +265,83 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.stats-row {
+/* ── Stats bar ── */
+.stats-bar {
   display: flex;
   align-items: stretch;
+  background: var(--color-surface-container-low);
   border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-l);
-  background: var(--color-surface-card);
-  box-shadow: var(--shadow-2), var(--shadow-card);
+  border-radius: var(--radius-m);
   margin-bottom: var(--space-l);
   overflow: hidden;
 }
-
-.stats-row > * {
+.stats-bar__cell {
   flex: 1;
-  border-right: 1px solid var(--color-border-subtle);
+  padding: var(--space-m) var(--space-l);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  border-right: 1px solid var(--color-border-default);
+}
+.stats-bar__cell:last-child { border-right: none; }
+.stats-bar__label {
+  font: var(--text-caption);
+  color: var(--color-fg-secondary);
+}
+.stats-bar__value {
+  font: var(--text-body-1-strong);
+  color: var(--color-fg-primary);
 }
 
-.stats-row > *:last-child {
-  border-right: none;
+/* ── Reminder table with headers ── */
+.reminder-table {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-l);
+  overflow: hidden;
 }
+
+.reminder-table__header {
+  display: grid;
+  grid-template-columns: 1fr 80px 100px 90px 80px 260px;
+  align-items: center;
+  padding: var(--space-s) var(--space-l);
+  background: var(--color-surface-container-low);
+  border-bottom: 1px solid var(--color-border-default);
+  gap: var(--space-m);
+}
+
+.reminder-table__th {
+  font: var(--text-label-sm);
+  color: var(--color-fg-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+}
+
+.reminder-table__th--center { text-align: center; }
+.reminder-table__th--right { text-align: right; }
 
 .reminder-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 80px 100px 90px 80px 260px;
   align-items: center;
   gap: var(--space-m);
   min-height: var(--height-row-min);
-  padding: var(--space-xs) var(--space-l);
+  padding: 0 var(--space-l);
+  border-bottom: 1px solid var(--color-border-subtle);
   cursor: pointer;
-  transition: background var(--duration-fast) var(--easing-standard);
+  transition: background-color var(--duration-fast) var(--easing-standard);
 }
 
-.reminder-row:hover {
-  background: var(--color-bg-tertiary);
+.reminder-row:last-child { border-bottom: none; }
+.reminder-row:hover { background: var(--color-bg-tertiary); }
+
+.reminder-row--overdue {
+  border-left: 3px solid var(--color-status-error);
 }
+
+.reminder-row__title-col { min-width: 0; }
 
 .reminder-row__title {
   font: var(--text-body-2);
@@ -289,48 +350,43 @@ onMounted(async () => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  min-width: 0;
-  flex-shrink: 1;
 }
 
-.reminder-row__meta {
+.reminder-row--overdue .reminder-row__title {
+  color: var(--color-status-error);
+}
+
+.reminder-row__status,
+.reminder-row__type,
+.reminder-row__assignee {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
-  flex-shrink: 0;
+  justify-content: center;
 }
 
 .reminder-row__due {
   font: var(--text-caption);
   color: var(--color-fg-tertiary);
   white-space: nowrap;
-  flex-shrink: 0;
-  margin-left: auto;
-}
-
-.reminder-row__end {
-  display: flex;
-  align-items: center;
-  gap: var(--space-s);
-  flex-shrink: 0;
+  text-align: right;
 }
 
 .reminder-row__actions {
   display: flex;
-  gap: var(--space-2xs);
-  opacity: 0;
-  transition: opacity var(--duration-fast) var(--easing-standard);
-}
-
-.reminder-row:hover .reminder-row__actions {
-  opacity: 1;
+  gap: var(--space-xs);
+  justify-content: flex-end;
 }
 
 @media (max-width: 640px) {
-  .stats-row { flex-direction: column; }
-  .stats-row > * { border-right: none; border-bottom: 1px solid var(--color-border-subtle); }
-  .stats-row > *:last-child { border-bottom: none; }
-  .reminder-row { flex-wrap: wrap; }
-  .reminder-row__actions { opacity: 1; flex-wrap: wrap; }
+  .stats-bar { flex-direction: column; }
+  .stats-bar__cell { border-right: none; border-bottom: 1px solid var(--color-border-default); }
+  .stats-bar__cell:last-child { border-bottom: none; }
+  .reminder-table__header { display: none; }
+  .reminder-row {
+    grid-template-columns: 1fr auto auto auto;
+    padding: var(--space-s) var(--space-m);
+  }
+  .reminder-row__type,
+  .reminder-row__due { display: none; }
 }
 </style>

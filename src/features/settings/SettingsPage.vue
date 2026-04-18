@@ -1,8 +1,7 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
-import ContentCard from '@/components/layout/ContentCard.vue'
 import SectionHeader from '@/components/data/SectionHeader.vue'
 import SettingsTabs from '@/features/settings/SettingsTabs.vue'
 import SButton from '@/components/ui/SButton.vue'
@@ -37,7 +36,7 @@ const householdStore = useHouseholdStore()
 const authStore = useAuthStore()
 const app = useAppStore()
 
-/* ── Tab navigation ── */
+/* -- Tab navigation -- */
 const TABS = [
   { id: 'appearance', label: 'Appearance' },
   { id: 'dashboard', label: 'Dashboard' },
@@ -49,7 +48,7 @@ const TABS = [
 
 const activeTab = ref('appearance')
 
-/* ── Household ── */
+/* -- Household -- */
 const householdName = ref('')
 const editingName = ref(false)
 const savingName = ref(false)
@@ -62,8 +61,8 @@ const formRole = ref<MemberRole>('member')
 const formColor = ref('#0F6CBD')
 
 const MEMBER_COLORS = [
-  '#0F6CBD', '#107C10', '#C4314B', '#D48C00',
-  '#8764B8', '#038387', '#CA5010', '#4F6BED',
+  '#1B5299', '#0D6B0D', '#9B2335', '#8B6914',
+  '#6B4D96', '#026C6F', '#9A3D0C', '#3D56B2',
 ]
 
 const ROLE_OPTIONS = [
@@ -155,7 +154,7 @@ async function deactivateMember(member: Member) {
   await householdStore.removeMember(member.id)
 }
 
-/* ── Computed models ── */
+/* -- Computed models -- */
 const compactModeModel = computed({ get: () => app.compactMode, set: (v: boolean) => app.setCompactMode(v) })
 const animationsModel = computed({ get: () => app.animationsEnabled, set: (v: boolean) => app.setAnimationsEnabled(v) })
 const highContrastModel = computed({ get: () => app.highContrast, set: (v: boolean) => app.setHighContrast(v) })
@@ -214,14 +213,14 @@ const budgetPeriodStr = computed({ get: () => app.defaultBudgetPeriod, set: (v: 
 const monthlyCompModel = computed({ get: () => app.showMonthlyComparison, set: (v: boolean) => app.setShowMonthlyComparison(v) })
 
 const CURRENCY_OPTIONS = [
-  { value: 'usd', label: 'USD — $' },
-  { value: 'eur', label: 'EUR — €' },
-  { value: 'gbp', label: 'GBP — £' },
-  { value: 'bdt', label: 'BDT — ৳' },
-  { value: 'inr', label: 'INR — ₹' },
-  { value: 'cad', label: 'CAD — C$' },
-  { value: 'aud', label: 'AUD — A$' },
-  { value: 'jpy', label: 'JPY — ¥' },
+  { value: 'usd', label: 'USD � $' },
+  { value: 'eur', label: 'EUR � �' },
+  { value: 'gbp', label: 'GBP � �' },
+  { value: 'bdt', label: 'BDT � ?' },
+  { value: 'inr', label: 'INR � ?' },
+  { value: 'cad', label: 'CAD � C$' },
+  { value: 'aud', label: 'AUD � A$' },
+  { value: 'jpy', label: 'JPY � �' },
 ]
 
 const taskPriorityStr = computed({ get: () => app.defaultTaskPriority, set: (v: string) => app.setDefaultTaskPriority(v as DefaultTaskPriority) })
@@ -294,9 +293,9 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
 
     <SettingsTabs v-model="activeTab" :tabs="TABS" class="page-enter" :style="{ '--stagger': 1 }" />
 
-    <!-- ═══════════ TAB: APPEARANCE ═══════════ -->
+    <!-- ----------- TAB: APPEARANCE ----------- -->
     <template v-if="activeTab === 'appearance'">
-      <ContentCard padding="none" class="settings-card page-enter" :style="{ '--stagger': 2 }">
+      <div class="settings-section page-enter" :style="{ '--stagger': 2 }">
         <div class="card-header">
           <SectionHeader title="Theme & Colors" />
         </div>
@@ -336,9 +335,9 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
             </div>
           </div>
         </div>
-      </ContentCard>
+      </div>
 
-      <ContentCard padding="none" class="settings-card page-enter" :style="{ '--stagger': 3 }">
+      <div class="settings-section page-enter" :style="{ '--stagger': 3 }">
         <div class="card-header">
           <SectionHeader title="Display" />
         </div>
@@ -379,12 +378,12 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
             <SToggle v-model="highContrastModel" />
           </div>
         </div>
-      </ContentCard>
+      </div>
     </template>
 
-    <!-- ═══════════ TAB: DASHBOARD ═══════════ -->
+    <!-- ----------- TAB: DASHBOARD ----------- -->
     <template v-if="activeTab === 'dashboard'">
-      <ContentCard padding="none" class="settings-card page-enter" :style="{ '--stagger': 2 }">
+      <div class="settings-section page-enter" :style="{ '--stagger': 2 }">
         <div class="card-header">
           <SectionHeader title="Layout" />
         </div>
@@ -409,26 +408,30 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
             <SToggle v-model="greetingModel" />
           </div>
         </div>
-      </ContentCard>
+      </div>
 
-      <ContentCard padding="none" class="settings-card page-enter" :style="{ '--stagger': 3 }">
+      <div class="settings-section page-enter" :style="{ '--stagger': 3 }">
         <div class="card-header">
           <SectionHeader title="Widgets" />
         </div>
         <div class="card-body">
-          <div class="widget-grid">
-            <label v-for="w in WIDGET_LIST" :key="w.key" class="widget-chip">
-              <SToggle v-model="widgetModel(w.key).value" />
-              <span class="widget-chip__text">{{ w.label }}</span>
-            </label>
+          <div
+            v-for="w in WIDGET_LIST"
+            :key="w.key"
+            class="row"
+          >
+            <div class="row__label">
+              <span class="row__name">{{ w.label }}</span>
+            </div>
+            <SToggle v-model="widgetModel(w.key).value" />
           </div>
         </div>
-      </ContentCard>
+      </div>
     </template>
 
-    <!-- ═══════════ TAB: FORMATS ═══════════ -->
+    <!-- ----------- TAB: FORMATS ----------- -->
     <template v-if="activeTab === 'formats'">
-      <ContentCard padding="none" class="settings-card page-enter" :style="{ '--stagger': 2 }">
+      <div class="settings-section page-enter" :style="{ '--stagger': 2 }">
         <div class="card-header">
           <SectionHeader title="Date & Time" />
         </div>
@@ -475,9 +478,9 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
             />
           </div>
         </div>
-      </ContentCard>
+      </div>
 
-      <ContentCard padding="none" class="settings-card page-enter" :style="{ '--stagger': 3 }">
+      <div class="settings-section page-enter" :style="{ '--stagger': 3 }">
         <div class="card-header">
           <SectionHeader title="Money & Budget" />
         </div>
@@ -515,12 +518,12 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
             <SToggle v-model="monthlyCompModel" />
           </div>
         </div>
-      </ContentCard>
+      </div>
     </template>
 
-    <!-- ═══════════ TAB: MODULES ═══════════ -->
+    <!-- ----------- TAB: MODULES ----------- -->
     <template v-if="activeTab === 'modules'">
-      <ContentCard padding="none" class="settings-card page-enter" :style="{ '--stagger': 2 }">
+      <div class="settings-section page-enter" :style="{ '--stagger': 2 }">
         <div class="card-header">
           <SectionHeader title="Tasks & Chores" />
         </div>
@@ -572,9 +575,9 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
             <SToggle v-model="confirmDeleteModel" />
           </div>
         </div>
-      </ContentCard>
+      </div>
 
-      <ContentCard padding="none" class="settings-card page-enter" :style="{ '--stagger': 3 }">
+      <div class="settings-section page-enter" :style="{ '--stagger': 3 }">
         <div class="card-header">
           <SectionHeader title="Pantry & Shopping" />
         </div>
@@ -605,9 +608,9 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
             <SToggle v-model="stockIndicatorsModel" />
           </div>
         </div>
-      </ContentCard>
+      </div>
 
-      <ContentCard padding="none" class="settings-card page-enter" :style="{ '--stagger': 4 }">
+      <div class="settings-section page-enter" :style="{ '--stagger': 4 }">
         <div class="card-header">
           <SectionHeader title="Meals" />
         </div>
@@ -636,9 +639,9 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
             <SToggle v-model="mealCalModel" />
           </div>
         </div>
-      </ContentCard>
+      </div>
 
-      <ContentCard padding="none" class="settings-card page-enter" :style="{ '--stagger': 5 }">
+      <div class="settings-section page-enter" :style="{ '--stagger': 5 }">
         <div class="card-header">
           <SectionHeader title="Reminders" />
         </div>
@@ -664,9 +667,9 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
             <SToggle v-model="reminderSoundModel" />
           </div>
         </div>
-      </ContentCard>
+      </div>
 
-      <ContentCard padding="none" class="settings-card page-enter" :style="{ '--stagger': 6 }">
+      <div class="settings-section page-enter" :style="{ '--stagger': 6 }">
         <div class="card-header">
           <SectionHeader title="Notes & Journal" />
         </div>
@@ -689,12 +692,12 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
             <SToggle v-model="journalPromptModel" />
           </div>
         </div>
-      </ContentCard>
+      </div>
     </template>
 
-    <!-- ═══════════ TAB: HOUSEHOLD ═══════════ -->
+    <!-- ----------- TAB: HOUSEHOLD ----------- -->
     <template v-if="activeTab === 'household'">
-      <ContentCard padding="none" class="settings-card page-enter" :style="{ '--stagger': 2 }">
+      <div class="settings-section page-enter" :style="{ '--stagger': 2 }">
         <div class="card-header">
           <SectionHeader title="Details" />
         </div>
@@ -723,9 +726,9 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
             <span v-else class="row__muted">Not loaded</span>
           </div>
         </div>
-      </ContentCard>
+      </div>
 
-      <ContentCard padding="none" class="settings-card page-enter" :style="{ '--stagger': 3 }">
+      <div class="settings-section page-enter" :style="{ '--stagger': 3 }">
         <div class="card-header">
           <SectionHeader title="Members" />
           <SButton size="sm" @click="openAddDrawer">Add member</SButton>
@@ -766,12 +769,12 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
             @action="openAddDrawer"
           />
         </div>
-      </ContentCard>
+      </div>
     </template>
 
-    <!-- ═══════════ TAB: PRIVACY ═══════════ -->
+    <!-- ----------- TAB: PRIVACY ----------- -->
     <template v-if="activeTab === 'privacy'">
-      <ContentCard padding="none" class="settings-card page-enter" :style="{ '--stagger': 2 }">
+      <div class="settings-section page-enter" :style="{ '--stagger': 2 }">
         <div class="card-header">
           <SectionHeader title="Data & Cache" />
         </div>
@@ -808,7 +811,7 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
             <SButton size="sm" variant="subtle" @click="exportData">Export</SButton>
           </div>
         </div>
-      </ContentCard>
+      </div>
     </template>
 
     <!-- Member Form Drawer -->
@@ -847,9 +850,11 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
 </template>
 
 <style scoped>
-/* ── Settings card ── */
-.settings-card {
+/* -- Settings section -- */
+.settings-section {
   margin-bottom: var(--space-l);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-m);
 }
 
 .card-header {
@@ -857,21 +862,21 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
   align-items: center;
   justify-content: space-between;
   gap: var(--space-s);
-  padding: var(--space-l) var(--space-xl) 0;
+  padding: var(--space-m) var(--space-l) 0;
 }
 
 .card-body {
-  padding: var(--space-s) var(--space-xl) var(--space-l);
+  padding: var(--space-xs) var(--space-l) var(--space-m);
 }
 
-/* ── Setting row ── */
+/* -- Setting row -- */
 .row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-xl);
   padding: var(--space-m) 0;
-  min-height: var(--height-row-min);
+  min-height: 44px;
 }
 
 .row + .row {
@@ -906,10 +911,10 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
   flex-shrink: 0;
 }
 
-/* ── Theme picker ── */
+/* -- Theme picker -- */
 .theme-group {
   display: flex;
-  gap: var(--space-s);
+  gap: var(--space-xs);
 }
 
 .theme-opt {
@@ -948,15 +953,15 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
   line-height: 1;
 }
 
-/* ── Accent color dots ── */
+/* -- Accent color dots -- */
 .accent-row {
   display: flex;
   gap: var(--space-s);
 }
 
 .accent-dot {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   border-radius: var(--radius-circle);
   border: 2px solid transparent;
   background: var(--dot-color);
@@ -965,21 +970,23 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
   align-items: center;
   justify-content: center;
   transition:
-    box-shadow var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard),
     transform var(--duration-fast) var(--easing-standard);
 }
 
 .accent-dot:hover {
-  transform: scale(1.15);
-  box-shadow: 0 0 0 2px var(--color-bg-primary), 0 0 0 3.5px var(--dot-color);
+  transform: scale(1.12);
+  border-color: var(--color-border-strong);
 }
 
 .accent-dot--active {
-  box-shadow: 0 0 0 2px var(--color-bg-primary), 0 0 0 3.5px var(--dot-color);
+  border-color: var(--color-fg-primary);
+  outline: 2px solid var(--color-bg-primary);
+  outline-offset: 0;
   transform: scale(1.08);
 }
 
-/* ── Segmented control ── */
+/* -- Segmented control -- */
 .seg {
   display: flex;
   background: var(--color-surface-input);
@@ -1013,34 +1020,7 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
   background: var(--color-brand-hover);
 }
 
-/* ── Widget grid ── */
-.widget-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-s);
-}
-
-.widget-chip {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  padding: var(--space-xs) var(--space-m) var(--space-xs) var(--space-xs);
-  border-radius: var(--radius-circle);
-  background: var(--color-bg-secondary);
-  cursor: pointer;
-  transition: background-color var(--duration-fast) var(--easing-standard);
-}
-
-.widget-chip:hover {
-  background: var(--color-bg-tertiary);
-}
-
-.widget-chip__text {
-  font: var(--text-label-md);
-  color: var(--color-fg-primary);
-}
-
-/* ── Inline edit / value ── */
+/* -- Inline edit / value -- */
 .inline-edit {
   display: flex;
   align-items: center;
@@ -1059,7 +1039,7 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
   font-weight: var(--font-weight-medium);
 }
 
-/* ── Members list ── */
+/* -- Members list -- */
 .members {
   display: flex;
   flex-direction: column;
@@ -1105,7 +1085,7 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
   opacity: 1;
 }
 
-/* ── Color swatches (drawer) ── */
+/* -- Color swatches (drawer) -- */
 .color-label {
   font: var(--text-body-2);
   color: var(--color-fg-secondary);
@@ -1125,26 +1105,27 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
   border-radius: var(--radius-circle);
   border: 2px solid transparent;
   cursor: pointer;
-  transition: box-shadow var(--duration-fast) var(--easing-standard);
+  transition: border-color var(--duration-fast) var(--easing-standard);
 }
 
 .color-swatch:hover {
-  box-shadow: 0 0 0 2px var(--color-fg-tertiary);
+  border-color: var(--color-border-strong);
 }
 
 .color-swatch--selected {
   border-color: var(--color-fg-primary);
-  box-shadow: 0 0 0 2px var(--color-bg-primary);
+  outline: 2px solid var(--color-bg-primary);
+  outline-offset: 0;
 }
 
-/* ── Responsive ── */
+/* -- Responsive -- */
 @media (max-width: 640px) {
   .card-header {
     padding: var(--space-m) var(--space-l) 0;
   }
 
   .card-body {
-    padding: var(--space-s) var(--space-l) var(--space-m);
+    padding: var(--space-xs) var(--space-l) var(--space-m);
   }
 
   .row {
@@ -1157,6 +1138,10 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
 
   .accent-row {
     flex-wrap: wrap;
+  }
+
+  .member__actions {
+    opacity: 1;
   }
 }
 </style>

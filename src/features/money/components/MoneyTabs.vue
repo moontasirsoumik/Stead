@@ -122,6 +122,7 @@ watch(activeTab, () => {
 
 .money-tab:hover {
   color: var(--color-fg-primary);
+  background: var(--color-surface-nav-hover);
 }
 
 .money-tab--active {
