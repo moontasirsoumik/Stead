@@ -24,4 +24,5 @@ export const taskSchema = householdEntitySchema.extend({
   rotation_enabled: z.coerce.boolean(),
   rotation_members: z.string(),
   rotation_index: z.number().int(),
+  visibility: z.enum(['private', 'shared', 'household']),
 })

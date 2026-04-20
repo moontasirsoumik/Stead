@@ -9,6 +9,8 @@ import STimePicker from '@/components/ui/STimePicker.vue'
 import STextarea from '@/components/ui/STextarea.vue'
 import SSelect from '@/components/ui/SSelect.vue'
 import SCheckbox from '@/components/ui/SCheckbox.vue'
+import SVisibilityPicker from '@/components/ui/SVisibilityPicker.vue'
+import SMemberPicker from '@/components/ui/SMemberPicker.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import ErrorBanner from '@/components/feedback/ErrorBanner.vue'
 import LoadingSkeleton from '@/components/feedback/LoadingSkeleton.vue'
@@ -22,6 +24,8 @@ import { useHouseholdStore } from '@/stores/household.store'
 import { useTasksStore } from '@/stores/tasks.store'
 import { useRemindersStore } from '@/stores/reminders.store'
 import { useBillsStore } from '@/stores/bills.store'
+import { entitySharesDataService } from '@/services/data/entity-shares.data'
+import type { Visibility } from '@/models/enums'
 
 const calendarStore = useCalendarStore()
 const authStore = useAuthStore()
@@ -53,6 +57,8 @@ const formAllDay = ref(false)
 const formCategory = ref('')
 const formAssignedTo = ref('')
 const formNote = ref('')
+const formVisibility = ref<Visibility>('private')
+const formSharedWith = ref<string[]>([])
 
 // ── Computed data ──
 const monthItems = computed(() =>
@@ -289,6 +295,8 @@ function openCreateDrawer() {
   formCategory.value = ''
   formAssignedTo.value = ''
   formNote.value = ''
+  formVisibility.value = 'private'
+  formSharedWith.value = []
   drawerOpen.value = true
 }
 
@@ -308,6 +316,14 @@ function openEditDrawer(item: CalendarItem) {
   formCategory.value = event.category ?? ''
   formAssignedTo.value = event.assigned_to ?? ''
   formNote.value = event.note ?? ''
+  formVisibility.value = (event.visibility ?? 'private') as Visibility
+  formSharedWith.value = []
+  // Load existing shares if shared
+  if (event.visibility === 'shared' && authStore.householdId) {
+    entitySharesDataService.getByEntity('calendar_event', event.id).then((shares) => {
+      formSharedWith.value = shares.map((s) => s.shared_with)
+    })
+  }
   drawerOpen.value = true
 }
 
@@ -332,13 +348,28 @@ async function handleSubmit() {
       recurring_rule: null,
       color: null,
       note: formNote.value.trim() || null,
+      visibility: appStore.isPersonal ? formVisibility.value : ('private' as const),
       deleted: false,
     }
 
     if (editingEventId.value) {
       await calendarStore.update(editingEventId.value, payload)
+      // Update shares if personal + shared
+      if (appStore.isPersonal && formVisibility.value === 'shared' && authStore.householdId) {
+        await entitySharesDataService.setShares(
+          authStore.householdId, 'calendar_event', editingEventId.value, formSharedWith.value,
+        )
+      } else if (appStore.isPersonal && editingEventId.value) {
+        await entitySharesDataService.deleteByEntity('calendar_event', editingEventId.value)
+      }
     } else {
-      await calendarStore.create(payload)
+      const created = await calendarStore.create(payload)
+      // Set shares for new event
+      if (appStore.isPersonal && formVisibility.value === 'shared' && created && authStore.householdId) {
+        await entitySharesDataService.setShares(
+          authStore.householdId, 'calendar_event', created.id, formSharedWith.value,
+        )
+      }
     }
 
     drawerOpen.value = false
@@ -709,6 +740,21 @@ watch(() => appStore.isPersonal, loadData)
             label="Note"
             placeholder="Any additional notes..."
             :rows="2"
+          />
+        </FormField>
+      </FormSection>
+
+      <!-- Visibility — only shown in personal scope -->
+      <FormSection v-if="appStore.isPersonal" title="Privacy">
+        <FormField>
+          <SVisibilityPicker v-model="formVisibility" label="Who can see this?" />
+        </FormField>
+        <FormField v-if="formVisibility === 'shared'">
+          <SMemberPicker
+            v-model="formSharedWith"
+            :members="householdStore.activeMembers"
+            :current-member-id="authStore.memberId ?? undefined"
+            label="Share with"
           />
         </FormField>
       </FormSection>

@@ -11,4 +11,5 @@ export const noteSchema = householdEntitySchema.extend({
   created_by: z.string().uuid().nullable(),
   scope: z.enum(['household', 'personal']),
   owner_id: z.string().uuid().nullable(),
+  visibility: z.enum(['private', 'shared', 'household']),
 })

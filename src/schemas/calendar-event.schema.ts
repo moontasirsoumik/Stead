@@ -16,4 +16,5 @@ export const calendarEventSchema = householdEntitySchema.extend({
   recurring_rule: z.string().nullable(),
   color: z.string().nullable(),
   note: z.string().nullable(),
+  visibility: z.enum(['private', 'shared', 'household']),
 })

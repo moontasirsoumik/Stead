@@ -1,5 +1,5 @@
 import type { HouseholdEntity } from '@/models/base.model'
-import type { DataScope, TaskPriority, TaskStatus, TaskType } from '@/models/enums'
+import type { DataScope, TaskPriority, TaskStatus, TaskType, Visibility } from '@/models/enums'
 
 export interface Task extends HouseholdEntity {
   title: string
@@ -24,4 +24,5 @@ export interface Task extends HouseholdEntity {
   rotation_enabled: boolean
   rotation_members: string
   rotation_index: number
+  visibility: Visibility
 }

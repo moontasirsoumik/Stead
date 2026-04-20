@@ -1,5 +1,5 @@
 import type { HouseholdEntity } from './base.model'
-import type { WishlistPriority, WishlistStatus } from './enums'
+import type { Visibility, WishlistPriority, WishlistStatus } from './enums'
 
 export interface WishlistItem extends HouseholdEntity {
   owner_id: string
@@ -12,4 +12,5 @@ export interface WishlistItem extends HouseholdEntity {
   saved_amount: number | null
   category: string | null
   note: string | null
+  visibility: Visibility
 }

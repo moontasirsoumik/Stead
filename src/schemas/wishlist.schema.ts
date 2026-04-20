@@ -12,4 +12,5 @@ export const wishlistItemSchema = householdEntitySchema.extend({
   saved_amount: z.number().int().nullable(),
   category: z.string().nullable(),
   note: z.string().nullable(),
+  visibility: z.enum(['private', 'shared', 'household']),
 })

@@ -1,5 +1,5 @@
 import type { HouseholdEntity } from '@/models/base.model'
-import type { DataScope } from '@/models/enums'
+import type { DataScope, Visibility } from '@/models/enums'
 
 export interface Note extends HouseholdEntity {
   title: string
@@ -11,4 +11,5 @@ export interface Note extends HouseholdEntity {
   created_by: string | null
   scope: DataScope
   owner_id: string | null
+  visibility: Visibility
 }

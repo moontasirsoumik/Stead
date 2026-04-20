@@ -1,5 +1,5 @@
 import type { HouseholdEntity } from '@/models/base.model'
-import type { DataScope } from '@/models/enums'
+import type { DataScope, Visibility } from '@/models/enums'
 
 export interface CalendarEvent extends HouseholdEntity {
   title: string
@@ -16,4 +16,5 @@ export interface CalendarEvent extends HouseholdEntity {
   recurring_rule: string | null
   color: string | null
   note: string | null
+  visibility: Visibility
 }

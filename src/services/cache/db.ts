@@ -21,6 +21,7 @@ import type { HouseholdDocument } from '@/models/document.model'
 import type { MealPlan, Meal } from '@/models/meal.model'
 import type { ExpenseSplit } from '@/models/expense-split.model'
 import type { CalendarEvent } from '@/models/calendar-event.model'
+import type { EntityShare } from '@/models/entity-share.model'
 
 class SteadDatabase extends Dexie {
   members!: Table<Member, string>
@@ -47,6 +48,7 @@ class SteadDatabase extends Dexie {
   meal_plans!: Table<MealPlan, string>
   meals!: Table<Meal, string>
   calendar_events!: Table<CalendarEvent, string>
+  entity_shares!: Table<EntityShare, string>
 
   constructor() {
     super('stead-db')
@@ -95,6 +97,13 @@ class SteadDatabase extends Dexie {
     })
     this.version(6).stores({
       calendar_events: 'id, household_id, start_date, scope, owner_id',
+    })
+    this.version(7).stores({
+      entity_shares: 'id, entity_type, entity_id, shared_with, household_id',
+      calendar_events: 'id, household_id, start_date, scope, owner_id, visibility',
+      notes: 'id, household_id, pinned, scope, owner_id, visibility',
+      tasks: 'id, household_id, status, due_date, assignee, task_type, scope, owner_id, visibility',
+      wishlists: 'id, household_id, owner_id, status, visibility',
     })
   }
 }

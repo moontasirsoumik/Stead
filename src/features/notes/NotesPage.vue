@@ -22,11 +22,17 @@ import { useNotesStore } from '@/stores/notes.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { useAppStore } from '@/stores/app.store'
 import { formatDate } from '@/utils/format'
+import SVisibilityPicker from '@/components/ui/SVisibilityPicker.vue'
+import SMemberPicker from '@/components/ui/SMemberPicker.vue'
+import { entitySharesDataService } from '@/services/data/entity-shares.data'
+import { useHouseholdStore } from '@/stores/household.store'
 import type { Note } from '@/models/note.model'
+import type { Visibility } from '@/models/enums'
 
 const notesStore = useNotesStore()
 const authStore = useAuthStore()
 const appStore = useAppStore()
+const householdStore = useHouseholdStore()
 const search = ref('')
 const categoryFilter = ref('')
 const viewMode = ref(appStore.defaultNoteView)
@@ -39,6 +45,8 @@ const formTitle = ref('')
 const formCategory = ref('')
 const formContent = ref('')
 const formPinned = ref(false)
+const formVisibility = ref<Visibility>('private')
+const formSharedWith = ref<string[]>([])
 
 const confirmDeleteOpen = ref(false)
 const deletingNoteId = ref<string | null>(null)
@@ -82,6 +90,8 @@ function openCreateDrawer() {
   formCategory.value = ''
   formContent.value = ''
   formPinned.value = false
+  formVisibility.value = 'private'
+  formSharedWith.value = []
   drawerOpen.value = true
 }
 
@@ -91,6 +101,13 @@ function openEditDrawer(note: Note) {
   formCategory.value = note.category ?? ''
   formContent.value = note.content
   formPinned.value = note.pinned
+  formVisibility.value = (note.visibility ?? 'private') as Visibility
+  formSharedWith.value = []
+  if (note.visibility === 'shared' && authStore.householdId) {
+    entitySharesDataService.getByEntity('note', note.id).then((shares) => {
+      formSharedWith.value = shares.map((s) => s.shared_with)
+    })
+  }
   drawerOpen.value = true
 }
 
@@ -103,11 +120,17 @@ async function handleSubmit() {
       category: formCategory.value.trim() || null,
       content: formContent.value,
       pinned: formPinned.value,
+      visibility: appStore.isPersonal ? formVisibility.value : ('private' as const),
     }
     if (editingNote.value) {
       await notesStore.update(editingNote.value.id, payload)
+      if (appStore.isPersonal && formVisibility.value === 'shared' && authStore.householdId) {
+        await entitySharesDataService.setShares(authStore.householdId, 'note', editingNote.value.id, formSharedWith.value)
+      } else if (appStore.isPersonal && editingNote.value.id) {
+        await entitySharesDataService.deleteByEntity('note', editingNote.value.id)
+      }
     } else {
-      await notesStore.create({
+      const created = await notesStore.create({
         ...payload,
         linked_type: null,
         linked_id: null,
@@ -117,6 +140,9 @@ async function handleSubmit() {
         scope: appStore.scope,
         owner_id: appStore.scope === 'personal' ? authStore.memberId : null,
       })
+      if (appStore.isPersonal && formVisibility.value === 'shared' && created && authStore.householdId) {
+        await entitySharesDataService.setShares(authStore.householdId, 'note', created.id, formSharedWith.value)
+      }
     }
     drawerOpen.value = false
   } finally {
@@ -144,6 +170,9 @@ async function handleDelete() {
 onMounted(async () => {
   if (authStore.householdId) {
     await notesStore.fetchNotes(authStore.householdId)
+    if (!householdStore.members.length) {
+      await householdStore.loadMembers(authStore.householdId)
+    }
   }
 })
 </script>
@@ -247,6 +276,20 @@ onMounted(async () => {
         <FormField><SInput v-model="formCategory" label="Category" placeholder="e.g. Recipe, Idea, Reference" /></FormField>
         <FormField><STextarea v-model="formContent" label="Content" :rows="10" placeholder="Write your note…" /></FormField>
         <FormField row><SToggle v-model="formPinned" label="Pin to top" /></FormField>
+      </FormSection>
+      <!-- Visibility — only in personal scope -->
+      <FormSection v-if="appStore.isPersonal" title="Privacy">
+        <FormField>
+          <SVisibilityPicker v-model="formVisibility" label="Who can see this?" />
+        </FormField>
+        <FormField v-if="formVisibility === 'shared'">
+          <SMemberPicker
+            v-model="formSharedWith"
+            :members="householdStore.activeMembers"
+            :current-member-id="authStore.memberId ?? undefined"
+            label="Share with"
+          />
+        </FormField>
       </FormSection>
     </FormDrawer>
 

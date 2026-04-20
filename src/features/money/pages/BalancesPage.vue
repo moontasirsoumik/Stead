@@ -64,8 +64,8 @@ onMounted(async () => {
 <template>
   <PageContainer>
     <PageHeader
-      title="Balances"
-      subtitle="Shared expenses and what you owe each other"
+      title="Settlements"
+      subtitle="Private view — only you can see your debts and credits"
       class="page-enter"
       :style="{ '--stagger': 0 }"
     />

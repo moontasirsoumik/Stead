@@ -20,11 +20,17 @@ import { useWishlistStore } from '@/stores/wishlist.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { useAppStore } from '@/stores/app.store'
 import { formatCents } from '@/utils/format'
+import SVisibilityPicker from '@/components/ui/SVisibilityPicker.vue'
+import SMemberPicker from '@/components/ui/SMemberPicker.vue'
+import { entitySharesDataService } from '@/services/data/entity-shares.data'
+import { useHouseholdStore } from '@/stores/household.store'
 import type { WishlistItem } from '@/models/wishlist.model'
+import type { Visibility } from '@/models/enums'
 
 const wishlistStore = useWishlistStore()
 const authStore = useAuthStore()
 const appStore = useAppStore()
+const householdStore = useHouseholdStore()
 
 const search = ref('')
 const statusFilter = ref('')
@@ -41,6 +47,8 @@ const formPrice = ref('')
 const formPriority = ref<'high' | 'medium' | 'low'>('medium')
 const formCategory = ref('')
 const formNote = ref('')
+const formVisibility = ref<Visibility>('private')
+const formSharedWith = ref<string[]>([])
 
 const confirmDeleteOpen = ref(false)
 const deletingItemId = ref<string | null>(null)
@@ -116,6 +124,8 @@ function openCreateDrawer() {
   formPriority.value = 'medium'
   formCategory.value = ''
   formNote.value = ''
+  formVisibility.value = 'private'
+  formSharedWith.value = []
   drawerOpen.value = true
 }
 
@@ -128,6 +138,13 @@ function openEditDrawer(item: WishlistItem) {
   formPriority.value = item.priority
   formCategory.value = item.category ?? ''
   formNote.value = item.note ?? ''
+  formVisibility.value = (item.visibility ?? 'private') as Visibility
+  formSharedWith.value = []
+  if (item.visibility === 'shared' && authStore.householdId) {
+    entitySharesDataService.getByEntity('wishlist', item.id).then((shares) => {
+      formSharedWith.value = shares.map((s) => s.shared_with)
+    })
+  }
   drawerOpen.value = true
 }
 
@@ -143,11 +160,17 @@ async function handleSubmit() {
       priority: formPriority.value,
       category: formCategory.value.trim(),
       note: formNote.value.trim(),
+      visibility: formVisibility.value,
     }
     if (editingItem.value) {
       await wishlistStore.update(editingItem.value.id, payload)
+      if (formVisibility.value === 'shared' && authStore.householdId) {
+        await entitySharesDataService.setShares(authStore.householdId, 'wishlist', editingItem.value.id, formSharedWith.value)
+      } else if (editingItem.value.id) {
+        await entitySharesDataService.deleteByEntity('wishlist', editingItem.value.id)
+      }
     } else {
-      await wishlistStore.create({
+      const created = await wishlistStore.create({
         ...payload,
         status: 'wanted',
         saved_amount: 0,
@@ -155,6 +178,9 @@ async function handleSubmit() {
         owner_id: authStore.memberId!,
         deleted: false,
       })
+      if (formVisibility.value === 'shared' && created && authStore.householdId) {
+        await entitySharesDataService.setShares(authStore.householdId, 'wishlist', created.id, formSharedWith.value)
+      }
     }
     drawerOpen.value = false
   } finally {
@@ -194,6 +220,9 @@ async function handleDelete() {
 onMounted(async () => {
   if (authStore.householdId) {
     await wishlistStore.fetchItems(authStore.householdId)
+    if (!householdStore.members.length) {
+      await householdStore.loadMembers(authStore.householdId)
+    }
   }
 })
 </script>
@@ -277,6 +306,20 @@ onMounted(async () => {
         <FormField><SSelect v-model="formPriority" :options="priorityFormOptions" label="Priority" /></FormField>
         <FormField><SInput v-model="formCategory" label="Category" placeholder="e.g. Tech, Home, Clothing" /></FormField>
         <FormField><STextarea v-model="formNote" label="Note" :rows="2" placeholder="Any extra notes…" /></FormField>
+      </FormSection>
+      <!-- Visibility -->
+      <FormSection title="Privacy">
+        <FormField>
+          <SVisibilityPicker v-model="formVisibility" label="Who can see this?" />
+        </FormField>
+        <FormField v-if="formVisibility === 'shared'">
+          <SMemberPicker
+            v-model="formSharedWith"
+            :members="householdStore.activeMembers"
+            :current-member-id="authStore.memberId ?? undefined"
+            label="Share with"
+          />
+        </FormField>
       </FormSection>
     </FormDrawer>
 

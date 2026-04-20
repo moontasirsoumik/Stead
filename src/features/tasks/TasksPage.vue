@@ -25,7 +25,10 @@ import { useAppStore } from '@/stores/app.store'
 import { useHouseholdStore } from '@/stores/household.store'
 import { formatRelativeDate } from '@/utils/format'
 import type { Task } from '@/models/task.model'
-import type { TaskStatus, TaskPriority, TaskType } from '@/models/enums'
+import SVisibilityPicker from '@/components/ui/SVisibilityPicker.vue'
+import SMemberPicker from '@/components/ui/SMemberPicker.vue'
+import { entitySharesDataService } from '@/services/data/entity-shares.data'
+import type { TaskStatus, TaskPriority, TaskType, Visibility } from '@/models/enums'
 
 const tasksStore = useTasksStore()
 const authStore = useAuthStore()
@@ -53,6 +56,8 @@ const formTaskType = ref<TaskType>('regular')
 const formEstimatedCost = ref('')
 const formVendor = ref('')
 const formContact = ref('')
+const formVisibility = ref<Visibility>('private')
+const formSharedWith = ref<string[]>([])
 
 const expandedTaskId = ref<string | null>(null)
 const newSubtaskTitle = ref('')
@@ -196,6 +201,8 @@ function openCreateDrawer() {
   formEstimatedCost.value = ''
   formVendor.value = ''
   formContact.value = ''
+  formVisibility.value = 'private'
+  formSharedWith.value = []
   drawerOpen.value = true
 }
 
@@ -213,6 +220,13 @@ function openEditDrawer(task: Task) {
   formEstimatedCost.value = task.estimated_cost != null ? String(task.estimated_cost / 100) : ''
   formVendor.value = task.vendor ?? ''
   formContact.value = task.contact ?? ''
+  formVisibility.value = (task.visibility ?? 'private') as Visibility
+  formSharedWith.value = []
+  if (task.visibility === 'shared' && authStore.householdId) {
+    entitySharesDataService.getByEntity('task', task.id).then((shares) => {
+      formSharedWith.value = shares.map((s) => s.shared_with)
+    })
+  }
   drawerOpen.value = true
 }
 
@@ -233,11 +247,17 @@ async function handleSubmit() {
       estimated_cost: formEstimatedCost.value ? Math.round(Number(formEstimatedCost.value) * 100) : null,
       vendor: formVendor.value.trim() || null,
       contact: formContact.value.trim() || null,
+      visibility: appStore.isPersonal ? formVisibility.value : ('private' as const),
     }
     if (editingTask.value) {
       await tasksStore.updateTask(editingTask.value.id, payload)
+      if (appStore.isPersonal && formVisibility.value === 'shared' && authStore.householdId) {
+        await entitySharesDataService.setShares(authStore.householdId, 'task', editingTask.value.id, formSharedWith.value)
+      } else if (appStore.isPersonal && editingTask.value.id) {
+        await entitySharesDataService.deleteByEntity('task', editingTask.value.id)
+      }
     } else {
-      await tasksStore.createTask({
+      const created = await tasksStore.createTask({
         ...payload,
         household_id: authStore.householdId!,
         status: 'not_started' as TaskStatus,
@@ -250,6 +270,9 @@ async function handleSubmit() {
         owner_id: appStore.scope === 'personal' ? authStore.memberId : null,      rotation_enabled: false,
       rotation_members: '',
       rotation_index: 0,      })
+      if (appStore.isPersonal && formVisibility.value === 'shared' && created && authStore.householdId) {
+        await entitySharesDataService.setShares(authStore.householdId, 'task', created.id, formSharedWith.value)
+      }
     }
     drawerOpen.value = false
   } finally {
@@ -432,6 +455,20 @@ onMounted(async () => {
         <FormField><SInput v-model="formEstimatedCost" label="Estimated Cost ($)" type="number" placeholder="0.00" /></FormField>
         <FormField><SInput v-model="formVendor" label="Vendor / Service" placeholder="e.g. Bob's Plumbing" /></FormField>
         <FormField><SInput v-model="formContact" label="Contact" placeholder="Phone or email" /></FormField>
+      </FormSection>
+      <!-- Visibility — only in personal scope -->
+      <FormSection v-if="appStore.isPersonal" title="Privacy">
+        <FormField>
+          <SVisibilityPicker v-model="formVisibility" label="Who can see this?" />
+        </FormField>
+        <FormField v-if="formVisibility === 'shared'">
+          <SMemberPicker
+            v-model="formSharedWith"
+            :members="householdStore.activeMembers"
+            :current-member-id="authStore.memberId ?? undefined"
+            label="Share with"
+          />
+        </FormField>
       </FormSection>
     </FormDrawer>
 

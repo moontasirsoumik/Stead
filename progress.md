@@ -1,7 +1,7 @@
 # Stead — Implementation Progress Tracker
 
-> **Last updated:** 2026-04-18
-> **Current Phase:** P30 — Settings Wiring (complete)
+> **Last updated:** 2026-04-20
+> **Current Phase:** P31 — Privacy & Sharing (frontend complete, migration pending)
 
 ---
 
@@ -44,6 +44,7 @@
 | P28e | UI Fixes Round 4 | ✅ Done | 2026-04-18 | 2026-04-18 | Reminders layout fix, sidebar scope toggle removal, mobile nav changes (sidebar-only), emoji→Material Symbols replacement |
 | P29 | Calendar Feature | ✅ Done | 2026-04-18 | 2026-04-18 | Full calendar page with month grid, aggregates tasks/reminders/bills, standalone event CRUD, day detail panel, DB migration applied |
 | P30 | Settings Wiring | ✅ Done | 2026-04-18 | 2026-04-18 | Wired 22 orphaned settings to feature pages — see details below |
+| P31 | Privacy & Sharing | 🟡 In Progress | 2026-04-20 | — | Frontend complete, DB migration pending — see details below |
 
 ---
 
@@ -384,6 +385,67 @@ Wired 22 previously orphaned settings from `app.store.ts` to their feature pages
 | 2026-04-16 | Switched design guidance from Fluent-inspired direction to Material Design 3, added shell/navigation quality rules, and began app-wide M3 migration. |
 | 2026-04-16 | Planned P15 (merge Tasks+Maintenance), P16 (merge Shopping+Inventory→Pantry), P17 (personal scope). Updated plan.md §25 and progress.md. |
 | 2026-04-17 | **Database seeding & RLS fix**: Seeded 206+ rows across 23 tables (both household + personal scope). Fixed member `active=false` bug blocking RLS. Applied RLS policies for 10 new feature tables (wishlists, subscriptions, journal_entries, habits, habit_logs, contacts, documents, meal_plans, meals, expense_splits). Deleted duplicate empty household/member. All data now accessible via authenticated user. |
+| 2026-04-20 | **Phase 31 — Privacy & Sharing**: Frontend complete, DB migration pending. See Phase 31 details below. |
+
+---
+
+## Phase 31 — Privacy & Sharing Features
+
+### Overview
+Privacy-centric feature set adding visibility controls and private debt view:
+- **Expense split privacy** — RLS-enforced: you only see your own debts and credits
+- **Calendar event sharing** — share personal events with specific members or entire household
+- **Notes sharing** — share personal notes with specific members
+- **Tasks sharing** — share personal tasks with specific members
+- **Wishlist sharing** — share wishlist items (e.g., gift hints) with specific members
+- **Settlements view** — renamed Balances tab with private debt subtitle
+- **Dummy members** — 4 test members added for multi-user testing
+
+### Files Created
+| File | Purpose |
+|---|---|
+| `supabase/migrations/013_privacy_sharing.sql` | DB migration: visibility columns, entity_shares table, RLS updates, dummy members |
+| `scripts/apply-migration-013.mjs` | Script to apply migration via Supabase Management API |
+| `src/models/entity-share.model.ts` | EntityShare TypeScript interface |
+| `src/schemas/entity-share.schema.ts` | EntityShare Zod schema |
+| `src/services/data/entity-shares.data.ts` | Data service for entity sharing (CRUD + cache) |
+| `src/components/ui/SVisibilityPicker.vue` | Reusable visibility selector (private/shared/household) |
+| `src/components/ui/SMemberPicker.vue` | Reusable member multi-select for sharing |
+
+### Files Modified
+| File | Change |
+|---|---|
+| `src/models/enums.ts` | Added `Visibility` type |
+| `src/models/calendar-event.model.ts` | Added `visibility: Visibility` |
+| `src/models/note.model.ts` | Added `visibility: Visibility` |
+| `src/models/task.model.ts` | Added `visibility: Visibility` |
+| `src/models/wishlist.model.ts` | Added `visibility: Visibility` |
+| `src/schemas/calendar-event.schema.ts` | Added visibility enum validation |
+| `src/schemas/note.schema.ts` | Added visibility enum validation |
+| `src/schemas/task.schema.ts` | Added visibility enum validation |
+| `src/schemas/wishlist.schema.ts` | Added visibility enum validation |
+| `src/services/cache/db.ts` | Dexie v7: entity_shares table + visibility indexes |
+| `src/features/calendar/CalendarPage.vue` | Visibility picker + member sharing in event form |
+| `src/features/notes/NotesPage.vue` | Visibility picker + member sharing in note form |
+| `src/features/tasks/TasksPage.vue` | Visibility picker + member sharing in task form |
+| `src/features/wishlist/WishlistPage.vue` | Visibility picker + member sharing in wishlist form |
+| `src/features/money/components/MoneyTabs.vue` | Renamed Balances → Settlements |
+| `src/features/money/pages/BalancesPage.vue` | Updated title/subtitle for private debt |
+
+### Migration Status
+
+⚠️ **PENDING**: Run the migration to apply DB changes:
+```bash
+node scripts/apply-migration-013.mjs <your_supabase_access_token>
+```
+Get token from: https://supabase.com/dashboard/account/tokens
+
+### What the migration does:
+1. Adds `visibility` column (default: 'private') to calendar_events, notes, tasks, wishlists
+2. Creates `entity_shares` junction table for sharing with specific members
+3. Updates `expense_splits` RLS to only show your own debts/credits (private debt view)
+4. Updates calendar_events, notes, tasks, wishlists SELECT RLS for visibility awareness
+5. Inserts 4 dummy household members (Alice Chen, Bob Rivera, Chloe Kim, Derek Patel)
 
 ---
 
