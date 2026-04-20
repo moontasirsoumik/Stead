@@ -18,12 +18,14 @@ import FormField from '@/components/forms/FormField.vue'
 import FormSection from '@/components/forms/FormSection.vue'
 import { useDocumentsStore } from '@/stores/documents.store'
 import { useAuthStore } from '@/stores/auth.store'
+import { useAppStore } from '@/stores/app.store'
 import { formatDate } from '@/utils/format'
 import type { HouseholdDocument } from '@/models/document.model'
 import type { DocType } from '@/models/enums'
 
 const documentsStore = useDocumentsStore()
 const authStore = useAuthStore()
+const appStore = useAppStore()
 
 const search = ref('')
 const typeFilter = ref('')
@@ -93,7 +95,7 @@ const filteredItems = computed(() => {
     result = result.filter(
       (d) =>
         d.title.toLowerCase().includes(q) ||
-        d.issuer.toLowerCase().includes(q),
+        (d.issuer ?? '').toLowerCase().includes(q),
     )
   }
   if (typeFilter.value) {
@@ -119,12 +121,12 @@ function openEditDrawer(doc: HouseholdDocument) {
   editingDoc.value = doc
   formTitle.value = doc.title
   formDocType.value = doc.doc_type
-  formDescription.value = doc.description
-  formIssuer.value = doc.issuer
+  formDescription.value = doc.description ?? ''
+  formIssuer.value = doc.issuer ?? ''
   formIssueDate.value = doc.issue_date ? doc.issue_date.slice(0, 10) : ''
   formExpiryDate.value = doc.expiry_date ? doc.expiry_date.slice(0, 10) : ''
-  formReferenceNumber.value = doc.reference_number
-  formNote.value = doc.note
+  formReferenceNumber.value = doc.reference_number ?? ''
+  formNote.value = doc.note ?? ''
   drawerOpen.value = true
 }
 
@@ -158,8 +160,12 @@ async function handleSubmit() {
 }
 
 function confirmDelete(id: string) {
-  deletingId.value = id
-  confirmDeleteOpen.value = true
+  if (appStore.confirmBeforeDelete) {
+    deletingId.value = id
+    confirmDeleteOpen.value = true
+  } else {
+    documentsStore.remove(id)
+  }
 }
 
 async function handleDelete() {

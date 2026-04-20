@@ -334,16 +334,16 @@ const dashDensityStr = computed({ get: () => app.dashboardDensity, set: (v: stri
 const greetingModel = computed({ get: () => app.showDashboardGreeting, set: (v: boolean) => app.setShowDashboardGreeting(v) })
 
 type WidgetKey = 'money' | 'tasks' | 'pantry' | 'reminders' | 'notes' | 'habits' | 'meals' | 'subscriptions' | 'wishlist'
-const WIDGET_LIST: { key: WidgetKey; label: string }[] = [
-  { key: 'money', label: 'Money' },
-  { key: 'tasks', label: 'Tasks' },
-  { key: 'pantry', label: 'Pantry' },
-  { key: 'reminders', label: 'Reminders' },
-  { key: 'notes', label: 'Notes' },
-  { key: 'habits', label: 'Habits' },
-  { key: 'meals', label: 'Meals' },
-  { key: 'subscriptions', label: 'Subscriptions' },
-  { key: 'wishlist', label: 'Wishlist' },
+const WIDGET_LIST: { key: WidgetKey; label: string; icon: string }[] = [
+  { key: 'money', label: 'Money', icon: 'payments' },
+  { key: 'tasks', label: 'Tasks', icon: 'task_alt' },
+  { key: 'pantry', label: 'Pantry', icon: 'kitchen' },
+  { key: 'reminders', label: 'Reminders', icon: 'alarm' },
+  { key: 'notes', label: 'Notes', icon: 'sticky_note_2' },
+  { key: 'habits', label: 'Habits', icon: 'self_improvement' },
+  { key: 'meals', label: 'Meals', icon: 'restaurant' },
+  { key: 'subscriptions', label: 'Subscriptions', icon: 'card_membership' },
+  { key: 'wishlist', label: 'Wishlist', icon: 'redeem' },
 ]
 
 function widgetModel(key: WidgetKey) {
@@ -385,14 +385,14 @@ const budgetPeriodStr = computed({ get: () => app.defaultBudgetPeriod, set: (v: 
 const monthlyCompModel = computed({ get: () => app.showMonthlyComparison, set: (v: boolean) => app.setShowMonthlyComparison(v) })
 
 const CURRENCY_OPTIONS = [
-  { value: 'usd', label: 'USD � $' },
-  { value: 'eur', label: 'EUR � �' },
-  { value: 'gbp', label: 'GBP � �' },
-  { value: 'bdt', label: 'BDT � ?' },
-  { value: 'inr', label: 'INR � ?' },
-  { value: 'cad', label: 'CAD � C$' },
-  { value: 'aud', label: 'AUD � A$' },
-  { value: 'jpy', label: 'JPY � �' },
+  { value: 'usd', label: 'USD ($)' },
+  { value: 'eur', label: 'EUR' },
+  { value: 'gbp', label: 'GBP' },
+  { value: 'bdt', label: 'BDT (Tk)' },
+  { value: 'inr', label: 'INR' },
+  { value: 'cad', label: 'CAD (C$)' },
+  { value: 'aud', label: 'AUD (A$)' },
+  { value: 'jpy', label: 'JPY' },
 ]
 
 const taskPriorityStr = computed({ get: () => app.defaultTaskPriority, set: (v: string) => app.setDefaultTaskPriority(v as DefaultTaskPriority) })
@@ -690,15 +690,17 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
           <SectionHeader title="Widgets" />
         </div>
         <div class="card-body">
-          <div
-            v-for="w in WIDGET_LIST"
-            :key="w.key"
-            class="row"
-          >
-            <div class="row__label">
-              <span class="row__name">{{ w.label }}</span>
-            </div>
-            <SToggle v-model="widgetModel(w.key).value" />
+          <p class="widget-hint">Tap to toggle widgets on your dashboard</p>
+          <div class="widget-chips">
+            <button
+              v-for="w in WIDGET_LIST"
+              :key="w.key"
+              :class="['widget-chip', { 'widget-chip--active': widgetModel(w.key).value }]"
+              @click="widgetModel(w.key).value = !widgetModel(w.key).value"
+            >
+              <span class="material-symbols-rounded widget-chip__icon">{{ w.icon }}</span>
+              <span class="widget-chip__label">{{ w.label }}</span>
+            </button>
           </div>
         </div>
       </div>
@@ -1250,6 +1252,15 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
   width: 220px;
 }
 
+/* Auto-size SSelect/SToggle inside rows (matches .row__control width) */
+.row > .sselect {
+  flex-shrink: 0;
+  width: 220px;
+}
+.row > .stoggle {
+  flex-shrink: 0;
+}
+
 /* -- Theme picker -- */
 .theme-group {
   display: flex;
@@ -1323,6 +1334,70 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
   outline: 2px solid var(--color-bg-primary);
   outline-offset: 0;
   transform: scale(1.08);
+}
+
+/* -- Widget chips -- */
+.widget-hint {
+  font: var(--text-caption);
+  color: var(--color-fg-tertiary);
+  margin-bottom: var(--space-m);
+}
+
+.widget-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-s);
+}
+
+.widget-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-m);
+  border: 1.5px solid var(--color-border-default);
+  border-radius: var(--radius-circle);
+  background: transparent;
+  cursor: pointer;
+  color: var(--color-fg-secondary);
+  font: var(--text-label-md);
+  transition:
+    border-color var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard),
+    transform var(--duration-fast) var(--easing-standard);
+  user-select: none;
+}
+
+.widget-chip:hover {
+  border-color: var(--color-border-strong);
+  background: var(--color-bg-tertiary);
+  box-shadow: var(--shadow-xs);
+}
+
+.widget-chip:active {
+  transform: scale(0.96);
+}
+
+.widget-chip--active {
+  border-color: var(--color-brand-primary);
+  background: var(--color-brand-selected);
+  color: var(--color-brand-primary);
+  box-shadow: 0 0 0 1px var(--color-brand-primary) inset;
+}
+
+.widget-chip--active:hover {
+  background: var(--color-brand-selected);
+  border-color: var(--color-brand-hover);
+}
+
+.widget-chip__icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.widget-chip__label {
+  line-height: 1;
 }
 
 /* -- Segmented control -- */
@@ -1579,6 +1654,10 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
   }
 
   .row__control {
+    width: 100%;
+  }
+
+  .row > .sselect {
     width: 100%;
   }
 

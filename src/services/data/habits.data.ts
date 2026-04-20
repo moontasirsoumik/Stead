@@ -14,4 +14,6 @@ export const habitLogsDataService = new BaseDataService<HabitLog>(
   'habit_logs',
   db.habit_logs,
   habitLogSchema,
+  '*',
+  false,
 )

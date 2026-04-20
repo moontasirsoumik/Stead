@@ -2,7 +2,7 @@
 import { useId } from 'vue'
 
 const inputId = useId()
-const model = defineModel<string>({ default: '' })
+const model = defineModel<string | number>({ default: '' })
 
 withDefaults(
   defineProps<{

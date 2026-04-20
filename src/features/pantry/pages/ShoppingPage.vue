@@ -21,12 +21,14 @@ import PantryTabs from '@/features/pantry/components/PantryTabs.vue'
 import { useShoppingStore } from '@/stores/shopping.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { useHouseholdStore } from '@/stores/household.store'
+import { useAppStore } from '@/stores/app.store'
 import type { GroceryItem } from '@/models/grocery.model'
 import type { GroceryStatus, TaskPriority } from '@/models/enums'
 
 const shoppingStore = useShoppingStore()
 const authStore = useAuthStore()
 const householdStore = useHouseholdStore()
+const appStore = useAppStore()
 
 const search = ref('')
 const categoryFilter = ref('')
@@ -102,11 +104,19 @@ const filteredItems = computed(() => {
 })
 
 const groupedByCategory = computed(() => {
+  const sortMode = appStore.defaultGrocerySort
+  if (sortMode === 'name') {
+    const sorted = [...filteredItems.value].sort((a, b) => a.name.localeCompare(b.name))
+    return [['All items', sorted]] as [string, GroceryItem[]][]
+  }
+  const keyFn = sortMode === 'status'
+    ? (i: GroceryItem) => i.status ?? 'needed'
+    : (i: GroceryItem) => i.category ?? 'Uncategorized'
   const groups: Record<string, GroceryItem[]> = {}
   for (const item of filteredItems.value) {
-    const cat = item.category ?? 'Uncategorized'
-    if (!groups[cat]) groups[cat] = []
-    groups[cat].push(item)
+    const key = keyFn(item)
+    if (!groups[key]) groups[key] = []
+    groups[key].push(item)
   }
   return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b))
 })
@@ -134,7 +144,7 @@ async function handleQuickAdd() {
     name: quickAddName.value.trim(),
     quantity: 1,
     unit: null,
-    category: null,
+    category: 'other',
     priority: 'medium' as TaskPriority,
     assigned_to: null,
     status: 'needed' as GroceryStatus,

@@ -76,7 +76,7 @@ export const useWishlistStore = defineStore('wishlist', () => {
   const totalWishlistValue = computed(() =>
     items.value
       .filter((i) => i.status === 'wanted' || i.status === 'saving')
-      .reduce((sum, i) => sum + i.price, 0),
+      .reduce((sum, i) => sum + (i.price ?? 0), 0),
   )
 
   return {

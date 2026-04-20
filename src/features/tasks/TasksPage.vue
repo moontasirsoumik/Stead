@@ -47,7 +47,7 @@ const formAssignee = ref('')
 const formRoom = ref('')
 const formCategory = ref('')
 const formDueDate = ref('')
-const formPriority = ref<TaskPriority>('medium')
+const formPriority = ref<TaskPriority>(appStore.defaultTaskPriority)
 const formNote = ref('')
 const formTaskType = ref<TaskType>('regular')
 const formEstimatedCost = ref('')
@@ -109,6 +109,9 @@ function getMemberName(id: string | null): string | null {
 
 const filteredItems = computed(() => {
   let result = tasksStore.items.filter((t) => t.scope === appStore.scope)
+  if (!appStore.showCompletedTasks) {
+    result = result.filter((t) => t.status !== 'done' && t.status !== 'skipped')
+  }
   if (typeFilter.value !== 'all') {
     result = result.filter((t) => t.task_type === typeFilter.value)
   }
@@ -268,8 +271,12 @@ async function handleAddSubtask(taskId: string) {
 }
 
 function confirmDelete(id: string) {
-  deletingTaskId.value = id
-  confirmDeleteOpen.value = true
+  if (appStore.confirmBeforeDelete) {
+    deletingTaskId.value = id
+    confirmDeleteOpen.value = true
+  } else {
+    tasksStore.removeTask(id)
+  }
 }
 
 async function handleDelete() {

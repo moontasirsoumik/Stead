@@ -107,10 +107,10 @@ function openCreateDrawer() {
 function openEditDrawer(habit: Habit) {
   editingHabit.value = habit
   formName.value = habit.name
-  formDescription.value = habit.description
+  formDescription.value = habit.description ?? ''
   formFrequency.value = habit.frequency
   formColor.value = habit.color || '#6366f1'
-  formTargetDays.value = habit.target_days
+  formTargetDays.value = habit.target_days ?? ''
   drawerOpen.value = true
 }
 
@@ -143,8 +143,12 @@ async function handleSubmit() {
 }
 
 function confirmDelete(id: string) {
-  deletingHabitId.value = id
-  confirmDeleteOpen.value = true
+  if (appStore.confirmBeforeDelete) {
+    deletingHabitId.value = id
+    confirmDeleteOpen.value = true
+  } else {
+    habitsStore.remove(id)
+  }
 }
 
 async function handleDelete() {

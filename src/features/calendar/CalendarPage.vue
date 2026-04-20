@@ -5,6 +5,7 @@ import PageHeader from '@/components/layout/PageHeader.vue'
 import SButton from '@/components/ui/SButton.vue'
 import SBadge from '@/components/ui/SBadge.vue'
 import SInput from '@/components/ui/SInput.vue'
+import STimePicker from '@/components/ui/STimePicker.vue'
 import STextarea from '@/components/ui/STextarea.vue'
 import SSelect from '@/components/ui/SSelect.vue'
 import SCheckbox from '@/components/ui/SCheckbox.vue'
@@ -68,8 +69,11 @@ const monthLabel = computed(() => {
   return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
 })
 
-const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-const dayNamesShort = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
+const allDayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const dayNames = computed(() => {
+  const offset = appStore.weekStart === 'sunday' ? 0 : appStore.weekStart === 'saturday' ? 6 : 1
+  return Array.from({ length: 7 }, (_, i) => allDayNames[(i + offset) % 7])
+})
 
 const todayStr = computed(() => {
   const d = new Date()
@@ -94,9 +98,9 @@ const calendarCells = computed<CalendarCell[]>(() => {
   const lastDay = new Date(year, month, 0)
   const daysInMonth = lastDay.getDate()
 
-  // Monday = 0, Sunday = 6
-  let startDow = firstDay.getDay() - 1
-  if (startDow < 0) startDow = 6
+  // Compute start day of week based on weekStart setting
+  const weekStartOffset = appStore.weekStart === 'sunday' ? 0 : appStore.weekStart === 'saturday' ? 6 : 1
+  let startDow = (firstDay.getDay() - weekStartOffset + 7) % 7
 
   const cells: CalendarCell[] = []
   const pad = (n: number) => String(n).padStart(2, '0')
@@ -453,7 +457,7 @@ watch(() => appStore.isPersonal, loadData)
           class="cal-grid__header"
         >
           <span class="cal-grid__header-full">{{ name }}</span>
-          <span class="cal-grid__header-short">{{ dayNamesShort[i] }}</span>
+          <span class="cal-grid__header-short">{{ name.charAt(0) }}</span>
         </div>
 
         <!-- Date cells -->
@@ -659,12 +663,10 @@ watch(() => appStore.isPersonal, loadData)
             type="date"
             required
           />
-          <SInput
+          <STimePicker
             v-if="!formAllDay"
             v-model="formStartTime"
             label="Start Time"
-            type="text"
-            placeholder="HH:MM"
           />
         </FormField>
 
@@ -674,12 +676,10 @@ watch(() => appStore.isPersonal, loadData)
             label="End Date"
             type="date"
           />
-          <SInput
+          <STimePicker
             v-if="!formAllDay"
             v-model="formEndTime"
             label="End Time"
-            type="text"
-            placeholder="HH:MM"
           />
         </FormField>
       </FormSection>

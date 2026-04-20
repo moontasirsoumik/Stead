@@ -19,10 +19,12 @@ import FormField from '@/components/forms/FormField.vue'
 import FormSection from '@/components/forms/FormSection.vue'
 import { useContactsStore } from '@/stores/contacts.store'
 import { useAuthStore } from '@/stores/auth.store'
+import { useAppStore } from '@/stores/app.store'
 import type { Contact } from '@/models/contact.model'
 
 const contactsStore = useContactsStore()
 const authStore = useAuthStore()
+const appStore = useAppStore()
 
 const search = ref('')
 const categoryFilter = ref('')
@@ -81,8 +83,8 @@ const filteredItems = computed(() => {
     result = result.filter(
       (c) =>
         c.name.toLowerCase().includes(q) ||
-        c.role.toLowerCase().includes(q) ||
-        c.company.toLowerCase().includes(q),
+        (c.role ?? '').toLowerCase().includes(q) ||
+        (c.company ?? '').toLowerCase().includes(q),
     )
   }
   if (categoryFilter.value) {
@@ -107,13 +109,13 @@ function openCreateDrawer() {
 function openEditDrawer(contact: Contact) {
   editingContact.value = contact
   formName.value = contact.name
-  formRole.value = contact.role
-  formCompany.value = contact.company
-  formPhone.value = contact.phone
-  formEmail.value = contact.email
-  formAddress.value = contact.address
-  formNote.value = contact.note
-  formCategory.value = contact.category
+  formRole.value = contact.role ?? ''
+  formCompany.value = contact.company ?? ''
+  formPhone.value = contact.phone ?? ''
+  formEmail.value = contact.email ?? ''
+  formAddress.value = contact.address ?? ''
+  formNote.value = contact.note ?? ''
+  formCategory.value = contact.category ?? 'other'
   drawerOpen.value = true
 }
 
@@ -147,8 +149,12 @@ async function handleSubmit() {
 }
 
 function confirmDelete(id: string) {
-  deletingId.value = id
-  confirmDeleteOpen.value = true
+  if (appStore.confirmBeforeDelete) {
+    deletingId.value = id
+    confirmDeleteOpen.value = true
+  } else {
+    contactsStore.remove(id)
+  }
 }
 
 async function handleDelete() {
@@ -221,7 +227,7 @@ onMounted(async () => {
         </div>
         <div class="contact-row__chips">
           <div class="contact-row__category">
-            <SBadge :variant="categoryVariant(contact.category)" size="sm">{{ contact.category }}</SBadge>
+            <SBadge v-if="contact.category" :variant="categoryVariant(contact.category)" size="sm">{{ contact.category }}</SBadge>
           </div>
           <div class="contact-row__phone">
             <a v-if="contact.phone" :href="`tel:${contact.phone}`" class="contact-link" @click.stop>{{ contact.phone }}</a>

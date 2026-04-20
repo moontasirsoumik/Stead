@@ -100,11 +100,11 @@ function openEditDrawer(sub: Subscription) {
   formName.value = sub.name
   formAmount.value = sub.amount ? String(sub.amount / 100) : ''
   formFrequency.value = sub.frequency
-  formCategory.value = sub.category
+  formCategory.value = sub.category ?? ''
   formNextBillingDate.value = sub.next_billing_date ?? ''
   formAutoRenew.value = sub.auto_renew
-  formUrl.value = sub.url
-  formNote.value = sub.note
+  formUrl.value = sub.url ?? ''
+  formNote.value = sub.note ?? ''
   drawerOpen.value = true
 }
 
@@ -152,8 +152,12 @@ async function cancelSubscription(sub: Subscription) {
 }
 
 function confirmDelete(id: string) {
-  deletingItemId.value = id
-  confirmDeleteOpen.value = true
+  if (appStore.confirmBeforeDelete) {
+    deletingItemId.value = id
+    confirmDeleteOpen.value = true
+  } else {
+    subscriptionsStore.remove(id)
+  }
 }
 
 async function handleDelete() {

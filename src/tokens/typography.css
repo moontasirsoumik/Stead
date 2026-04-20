@@ -7,18 +7,18 @@
   --font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
 
-  --text-display: 700 32px/40px var(--font-family);
-  --text-title-1: 700 24px/32px var(--font-family);
-  --text-title-2: 600 20px/28px var(--font-family);
-  --text-title-3: 600 16px/22px var(--font-family);
-  --text-subtitle-1: 600 15px/20px var(--font-family);
-  --text-body-1: 400 15px/22px var(--font-family);
-  --text-body-1-strong: 600 15px/22px var(--font-family);
-  --text-body-2: 400 14px/20px var(--font-family);
-  --text-caption: 500 12.5px/18px var(--font-family);
-  --text-label-lg: 600 14px/20px var(--font-family);
-  --text-label-md: 600 12.5px/18px var(--font-family);
-  --text-label-sm: 600 11px/16px var(--font-family);
+  --text-display: 700 2rem/2.5rem var(--font-family);
+  --text-title-1: 700 1.5rem/2rem var(--font-family);
+  --text-title-2: 600 1.25rem/1.75rem var(--font-family);
+  --text-title-3: 600 1rem/1.375rem var(--font-family);
+  --text-subtitle-1: 600 0.9375rem/1.25rem var(--font-family);
+  --text-body-1: 400 0.9375rem/1.375rem var(--font-family);
+  --text-body-1-strong: 600 0.9375rem/1.375rem var(--font-family);
+  --text-body-2: 400 0.875rem/1.25rem var(--font-family);
+  --text-caption: 500 0.78125rem/1.125rem var(--font-family);
+  --text-label-lg: 600 0.875rem/1.25rem var(--font-family);
+  --text-label-md: 600 0.78125rem/1.125rem var(--font-family);
+  --text-label-sm: 600 0.6875rem/1rem var(--font-family);
 
   --font-weight-regular: 400;
   --font-weight-medium: 500;

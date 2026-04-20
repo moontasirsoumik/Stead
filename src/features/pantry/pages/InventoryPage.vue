@@ -21,6 +21,7 @@ import PantryTabs from '@/features/pantry/components/PantryTabs.vue'
 import { useInventoryStore } from '@/stores/inventory.store'
 import { useShoppingStore } from '@/stores/shopping.store'
 import { useAuthStore } from '@/stores/auth.store'
+import { useAppStore } from '@/stores/app.store'
 import { formatDate } from '@/utils/format'
 import type { InventoryItem } from '@/models/inventory.model'
 import type { StockStatus, TargetLevel } from '@/models/enums'
@@ -28,6 +29,7 @@ import type { StockStatus, TargetLevel } from '@/models/enums'
 const inventoryStore = useInventoryStore()
 const authStore = useAuthStore()
 const shoppingStore = useShoppingStore()
+const appStore = useAppStore()
 
 const search = ref('')
 const stockStatusFilter = ref('')
@@ -192,8 +194,12 @@ async function handleSubmit() {
 }
 
 function confirmDelete(id: string) {
-  deletingItemId.value = id
-  confirmDeleteOpen.value = true
+  if (appStore.confirmBeforeDelete) {
+    deletingItemId.value = id
+    confirmDeleteOpen.value = true
+  } else {
+    inventoryStore.remove(id)
+  }
 }
 
 async function handleDelete() {
@@ -290,7 +296,7 @@ onMounted(async () => {
       >
         <div class="inv-row__name">{{ item.name }}</div>
         <div class="inv-row__stock">
-          <SBadge :variant="stockVariant(item.stock_status)" size="sm">{{ stockLabel(item.stock_status) }}</SBadge>
+          <SBadge v-if="appStore.showStockIndicators" :variant="stockVariant(item.stock_status)" size="sm">{{ stockLabel(item.stock_status) }}</SBadge>
         </div>
         <div class="inv-row__chips">
           <div class="inv-row__category">

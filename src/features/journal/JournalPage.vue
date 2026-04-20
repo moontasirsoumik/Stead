@@ -171,7 +171,7 @@ onMounted(async () => {
     <ErrorBanner v-if="journalStore.error" :message="journalStore.error" @retry="authStore.householdId && journalStore.fetchEntries(authStore.householdId)" />
 
     <!-- Quick-write CTA -->
-    <div v-if="!hasTodayEntry && !journalStore.loading" class="today-cta page-enter" :style="{ '--stagger': 1 }">
+    <div v-if="appStore.journalPromptEnabled && !hasTodayEntry && !journalStore.loading" class="today-cta page-enter" :style="{ '--stagger': 1 }">
       <div class="today-cta__inner">
         <div class="today-cta__text">
           <span class="today-cta__title">How's your day going?</span>

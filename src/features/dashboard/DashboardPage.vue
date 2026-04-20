@@ -192,8 +192,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <PageContainer>
-    <PageHeader :title="greeting" :subtitle="householdName" />
+  <PageContainer :class="{ 'dash--compact': app.dashboardDensity === 'compact', 'dash--spacious': app.dashboardDensity === 'spacious' }">
+    <PageHeader v-if="app.showDashboardGreeting" :title="greeting" :subtitle="householdName" />
 
     <!-- Stats row — compact bar with vertical dividers -->
     <div class="stats-row">
@@ -216,7 +216,7 @@ onMounted(() => {
     </div>
 
     <!-- Tasks Due -->
-    <section class="dash-section">
+    <section v-if="app.dashboardWidgets.tasks" class="dash-section">
       <div class="dash-section__header">
         <h3 class="dash-section__title">Tasks Due ({{ tasksDue.length }})</h3>
         <RouterLink to="/tasks" class="dash-section__link">View all</RouterLink>
@@ -234,7 +234,7 @@ onMounted(() => {
     </section>
 
     <!-- Upcoming Bills (household only) -->
-    <section v-if="!app.isPersonal" class="dash-section">
+    <section v-if="!app.isPersonal && app.dashboardWidgets.money" class="dash-section">
       <div class="dash-section__header">
         <h3 class="dash-section__title">Upcoming Bills ({{ nextBills.length }})</h3>
         <RouterLink to="/money/bills" class="dash-section__link">View all</RouterLink>
@@ -252,7 +252,7 @@ onMounted(() => {
     </section>
 
     <!-- Recent Expenses -->
-    <section class="dash-section">
+    <section v-if="app.dashboardWidgets.money" class="dash-section">
       <div class="dash-section__header">
         <h3 class="dash-section__title">Recent Expenses ({{ recentExpenses.length }})</h3>
         <RouterLink to="/money/expenses" class="dash-section__link">View all</RouterLink>
@@ -270,7 +270,7 @@ onMounted(() => {
     </section>
 
     <!-- Reminders (household only) -->
-    <section v-if="!app.isPersonal" class="dash-section">
+    <section v-if="!app.isPersonal && app.dashboardWidgets.reminders" class="dash-section">
       <div class="dash-section__header">
         <h3 class="dash-section__title">Reminders ({{ upcomingReminders.length }})</h3>
         <RouterLink to="/reminders" class="dash-section__link">View all</RouterLink>
@@ -295,7 +295,7 @@ onMounted(() => {
     </section>
 
     <!-- Maintenance (household only) -->
-    <section v-if="!app.isPersonal" class="dash-section">
+    <section v-if="!app.isPersonal && app.dashboardWidgets.tasks" class="dash-section">
       <div class="dash-section__header">
         <h3 class="dash-section__title">Maintenance ({{ maintenanceAlerts.length }})</h3>
         <RouterLink to="/tasks" class="dash-section__link">View all</RouterLink>
@@ -364,7 +364,7 @@ onMounted(() => {
     </div>
 
     <!-- Low Stock + Shopping row -->
-    <div v-if="!app.isPersonal" class="dash-grid">
+    <div v-if="!app.isPersonal && app.dashboardWidgets.pantry" class="dash-grid">
       <section class="dash-section">
         <div class="dash-section__header">
           <h3 class="dash-section__title">Low Stock</h3>
@@ -398,7 +398,7 @@ onMounted(() => {
 
     <!-- Personal scope widgets -->
     <template v-if="app.isPersonal">
-      <section class="dash-section">
+      <section v-if="app.dashboardWidgets.wishlist" class="dash-section">
         <div class="dash-section__header">
           <h3 class="dash-section__title">Wishlist ({{ wishlistItems.length }})</h3>
           <RouterLink to="/wishlist" class="dash-section__link">View all</RouterLink>
@@ -408,13 +408,13 @@ onMounted(() => {
             <span class="dash-row__name">{{ item.name }}</span>
             <span class="dash-row__badge"><SBadge :variant="item.priority === 'high' ? 'error' : item.priority === 'medium' ? 'warning' : 'default'" size="sm">{{ item.priority }}</SBadge></span>
             <span class="dash-row__trailing"></span>
-            <span class="dash-row__amount">{{ formatCents(item.price) }}</span>
+            <span class="dash-row__amount">{{ formatCents(item.price ?? 0) }}</span>
           </div>
         </div>
         <p v-else class="dash-empty">Your wishlist is empty — start dreaming!</p>
       </section>
 
-      <section class="dash-section">
+      <section v-if="app.dashboardWidgets.subscriptions" class="dash-section">
         <div class="dash-section__header">
           <h3 class="dash-section__title">Subscriptions</h3>
           <RouterLink to="/subscriptions" class="dash-section__link">View all</RouterLink>
@@ -433,7 +433,7 @@ onMounted(() => {
         <p v-else class="dash-empty">No subscriptions tracked</p>
       </section>
 
-      <section class="dash-section">
+      <section v-if="app.dashboardWidgets.habits" class="dash-section">
         <div class="dash-section__header">
           <h3 class="dash-section__title">Habits Today</h3>
           <RouterLink to="/habits" class="dash-section__link">View all</RouterLink>
@@ -785,4 +785,10 @@ onMounted(() => {
     border-bottom: 1px solid var(--color-border-default);
   }
 }
+
+/* Dashboard density */
+.dash--compact :deep(.dash-section) { margin-bottom: var(--space-m); }
+.dash--compact :deep(.stat-cell) { padding: var(--space-xs) var(--space-s); }
+.dash--spacious :deep(.dash-section) { margin-bottom: var(--space-3xl); }
+.dash--spacious :deep(.stat-cell) { padding: var(--space-l) var(--space-xl); }
 </style>

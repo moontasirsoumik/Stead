@@ -6,10 +6,10 @@ export interface Subscription extends HouseholdEntity {
   name: string
   amount: number
   frequency: SubscriptionFrequency
-  category: string
+  category: string | null
   next_billing_date: string | null
   auto_renew: boolean
-  url: string
-  note: string
+  url: string | null
+  note: string | null
   status: SubscriptionStatus
 }

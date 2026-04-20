@@ -13,6 +13,7 @@ export class BaseDataService<T extends { id: string }> {
     protected dexieTable: Table<T, string>,
     protected schema: ZodType,
     protected columns: string = '*',
+    protected hasSoftDelete: boolean = true,
   ) {}
 
   async getAll(householdId: string): Promise<StaleWhileRevalidateResult<T>> {
@@ -20,12 +21,16 @@ export class BaseDataService<T extends { id: string }> {
 
     let fresh: T[] | null = null
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from(this.tableName)
         .select(this.columns)
         .eq('household_id', householdId)
-        .eq('deleted', false)
-        .limit(100)
+
+      if (this.hasSoftDelete) {
+        query = query.eq('deleted', false)
+      }
+
+      const { data, error } = await query.limit(100)
 
       if (error) throw error
 

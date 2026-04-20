@@ -29,6 +29,7 @@ const authStore = useAuthStore()
 const appStore = useAppStore()
 const search = ref('')
 const categoryFilter = ref('')
+const viewMode = ref(appStore.defaultNoteView)
 
 const drawerOpen = ref(false)
 const drawerLoading = ref(false)
@@ -124,8 +125,12 @@ async function handleSubmit() {
 }
 
 function confirmDelete(id: string) {
-  deletingNoteId.value = id
-  confirmDeleteOpen.value = true
+  if (appStore.confirmBeforeDelete) {
+    deletingNoteId.value = id
+    confirmDeleteOpen.value = true
+  } else {
+    notesStore.remove(id)
+  }
 }
 
 async function handleDelete() {
@@ -155,6 +160,10 @@ onMounted(async () => {
 
     <FilterBar v-model:search="search" show-search class="page-enter" :style="{ '--stagger': 1 }">
       <SSelect v-model="categoryFilter" :options="categoryOptions" placeholder="Category" />
+      <SIconButton :label="viewMode === 'grid' ? 'List view' : 'Grid view'" size="sm" @click="viewMode = viewMode === 'grid' ? 'list' : 'grid'">
+        <svg v-if="viewMode === 'grid'" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
+        <svg v-else width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
+      </SIconButton>
     </FilterBar>
 
     <div v-if="notesStore.loading && !notesStore.items.length" class="page-enter" :style="{ '--stagger': 2 }">
@@ -172,7 +181,7 @@ onMounted(async () => {
       <!-- Pinned section -->
       <div v-if="pinnedItems.length" class="page-enter" :style="{ '--stagger': 2 }">
         <SectionHeader title="Pinned" :count="pinnedItems.length" />
-        <div class="notes-grid">
+        <div :class="viewMode === 'grid' ? 'notes-grid' : 'notes-list'">
           <div
             v-for="note in pinnedItems"
             :key="note.id"
@@ -203,7 +212,7 @@ onMounted(async () => {
       <!-- All notes -->
       <div class="page-enter" :style="{ '--stagger': pinnedItems.length ? 3 : 2 }">
         <SectionHeader v-if="pinnedItems.length" title="All Notes" :count="unpinnedItems.length" />
-        <div class="notes-grid">
+        <div :class="viewMode === 'grid' ? 'notes-grid' : 'notes-list'">
           <div
             v-for="note in unpinnedItems"
             :key="note.id"
@@ -252,6 +261,24 @@ onMounted(async () => {
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: var(--space-m);
   margin-bottom: var(--space-l);
+}
+
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+  margin-bottom: var(--space-l);
+}
+
+.notes-list .note-card {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-m);
+}
+
+.notes-list .note-card__preview {
+  flex: 1;
+  -webkit-line-clamp: 1;
 }
 
 /* ── Note card ── */

@@ -17,11 +17,13 @@ import FormField from '@/components/forms/FormField.vue'
 import FormSection from '@/components/forms/FormSection.vue'
 import { useMealsStore } from '@/stores/meals.store'
 import { useAuthStore } from '@/stores/auth.store'
+import { useAppStore } from '@/stores/app.store'
 import type { Meal, MealPlan } from '@/models/meal.model'
 import type { MealType } from '@/models/enums'
 
 const mealsStore = useMealsStore()
 const authStore = useAuthStore()
+const appStore = useAppStore()
 
 const weekOffset = ref(0)
 const drawerOpen = ref(false)
@@ -36,7 +38,7 @@ const formName = ref('')
 const formMealType = ref<MealType>('breakfast')
 const formDayOfWeek = ref('0')
 const formRecipeNotes = ref('')
-const formServings = ref('4')
+const formServings = ref(String(appStore.defaultServings))
 
 const mealTypes: MealType[] = ['breakfast', 'lunch', 'dinner', 'snack']
 const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']

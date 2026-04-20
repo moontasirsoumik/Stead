@@ -100,7 +100,7 @@ function statusVariant(status: string): 'success' | 'info' | 'warning' | 'defaul
 
 function savingProgress(item: WishlistItem): number {
   if (!item.price || item.price === 0) return 0
-  return Math.min(100, Math.round((item.saved_amount / item.price) * 100))
+  return Math.min(100, Math.round(((item.saved_amount ?? 0) / item.price) * 100))
 }
 
 function isItemDimmed(item: WishlistItem): boolean {
@@ -122,12 +122,12 @@ function openCreateDrawer() {
 function openEditDrawer(item: WishlistItem) {
   editingItem.value = item
   formName.value = item.name
-  formDescription.value = item.description
-  formUrl.value = item.url
+  formDescription.value = item.description ?? ''
+  formUrl.value = item.url ?? ''
   formPrice.value = item.price ? String(item.price / 100) : ''
   formPriority.value = item.priority
-  formCategory.value = item.category
-  formNote.value = item.note
+  formCategory.value = item.category ?? ''
+  formNote.value = item.note ?? ''
   drawerOpen.value = true
 }
 
@@ -175,8 +175,12 @@ async function dropItem(item: WishlistItem) {
 }
 
 function confirmDelete(id: string) {
-  deletingItemId.value = id
-  confirmDeleteOpen.value = true
+  if (appStore.confirmBeforeDelete) {
+    deletingItemId.value = id
+    confirmDeleteOpen.value = true
+  } else {
+    wishlistStore.remove(id)
+  }
 }
 
 async function handleDelete() {
@@ -259,7 +263,7 @@ onMounted(async () => {
               <SBadge :variant="statusVariant(item.status)" size="sm">{{ item.status }}</SBadge>
             </div>
           </div>
-          <div class="wish-row__price">{{ formatCents(item.price) }}</div>
+          <div class="wish-row__price">{{ formatCents(item.price ?? 0) }}</div>
         </div>
       </div>
     </template>

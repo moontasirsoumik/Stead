@@ -19,6 +19,7 @@ import ConfirmDialog from '@/components/feedback/ConfirmDialog.vue'
 import { useRemindersStore } from '@/stores/reminders.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { useHouseholdStore } from '@/stores/household.store'
+import { useAppStore } from '@/stores/app.store'
 import { formatRelativeDate } from '@/utils/format'
 import type { Reminder } from '@/models/reminder.model'
 import type { ReminderStatus } from '@/models/enums'
@@ -26,6 +27,7 @@ import type { ReminderStatus } from '@/models/enums'
 const remindersStore = useRemindersStore()
 const authStore = useAuthStore()
 const householdStore = useHouseholdStore()
+const appStore = useAppStore()
 
 const search = ref('')
 const statusFilter = ref('')
@@ -155,8 +157,12 @@ async function handleSubmit() {
 }
 
 function confirmDelete(id: string) {
-  deletingReminderId.value = id
-  confirmDeleteOpen.value = true
+  if (appStore.confirmBeforeDelete) {
+    deletingReminderId.value = id
+    confirmDeleteOpen.value = true
+  } else {
+    remindersStore.remove(id)
+  }
 }
 
 async function handleDelete() {

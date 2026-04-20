@@ -1,7 +1,7 @@
 # Stead — Implementation Progress Tracker
 
 > **Last updated:** 2026-04-18
-> **Current Phase:** P29 — Calendar Feature (complete)
+> **Current Phase:** P30 — Settings Wiring (complete)
 
 ---
 
@@ -43,6 +43,7 @@
 | P28d | UI Refinement Round 3 | ✅ Done | 2026-04-17 | 2026-04-17 | Universal grid table standardization (all list pages), expandable sidebar, account dropdown, always-visible actions, dashboard bordered tables |
 | P28e | UI Fixes Round 4 | ✅ Done | 2026-04-18 | 2026-04-18 | Reminders layout fix, sidebar scope toggle removal, mobile nav changes (sidebar-only), emoji→Material Symbols replacement |
 | P29 | Calendar Feature | ✅ Done | 2026-04-18 | 2026-04-18 | Full calendar page with month grid, aggregates tasks/reminders/bills, standalone event CRUD, day detail panel, DB migration applied |
+| P30 | Settings Wiring | ✅ Done | 2026-04-18 | 2026-04-18 | Wired 22 orphaned settings to feature pages — see details below |
 
 ---
 
@@ -325,6 +326,47 @@
 | P14-01 | Write unit tests (data services, stores, utils) | ✅ Done | `src/utils/__tests__/format.test.ts`, `src/services/data/__tests__/base.data.test.ts` |
 | P14-02 | Write E2E tests (critical flows) | ⬜ Not Started | `tests/e2e/` |
 | P14-03 | Accessibility audit | ✅ Done | SButton, SIconButton, SInput a11y fixes |
+
+---
+
+## Phase 30 — Settings Wiring
+
+Wired 22 previously orphaned settings from `app.store.ts` to their feature pages.
+
+### Settings Now Active
+
+| Setting | Feature Page | What it does |
+|---|---|---|
+| `currency` | All money displays via `formatCents()` | Locale-aware currency formatting (USD, EUR, GBP, BDT, INR, CAD, AUD, JPY) |
+| `showCents` | All money displays via `formatCents()` | Show/hide decimal places in currency |
+| `dateFormat` | All date displays via `formatDate()` | MDY, DMY, YMD, ISO date formats |
+| `showDashboardGreeting` | DashboardPage | Show/hide "Good morning, Name" greeting |
+| `dashboardWidgets` | DashboardPage | Toggle visibility of each widget section (tasks, money, pantry, reminders, notes, habits, meals, subscriptions, wishlist) |
+| `dashboardDensity` | DashboardPage | Comfortable/compact/spacious spacing |
+| `defaultTaskPriority` | TasksPage | New task form default priority |
+| `showCompletedTasks` | TasksPage | Filter out done/skipped tasks from list |
+| `confirmBeforeDelete` | ALL pages with delete | Skip/show confirm dialog before deletion (Tasks, Notes, Reminders, Contacts, Documents, Habits, Wishlist, Subscriptions, Inventory) |
+| `weekStart` | CalendarPage | Sunday/Monday/Saturday week start — changes grid layout and day headers |
+| `defaultNoteView` | NotesPage | Grid or list layout with toggle button |
+| `journalPromptEnabled` | JournalPage | Show/hide "How's your day going?" CTA |
+| `defaultServings` | MealsPage | Default servings in new meal form |
+| `defaultGrocerySort` | ShoppingPage | Sort by name, category, or status |
+| `showStockIndicators` | InventoryPage | Show/hide stock status badges |
+
+### Settings Not Wired (no feature exists yet)
+
+| Setting | Reason |
+|---|---|
+| `autoArchiveDays` | Would need a background cron/cleanup service |
+| `autoAddRestock` | Would need inventory-to-shopping automation logic |
+| `defaultSnoozeMinutes` | Snooze is status-based, not time-based — needs model change |
+| `reminderSound` | No browser notification system exists |
+| `showMealCalendar` | Meal calendar view not implemented |
+| `defaultTaskView` | Task view modes (list/board) not implemented |
+| `cacheEnabled` | Would need data service layer changes |
+| `analyticsOptIn` | No analytics system exists |
+| `showMonthlyComparison` | Monthly comparison widget not implemented |
+| `defaultBudgetPeriod` | Budget period selector not implemented |
 | P14-04 | Performance audit | ✅ Done | Vite vendor chunk splitting |
 | P14-05 | Configure CI (lint + typecheck + build) | ✅ Done | `.github/workflows/ci.yml` |
 | P14-06 | Set up Cloudflare Pages deployment | ✅ Done | `public/_redirects`, `public/_headers` |
