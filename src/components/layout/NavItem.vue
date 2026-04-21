@@ -64,7 +64,9 @@ const materialIcon = computed(() => {
   position: relative;
   flex-shrink: 0;
   overflow: hidden;
-  transition: color var(--duration-fast) var(--easing-standard);
+  transition:
+    color var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard);
 }
 
 .navitem__pill {
@@ -78,23 +80,21 @@ const materialIcon = computed(() => {
   transition: background-color var(--duration-fast) var(--easing-standard);
 }
 
-.navitem:hover .navitem__pill {
-  background: var(--color-surface-nav-hover);
-}
-
 .navitem:hover {
+  background: var(--color-surface-nav-hover);
   color: var(--color-nav-fg-hover);
 }
 
 .navitem--active .navitem__pill {
-  background: var(--color-primary-container);
+  background: transparent;
 }
 
 .navitem--active {
+  background: var(--color-primary-container);
   color: var(--color-on-primary-container);
 }
 
-.navitem--active:hover .navitem__pill {
+.navitem--active:hover {
   background: var(--color-primary-container);
 }
 

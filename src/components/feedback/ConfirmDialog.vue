@@ -23,6 +23,19 @@ const emit = defineEmits<{
   cancel: []
 }>()
 
+const mouseDownOnOverlay = ref(false)
+
+function handleOverlayMouseDown(e: MouseEvent) {
+  mouseDownOnOverlay.value = e.target === e.currentTarget
+}
+
+function handleOverlayMouseUp(e: MouseEvent) {
+  if (mouseDownOnOverlay.value && e.target === e.currentTarget) {
+    emit('cancel')
+  }
+  mouseDownOnOverlay.value = false
+}
+
 const loading = ref(false)
 
 async function handleConfirm() {
@@ -34,7 +47,7 @@ async function handleConfirm() {
 <template>
   <Teleport to="body">
     <Transition name="dialog">
-      <div v-if="open" class="dialog-overlay" @click.self="emit('cancel')">
+      <div v-if="open" class="dialog-overlay" @mousedown="handleOverlayMouseDown" @mouseup="handleOverlayMouseUp">
         <div
           class="dialog"
           role="alertdialog"

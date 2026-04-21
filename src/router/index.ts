@@ -1,17 +1,17 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
 const routes: RouteRecordRaw[] = [
-  /* ── Public ── */
+  /* ── Public (Auth) ── */
   {
     path: '/login',
     name: 'login',
-    component: () => import('@/features/auth/LoginPage.vue'),
+    component: () => import('@/features/auth/AuthShell.vue'),
     meta: { public: true },
   },
   {
     path: '/signup',
     name: 'signup',
-    component: () => import('@/features/auth/SignupPage.vue'),
+    component: () => import('@/features/auth/AuthShell.vue'),
     meta: { public: true },
   },
   {

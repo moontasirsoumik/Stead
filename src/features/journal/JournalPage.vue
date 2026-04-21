@@ -18,7 +18,6 @@ import ConfirmDialog from '@/components/feedback/ConfirmDialog.vue'
 import { useJournalStore } from '@/stores/journal.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { useAppStore } from '@/stores/app.store'
-import { formatDate } from '@/utils/format'
 import type { JournalEntry } from '@/models/journal.model'
 import type { Mood } from '@/models/enums'
 
@@ -55,6 +54,14 @@ const moodIcon: Record<string, string> = {
   terrible: 'sentiment_very_dissatisfied',
 }
 
+const moodLabel: Record<Mood, string> = {
+  great: 'Great',
+  good: 'Good',
+  okay: 'Okay',
+  bad: 'Bad',
+  terrible: 'Terrible',
+}
+
 const todayString = computed(() => new Date().toISOString().slice(0, 10))
 
 const hasTodayEntry = computed(() => journalStore.todayEntry !== null)
@@ -86,6 +93,33 @@ function formatEntryDate(dateStr: string): string {
     month: 'short',
     day: 'numeric',
   })
+}
+
+function formatEntryWeekday(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    weekday: 'short',
+  })
+}
+
+function formatEntryMonthDay(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
+function getMoodBadgeVariant(mood: Mood): 'success' | 'info' | 'warning' | 'error' {
+  switch (mood) {
+    case 'great':
+    case 'good':
+      return 'success'
+    case 'okay':
+      return 'info'
+    case 'bad':
+      return 'warning'
+    case 'terrible':
+      return 'error'
+  }
 }
 
 function parseTags(entry: JournalEntry): string[] {
@@ -198,29 +232,35 @@ onMounted(async () => {
         class="journal-month page-enter"
         :style="{ '--stagger': gi + 2 }"
       >
-        <h3 class="journal-month__label">{{ group.label }}</h3>
-        <div class="journal-timeline">
+        <div class="journal-month__header">
+          <h3 class="journal-month__label">{{ group.label }}</h3>
+          <SBadge size="sm">{{ group.entries.length }} {{ group.entries.length === 1 ? 'entry' : 'entries' }}</SBadge>
+        </div>
+
+        <div class="journal-list">
           <div
             v-for="entry in group.entries"
             :key="entry.id"
-            class="journal-entry"
+            class="journal-row"
             @click="openEditDrawer(entry)"
           >
-            <div class="journal-entry__date-col">
-              <span class="journal-entry__date">{{ formatEntryDate(entry.entry_date) }}</span>
-              <span v-if="entry.mood" class="journal-entry__mood material-symbols-rounded">{{ moodIcon[entry.mood] }}</span>
+            <div class="journal-row__main">
+              <div class="journal-row__meta">
+                <span class="journal-row__date">{{ formatEntryDate(entry.entry_date) }}</span>
+                <SBadge v-if="entry.mood" :variant="getMoodBadgeVariant(entry.mood)" size="sm">
+                  {{ moodLabel[entry.mood] }}
+                </SBadge>
+                <template v-if="parseTags(entry).length">
+                  <span class="journal-row__divider">·</span>
+                  <SBadge v-for="tag in parseTags(entry)" :key="tag" size="sm">{{ tag }}</SBadge>
+                </template>
+              </div>
+              <p class="journal-row__content">{{ entry.content }}</p>
             </div>
-            <div class="journal-entry__line" />
-            <div class="journal-entry__body">
-              <p class="journal-entry__content">{{ entry.content }}</p>
-              <div v-if="parseTags(entry).length" class="journal-entry__tags">
-                <SBadge v-for="tag in parseTags(entry)" :key="tag" size="sm">{{ tag }}</SBadge>
-              </div>
-              <div class="journal-entry__actions" @click.stop>
-                <SIconButton label="Delete" size="sm" @click="confirmDelete(entry.id)">
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 3H10M4 3V2H8V3M5 5V9M7 5V9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" /></svg>
-                </SIconButton>
-              </div>
+            <div class="journal-row__actions" @click.stop>
+              <SIconButton label="Delete entry" size="sm" @click="confirmDelete(entry.id)">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 3L9 9M9 3L3 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
+              </SIconButton>
             </div>
           </div>
         </div>
@@ -241,6 +281,13 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.today-cta {
+  margin-bottom: var(--space-l);
+  padding: var(--space-m) var(--space-l);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-m);
+}
+
 .today-cta__inner {
   display: flex;
   align-items: center;
@@ -265,111 +312,88 @@ onMounted(async () => {
   color: var(--color-fg-secondary);
 }
 
-.today-cta {
-  margin-bottom: var(--space-l);
-  padding: var(--space-m) var(--space-l);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-m);
-}
-
 .journal-month {
   margin-bottom: var(--space-xl);
+}
+
+.journal-month__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-m);
+  margin-bottom: var(--space-m);
 }
 
 .journal-month__label {
   font: var(--text-title-3);
   color: var(--color-fg-secondary);
   font-weight: var(--font-weight-semibold);
-  margin-bottom: var(--space-m);
+  margin: 0;
 }
 
-.journal-timeline {
+/* Journal list */
+.journal-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-l);
-}
-
-.journal-entry {
-  display: flex;
-  gap: var(--space-m);
-  cursor: pointer;
-  padding: var(--space-l);
-  background: var(--color-surface-card);
-  border-radius: var(--radius-l);
   border: 1px solid var(--color-border-default);
-  transition:
-    background-color var(--duration-fast) var(--easing-standard),
-    border-color var(--duration-fast) var(--easing-standard);
+  border-radius: var(--radius-l);
+  overflow: hidden;
 }
 
-.journal-entry:hover {
-  background: var(--color-surface-card-hover);
-  border-color: var(--color-outline-variant);
-}
-
-.journal-entry__date-col {
+.journal-row {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-2xs);
-  flex-shrink: 0;
-  min-width: 72px;
+  align-items: flex-start;
+  gap: var(--space-m);
+  padding: var(--space-m) var(--space-l);
+  border-bottom: 1px solid var(--color-border-subtle);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--easing-standard);
 }
 
-.journal-entry__date {
-  font: var(--text-caption);
-  color: var(--color-fg-tertiary);
-  font-weight: var(--font-weight-medium);
-  text-align: center;
-}
+.journal-row:last-child { border-bottom: none; }
+.journal-row:hover { background: var(--color-bg-tertiary); }
 
-.journal-entry__mood {
-  font-size: 1.5rem;
-  line-height: 1;
-  color: var(--color-fg-secondary);
-}
-
-.journal-entry__line {
-  width: 2px;
-  background: var(--color-border-default);
-  border-radius: var(--radius-pill);
-  flex-shrink: 0;
-  display: none;
-}
-
-.journal-entry__body {
+.journal-row__main {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
-  min-width: 0;
+  gap: var(--space-2xs);
 }
 
-.journal-entry__content {
+.journal-row__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.journal-row__date {
   font: var(--text-body-2);
+  font-weight: var(--font-weight-medium);
   color: var(--color-fg-primary);
-  white-space: pre-line;
+  white-space: nowrap;
+}
+
+.journal-row__divider {
+  color: var(--color-fg-tertiary);
+  font: var(--text-caption);
+}
+
+.journal-row__content {
+  margin: 0;
+  font: var(--text-body-2);
+  color: var(--color-fg-secondary);
   overflow: hidden;
   display: -webkit-box;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  line-height: 1.5;
 }
 
-.journal-entry__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2xs);
-}
-
-.journal-entry__actions {
-  display: flex;
-  justify-content: flex-end;
-  opacity: 0;
-  transition: opacity var(--duration-fast) var(--easing-standard);
-}
-
-.journal-entry:hover .journal-entry__actions {
-  opacity: 1;
+.journal-row__actions {
+  flex-shrink: 0;
+  padding-top: 2px;
 }
 
 @media (max-width: 640px) {
@@ -377,14 +401,14 @@ onMounted(async () => {
     flex-direction: column;
     align-items: flex-start;
   }
-  .journal-entry__date-col {
-    min-width: 56px;
+
+  .journal-month__header {
+    align-items: flex-start;
+    flex-direction: column;
   }
-  .journal-entry__line {
-    display: none;
-  }
-  .journal-entry__actions {
-    opacity: 1;
+
+  .journal-row {
+    padding: var(--space-s) var(--space-m);
   }
 }
 </style>

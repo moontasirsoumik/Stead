@@ -607,8 +607,10 @@ watch(() => appStore.isPersonal, loadData)
                   {{ getMemberName(item.assigned_to) }}
                 </span>
                 <span v-if="isSharedFromOther(item)" class="day-item__shared-by">
-                  <span class="material-symbols-rounded day-item__shared-icon">share</span>
-                  {{ getMemberName(item.owner_id) }}
+                  <SBadge variant="default" size="sm">
+                    <span class="material-symbols-rounded day-item__shared-icon">share</span>
+                    {{ getMemberName(item.owner_id) }}
+                  </SBadge>
                 </span>
               </div>
             </div>
@@ -1107,10 +1109,6 @@ watch(() => appStore.isPersonal, loadData)
 .day-item__shared-by {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  font: var(--text-caption);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-brand-primary);
 }
 
 .day-item__shared-by::before {
@@ -1121,6 +1119,7 @@ watch(() => appStore.isPersonal, loadData)
 
 .day-item__shared-icon {
   font-size: 12px;
+  margin-right: 2px;
 }
 
 .day-item__assignee::before {

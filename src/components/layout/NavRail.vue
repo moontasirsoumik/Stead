@@ -155,7 +155,7 @@ const extraItems = computed(() =>
     <!-- Footer: expand button + settings -->
     <div class="rail__footer">
       <button v-if="!props.isMobile" class="rail__expand-btn" :title="expanded ? 'Collapse sidebar' : 'Expand sidebar'" @click="toggleExpand">
-        <span class="rail__expand-icon material-symbols-rounded">{{ expanded ? 'left_panel_close' : 'left_panel_open' }}</span>
+        <span class="rail__expand-icon material-symbols-rounded">{{ expanded ? 'first_page' : 'last_page' }}</span>
         <span class="rail__expand-label">{{ expanded ? 'Collapse' : 'Expand' }}</span>
       </button>
       <NavItem to="/settings" icon="settings" label="Settings" @click="$emit('navigate')" />
@@ -302,7 +302,7 @@ const extraItems = computed(() =>
   color: var(--color-nav-fg);
   cursor: pointer;
   flex-shrink: 0;
-  opacity: 0.5;
+  opacity: 1;
   gap: var(--space-s);
   overflow: hidden;
   transition:
@@ -324,7 +324,7 @@ const extraItems = computed(() =>
   width: 32px;
   min-width: 32px;
   height: 32px;
-  font-size: 18px;
+  font-size: 24px;
 }
 
 .rail__expand-label {

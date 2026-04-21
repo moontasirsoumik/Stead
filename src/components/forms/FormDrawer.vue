@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import SButton from '@/components/ui/SButton.vue'
 import SIconButton from '@/components/ui/SIconButton.vue'
 
@@ -17,16 +18,29 @@ const props = withDefaults(
   },
 )
 
-defineEmits<{
+const emit = defineEmits<{
   close: []
   submit: []
 }>()
+
+const mouseDownOnOverlay = ref(false)
+
+function handleOverlayMouseDown(e: MouseEvent) {
+  mouseDownOnOverlay.value = e.target === e.currentTarget
+}
+
+function handleOverlayMouseUp(e: MouseEvent) {
+  if (mouseDownOnOverlay.value && e.target === e.currentTarget) {
+    emit('close')
+  }
+  mouseDownOnOverlay.value = false
+}
 </script>
 
 <template>
   <Teleport to="body">
     <Transition name="drawer">
-      <div v-if="open" class="drawer-overlay" @click.self="$emit('close')">
+      <div v-if="open" class="drawer-overlay" @mousedown="handleOverlayMouseDown" @mouseup="handleOverlayMouseUp">
         <aside
           :class="['drawer', { 'drawer--wide': wide }]"
           role="dialog"

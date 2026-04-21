@@ -11,9 +11,10 @@ const { signIn, error: authError, loading } = useAuth()
 
 const email = ref('')
 const password = ref('')
+const rememberMe = ref(false)
 
 async function handleSubmit() {
-  const success = await signIn(email.value, password.value)
+  const success = await signIn(email.value, password.value, rememberMe.value)
   if (success) {
     const redirect = (route.query.redirect as string) || '/'
     router.push(redirect)
@@ -22,88 +23,72 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="auth-page">
-    <div class="auth-card page-enter" :style="{ '--stagger': 0 }">
-      <div class="auth-header">
-        <span class="auth-logo" aria-hidden="true">S</span>
-        <h1 class="auth-title">Welcome back</h1>
-        <p class="auth-subtitle">Sign in to your Stead account</p>
-      </div>
+  <div class="auth-form-content">
+    <div class="auth-header">
+      <h2 class="auth-title">Welcome back</h2>
+      <p class="auth-subtitle">Sign in to continue to Stead</p>
+    </div>
 
-      <form class="auth-form" @submit.prevent="handleSubmit">
+    <form class="auth-form" @submit.prevent="handleSubmit">
+      <div class="input-group">
         <SInput
           v-model="email"
-          label="Email"
           type="email"
-          placeholder="you@example.com"
+          placeholder="Email address"
           required
-        />
+        >
+          <template #prefix>
+            <span class="material-symbols-rounded input-icon">mail</span>
+          </template>
+        </SInput>
+      </div>
 
+      <div class="input-group">
         <SInput
           v-model="password"
-          label="Password"
           type="password"
-          placeholder="Enter your password"
+          placeholder="Password"
           required
-        />
+        >
+          <template #prefix>
+            <span class="material-symbols-rounded input-icon">lock</span>
+          </template>
+        </SInput>
+      </div>
 
-        <p v-if="authError" class="auth-error" role="alert">{{ authError }}</p>
+      <label class="remember-row">
+        <input v-model="rememberMe" type="checkbox" class="remember-row__check" />
+        <span class="remember-row__text">Keep me signed in</span>
+      </label>
 
-        <SButton :loading="loading" type="submit" full-width size="lg">
-          Sign in
-        </SButton>
-      </form>
+      <p v-if="authError" class="auth-error" role="alert">{{ authError }}</p>
 
-      <p class="auth-footer">
-        Don't have an account?
-        <RouterLink to="/signup" class="auth-link">Sign up</RouterLink>
-      </p>
-    </div>
+      <SButton :loading="loading" type="submit" full-width size="lg">
+        Sign in
+      </SButton>
+    </form>
+
+    <p class="auth-footer">
+      Don't have an account?
+      <RouterLink to="/signup" class="auth-link">Create one</RouterLink>
+    </p>
   </div>
 </template>
 
 <style scoped>
-.auth-page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100dvh;
-  padding: var(--space-xl);
-  background: var(--color-bg-wash);
-}
-
-.auth-card {
+.auth-form-content {
   width: 100%;
-  max-width: 360px;
-  background: var(--color-surface-card);
-  border-radius: var(--radius-l);
-  padding: var(--space-2xl);
-  border: 1px solid var(--color-border-default);
 }
 
 .auth-header {
-  text-align: center;
   margin-bottom: var(--space-xl);
 }
 
-.auth-logo {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  background: var(--color-brand-primary);
-  color: var(--color-fg-on-brand);
-  font-weight: var(--font-weight-semibold);
-  font-size: 16px;
-  border-radius: var(--radius-m);
-  margin-bottom: var(--space-m);
-}
-
 .auth-title {
-  font: var(--text-title-2);
+  font: var(--text-title-1);
   color: var(--color-fg-primary);
   margin-bottom: var(--space-2xs);
+  letter-spacing: var(--tracking-tight);
 }
 
 .auth-subtitle {
@@ -111,10 +96,57 @@ async function handleSubmit() {
   color: var(--color-fg-secondary);
 }
 
+/* ── Form ── */
 .auth-form {
   display: flex;
   flex-direction: column;
   gap: var(--space-m);
+}
+
+.input-icon {
+  font-size: 20px;
+  color: var(--color-fg-tertiary);
+}
+
+.input-group :deep(.sinput__wrapper) {
+  height: 48px;
+  border-radius: var(--radius-l);
+  background: var(--color-bg-primary);
+  border-color: var(--color-border-default);
+}
+
+.input-group :deep(.sinput__wrapper:focus-within) {
+  border-color: var(--color-brand-primary);
+  background: var(--color-bg-primary);
+}
+
+.input-group :deep(.sinput__field) {
+  font: var(--text-body-1);
+}
+
+.input-group :deep(.sinput__field::placeholder) {
+  color: var(--color-fg-tertiary);
+}
+
+.remember-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  cursor: pointer;
+  user-select: none;
+}
+
+.remember-row__check {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-brand-primary);
+  cursor: pointer;
+  margin: 0;
+}
+
+.remember-row__text {
+  font: var(--text-body-2);
+  color: var(--color-fg-secondary);
 }
 
 .auth-error {
@@ -125,6 +157,7 @@ async function handleSubmit() {
   border-radius: var(--radius-s);
 }
 
+/* ── Footer ── */
 .auth-footer {
   text-align: center;
   margin-top: var(--space-l);

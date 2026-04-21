@@ -19,11 +19,31 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
 
     try {
+      // If "remember me" was not checked, the localStorage flag won't exist
+      // but sessionStorage dies with the browser. On a fresh browser session,
+      // if there's no localStorage remember flag, sign out the stale session.
+      const remembered = localStorage.getItem('stead_remember')
+      const sessionAlive = sessionStorage.getItem('stead_remember')
+
+      if (!remembered && !sessionAlive) {
+        // Could be a stale session from a non-remembered login — clear it
+        const { data: peek } = await supabase.auth.getSession()
+        if (peek.session) {
+          await supabase.auth.signOut()
+          loading.value = false
+          return
+        }
+      }
+
       const { data } = await supabase.auth.getSession()
       session.value = data.session
       user.value = data.session?.user ?? null
 
       if (user.value) {
+        // Keep sessionStorage alive for this tab
+        if (remembered) {
+          sessionStorage.setItem('stead_remember', '1')
+        }
         await loadMembership()
       }
     } finally {
@@ -63,7 +83,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function signIn(email: string, password: string) {
+  async function signIn(email: string, password: string, rememberMe = true) {
     error.value = null
     loading.value = true
 
@@ -76,6 +96,14 @@ export const useAuthStore = defineStore('auth', () => {
       if (authError) {
         error.value = authError.message
         return false
+      }
+
+      if (rememberMe) {
+        sessionStorage.setItem('stead_remember', '1')
+        localStorage.setItem('stead_remember', '1')
+      } else {
+        sessionStorage.setItem('stead_remember', '0')
+        localStorage.removeItem('stead_remember')
       }
 
       const { data } = await supabase.auth.getSession()
@@ -117,6 +145,8 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function signOut() {
     await supabase.auth.signOut()
+    localStorage.removeItem('stead_remember')
+    sessionStorage.removeItem('stead_remember')
     user.value = null
     session.value = null
     householdId.value = null

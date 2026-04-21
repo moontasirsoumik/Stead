@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { inject, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import SInput from '@/components/ui/SInput.vue'
@@ -11,8 +11,12 @@ const { signUp, error: authError, loading } = useAuth()
 const name = ref('')
 const email = ref('')
 const password = ref('')
+const agreedToTerms = ref(false)
+
+const openLegal = inject<(doc: 'privacy' | 'terms') => void>('openLegal', () => {})
 
 async function handleSubmit() {
+  if (!agreedToTerms.value) return
   const success = await signUp(email.value, password.value, name.value)
   if (success) {
     router.push('/onboarding')
@@ -21,96 +25,90 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="auth-page">
-    <div class="auth-card page-enter" :style="{ '--stagger': 0 }">
-      <div class="auth-header">
-        <span class="auth-logo" aria-hidden="true">S</span>
-        <h1 class="auth-title">Create your account</h1>
-        <p class="auth-subtitle">Start managing your household with Stead</p>
-      </div>
+  <div class="auth-form-content">
+    <div class="auth-header">
+      <h2 class="auth-title">Create your account</h2>
+      <p class="auth-subtitle">Get started with Stead — it's free</p>
+    </div>
 
-      <form class="auth-form" @submit.prevent="handleSubmit">
+    <form class="auth-form" @submit.prevent="handleSubmit">
+      <div class="input-group">
         <SInput
           v-model="name"
-          label="Full name"
-          placeholder="Your name"
+          placeholder="Full name"
           required
-        />
+        >
+          <template #prefix>
+            <span class="material-symbols-rounded input-icon">person</span>
+          </template>
+        </SInput>
+      </div>
 
+      <div class="input-group">
         <SInput
           v-model="email"
-          label="Email"
           type="email"
-          placeholder="you@example.com"
+          placeholder="Email address"
           required
-        />
+        >
+          <template #prefix>
+            <span class="material-symbols-rounded input-icon">mail</span>
+          </template>
+        </SInput>
+      </div>
 
+      <div class="input-group">
         <SInput
           v-model="password"
-          label="Password"
           type="password"
           placeholder="Create a password"
           hint="Must be at least 6 characters"
           required
-        />
+        >
+          <template #prefix>
+            <span class="material-symbols-rounded input-icon">lock</span>
+          </template>
+        </SInput>
+      </div>
 
-        <p v-if="authError" class="auth-error" role="alert">{{ authError }}</p>
+      <label class="terms-row">
+        <input v-model="agreedToTerms" type="checkbox" class="terms-row__check" />
+        <span class="terms-row__text">
+          I agree to the
+          <button type="button" class="terms-row__link" @click.stop="openLegal('privacy')">Privacy Policy</button>
+          and
+          <button type="button" class="terms-row__link" @click.stop="openLegal('terms')">Terms of Service</button>
+        </span>
+      </label>
 
-        <SButton :loading="loading" type="submit" full-width size="lg">
-          Create account
-        </SButton>
-      </form>
+      <p v-if="authError" class="auth-error" role="alert">{{ authError }}</p>
 
-      <p class="auth-footer">
-        Already have an account?
-        <RouterLink to="/login" class="auth-link">Sign in</RouterLink>
-      </p>
-    </div>
+      <SButton :loading="loading" :disabled="!agreedToTerms" type="submit" full-width size="lg">
+        Create account
+      </SButton>
+    </form>
+
+    <p class="auth-footer">
+      Already have an account?
+      <RouterLink to="/login" class="auth-link">Sign in</RouterLink>
+    </p>
   </div>
 </template>
 
 <style scoped>
-.auth-page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100dvh;
-  padding: var(--space-xl);
-  background: var(--color-bg-wash);
-}
-
-.auth-card {
+.auth-form-content {
   width: 100%;
-  max-width: 360px;
-  background: var(--color-surface-card);
-  border-radius: var(--radius-l);
-  padding: var(--space-2xl);
-  border: 1px solid var(--color-border-default);
 }
 
 .auth-header {
-  text-align: center;
   margin-bottom: var(--space-xl);
 }
 
-.auth-logo {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  background: var(--color-brand-primary);
-  color: var(--color-fg-on-brand);
-  font-weight: var(--font-weight-semibold);
-  font-size: 16px;
-  border-radius: var(--radius-m);
-  margin-bottom: var(--space-m);
-}
-
 .auth-title {
-  font: var(--text-title-2);
+  font: var(--text-title-1);
   color: var(--color-fg-primary);
   margin-bottom: var(--space-2xs);
+  letter-spacing: var(--tracking-tight);
 }
 
 .auth-subtitle {
@@ -118,10 +116,76 @@ async function handleSubmit() {
   color: var(--color-fg-secondary);
 }
 
+/* ── Form ── */
 .auth-form {
   display: flex;
   flex-direction: column;
   gap: var(--space-m);
+}
+
+.input-icon {
+  font-size: 20px;
+  color: var(--color-fg-tertiary);
+}
+
+.input-group :deep(.sinput__wrapper) {
+  height: 48px;
+  border-radius: var(--radius-l);
+  background: var(--color-bg-primary);
+  border-color: var(--color-border-default);
+}
+
+.input-group :deep(.sinput__wrapper:focus-within) {
+  border-color: var(--color-brand-primary);
+  background: var(--color-bg-primary);
+}
+
+.input-group :deep(.sinput__field) {
+  font: var(--text-body-1);
+}
+
+.input-group :deep(.sinput__field::placeholder) {
+  color: var(--color-fg-tertiary);
+}
+
+.terms-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-xs);
+  cursor: pointer;
+  user-select: none;
+}
+
+.terms-row__check {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-brand-primary);
+  cursor: pointer;
+  margin: 2px 0 0;
+  flex-shrink: 0;
+}
+
+.terms-row__text {
+  font: var(--text-caption);
+  color: var(--color-fg-secondary);
+  line-height: 1.5;
+}
+
+.terms-row__link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--color-brand-primary);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--easing-standard);
+}
+
+.terms-row__link:hover {
+  color: var(--color-brand-hover);
+  text-decoration: underline;
 }
 
 .auth-error {
@@ -132,6 +196,7 @@ async function handleSubmit() {
   border-radius: var(--radius-s);
 }
 
+/* ── Footer ── */
 .auth-footer {
   text-align: center;
   margin-top: var(--space-l);

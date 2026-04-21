@@ -53,7 +53,12 @@ const TABS = [
 
 const activeTab = ref('account')
 
-/* -- Household -- */
+/* -- Legal docs -- */
+const expandedDoc = ref<string | null>(null)
+
+function toggleDoc(id: string) {
+  expandedDoc.value = expandedDoc.value === id ? null : id
+}
 const householdName = ref('')
 const editingName = ref(false)
 const savingName = ref(false)
@@ -1152,6 +1157,285 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
           </div>
         </div>
       </div>
+
+      <!-- Your Rights -->
+      <div class="settings-section page-enter" :style="{ '--stagger': 3 }">
+        <div class="card-header">
+          <SectionHeader title="Your Data Rights" />
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="row__label">
+              <span class="row__name">Right to access</span>
+              <span class="row__hint">You may request a copy of all personal data we hold about you at any time. Use the Export function above or contact us directly.</span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row__label">
+              <span class="row__name">Right to deletion</span>
+              <span class="row__hint">You may request permanent deletion of your account and all associated data. This action is irreversible and will be completed within 30 days.</span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row__label">
+              <span class="row__name">Right to portability</span>
+              <span class="row__hint">You may export your data in a standard machine-readable format (JSON) and transfer it to another service.</span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row__label">
+              <span class="row__name">Right to rectification</span>
+              <span class="row__hint">You may correct any inaccurate personal data at any time through your Account settings or by contacting us.</span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row__label">
+              <span class="row__name">Right to object</span>
+              <span class="row__hint">You may opt out of analytics data collection at any time using the toggle above. We will never sell your data.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Legal Documents -->
+      <div class="settings-section page-enter" :style="{ '--stagger': 4 }">
+        <div class="card-header">
+          <SectionHeader title="Legal" />
+        </div>
+        <div class="card-body legal-docs">
+          <!-- Privacy Policy -->
+          <button class="legal-toggle" :class="{ 'legal-toggle--open': expandedDoc === 'privacy' }" @click="toggleDoc('privacy')">
+            <div class="legal-toggle__text">
+              <span class="legal-toggle__title">Privacy Policy</span>
+              <span class="legal-toggle__hint">How we collect, use, and protect your data</span>
+            </div>
+            <span class="material-symbols-rounded legal-toggle__icon">expand_more</span>
+          </button>
+          <Transition name="legal-expand">
+            <div v-if="expandedDoc === 'privacy'" class="legal-body">
+              <p class="legal-updated">Last updated: April 21, 2026</p>
+
+              <h4 class="legal-h">1. Introduction</h4>
+              <p>Stead ("we", "us", "our") operates the Stead household management application (the "Service"). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our Service. By using Stead, you consent to the practices described in this policy.</p>
+
+              <h4 class="legal-h">2. Information We Collect</h4>
+              <p><strong>Account Information.</strong> When you create an account, we collect your email address and password (stored as a cryptographic hash — we never store plaintext passwords). You may optionally provide your name, date of birth, phone number, and timezone.</p>
+              <p><strong>Household Data.</strong> All content you create within Stead — including tasks, expenses, journal entries, calendar events, notes, contacts, documents, and other household information — is stored in our database and associated with your household.</p>
+              <p><strong>Device and Usage Data.</strong> If you opt in to usage analytics, we collect anonymous, aggregated data about how the Service is used (e.g., feature usage frequency, page views). This data cannot be used to identify you personally. We do not collect IP addresses, device fingerprints, or location data for analytics purposes.</p>
+              <p><strong>Local Cache.</strong> If you enable local caching, a copy of your household data is stored in your browser's IndexedDB storage on your device. This data never leaves your device and is solely used to enable offline access and improve performance.</p>
+
+              <h4 class="legal-h">3. How We Use Your Information</h4>
+              <p>We use the information we collect to:</p>
+              <ul>
+                <li>Provide, operate, and maintain the Service</li>
+                <li>Authenticate your identity and manage your account</li>
+                <li>Enforce household-level access controls and data isolation</li>
+                <li>Improve and optimize the Service (only with anonymous analytics data, when you have opted in)</li>
+                <li>Communicate with you regarding account security, service updates, or support</li>
+              </ul>
+              <p>We do <strong>not</strong> use your data for advertising, profiling, automated decision-making, or any purpose unrelated to operating the Service.</p>
+
+              <h4 class="legal-h">4. Data Storage and Security</h4>
+              <p>Your data is stored on Supabase-managed PostgreSQL databases with infrastructure hosted by Amazon Web Services (AWS). All data is encrypted in transit using TLS 1.2 or higher. At rest, data is encrypted using AES-256 encryption.</p>
+              <p>Row Level Security (RLS) is enforced at the database level, ensuring that every query is scoped to your household. No user can access data belonging to another household, even in the event of an application-level vulnerability.</p>
+              <p>Authentication is handled via industry-standard JSON Web Tokens (JWT) issued by Supabase Auth. Passwords are hashed using bcrypt with a minimum cost factor of 10.</p>
+
+              <h4 class="legal-h">5. Data Sharing and Disclosure</h4>
+              <p>We do <strong>not</strong> sell, rent, license, or trade your personal information to any third party for any reason.</p>
+              <p>We may share data only in the following limited circumstances:</p>
+              <ul>
+                <li><strong>Infrastructure Providers.</strong> Supabase (database hosting) and Cloudflare (content delivery and DDoS protection) process your data as part of service delivery. These providers are bound by their own privacy policies and data processing agreements.</li>
+                <li><strong>Legal Requirements.</strong> We may disclose information if required to do so by law, court order, or governmental regulation, or if we believe in good faith that disclosure is necessary to protect our rights, your safety, or the safety of others.</li>
+                <li><strong>Household Members.</strong> Data you mark as "household" scope is visible to all members of your household. Data you mark as "personal" scope is visible only to you, unless you explicitly share it with specific members.</li>
+              </ul>
+
+              <h4 class="legal-h">6. Data Retention</h4>
+              <p>We retain your data for as long as your account is active. If you delete your account, all associated personal data and household data (where you are the sole owner) will be permanently deleted within 30 days. Shared household data will be retained for remaining household members.</p>
+              <p>Anonymized analytics data (if previously collected with your consent) may be retained indefinitely as it cannot be traced back to any individual.</p>
+
+              <h4 class="legal-h">7. Cookies and Tracking</h4>
+              <p>Stead does <strong>not</strong> use cookies for tracking or advertising. We use a single authentication token stored in your browser's local storage solely to maintain your login session. No third-party tracking scripts, pixels, or beacons are loaded by the Service.</p>
+
+              <h4 class="legal-h">8. Children's Privacy</h4>
+              <p>Stead is not directed at children under 13 years of age. We do not knowingly collect personal information from children under 13. If you believe we have inadvertently collected such information, please contact us immediately and we will delete it.</p>
+
+              <h4 class="legal-h">9. International Data Transfers</h4>
+              <p>Your data may be processed in countries outside your country of residence, including the United States, where our infrastructure providers operate. We ensure that any such transfer is protected by appropriate safeguards, including standard contractual clauses where applicable.</p>
+
+              <h4 class="legal-h">10. Changes to This Policy</h4>
+              <p>We may update this Privacy Policy from time to time. We will notify you of material changes by posting the updated policy within the Service and updating the "Last updated" date. Continued use of the Service after changes constitutes acceptance of the revised policy.</p>
+            </div>
+          </Transition>
+
+          <!-- Terms of Service -->
+          <button class="legal-toggle" :class="{ 'legal-toggle--open': expandedDoc === 'terms' }" @click="toggleDoc('terms')">
+            <div class="legal-toggle__text">
+              <span class="legal-toggle__title">Terms of Service</span>
+              <span class="legal-toggle__hint">Rules governing use of the Stead application</span>
+            </div>
+            <span class="material-symbols-rounded legal-toggle__icon">expand_more</span>
+          </button>
+          <Transition name="legal-expand">
+            <div v-if="expandedDoc === 'terms'" class="legal-body">
+              <p class="legal-updated">Last updated: April 21, 2026</p>
+
+              <h4 class="legal-h">1. Acceptance of Terms</h4>
+              <p>By accessing or using Stead ("the Service"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree, you must not use the Service. These Terms constitute a legally binding agreement between you and Stead.</p>
+
+              <h4 class="legal-h">2. Description of Service</h4>
+              <p>Stead is a household management application that allows users to organize tasks, expenses, calendars, journals, and other household-related information. The Service is provided as a web application accessible via modern web browsers.</p>
+
+              <h4 class="legal-h">3. Accounts and Households</h4>
+              <p>To use the Service, you must create an account with a valid email address and password. You are responsible for maintaining the confidentiality of your credentials and for all activities conducted under your account.</p>
+              <p>Each account is associated with one household. Household administrators may invite other users to join. You are responsible for ensuring that all members of your household comply with these Terms.</p>
+
+              <h4 class="legal-h">4. Acceptable Use</h4>
+              <p>You agree not to:</p>
+              <ul>
+                <li>Use the Service for any unlawful purpose or in violation of any applicable law or regulation</li>
+                <li>Attempt to gain unauthorized access to any part of the Service, other user accounts, or associated systems</li>
+                <li>Transmit malware, viruses, or any other malicious code</li>
+                <li>Interfere with or disrupt the integrity or performance of the Service</li>
+                <li>Reverse-engineer, decompile, or disassemble any part of the Service</li>
+                <li>Use automated scripts, bots, or scrapers to access the Service</li>
+                <li>Impersonate another person or misrepresent your affiliation with any entity</li>
+              </ul>
+
+              <h4 class="legal-h">5. Intellectual Property</h4>
+              <p>The Service, including its design, code, logos, and documentation, is owned by Stead and protected by applicable intellectual property laws. You are granted a limited, non-exclusive, non-transferable, revocable license to use the Service for its intended purpose.</p>
+              <p>You retain full ownership of all content you create within the Service. We do not claim any intellectual property rights over your household data.</p>
+
+              <h4 class="legal-h">6. Data and Privacy</h4>
+              <p>Your use of the Service is also governed by our Privacy Policy, which is incorporated into these Terms by reference. By using the Service, you consent to the collection and use of your data as described in the Privacy Policy.</p>
+
+              <h4 class="legal-h">7. Service Availability</h4>
+              <p>We strive to maintain high availability but do not guarantee uninterrupted access to the Service. We may suspend or discontinue the Service (or any part thereof) at any time for maintenance, updates, or other operational reasons. We will make reasonable efforts to provide advance notice of planned downtime.</p>
+
+              <h4 class="legal-h">8. Limitation of Liability</h4>
+              <p>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, STEAD AND ITS OPERATORS SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO LOSS OF DATA, LOSS OF PROFITS, OR BUSINESS INTERRUPTION, ARISING OUT OF OR RELATED TO YOUR USE OF THE SERVICE, REGARDLESS OF THE THEORY OF LIABILITY.</p>
+              <p>Our total aggregate liability for any claims arising from or related to the Service shall not exceed the amount you have paid us (if any) in the twelve (12) months preceding the claim.</p>
+
+              <h4 class="legal-h">9. Disclaimer of Warranties</h4>
+              <p>THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, WHETHER EXPRESS, IMPLIED, OR STATUTORY, INCLUDING BUT NOT LIMITED TO IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.</p>
+
+              <h4 class="legal-h">10. Indemnification</h4>
+              <p>You agree to indemnify, defend, and hold harmless Stead and its operators from and against any claims, liabilities, damages, losses, and expenses (including reasonable attorneys' fees) arising out of or related to your violation of these Terms or misuse of the Service.</p>
+
+              <h4 class="legal-h">11. Termination</h4>
+              <p>We may suspend or terminate your access to the Service at any time if you violate these Terms, with or without prior notice. Upon termination, your right to use the Service ceases immediately. You may delete your account at any time through your Account settings.</p>
+
+              <h4 class="legal-h">12. Governing Law</h4>
+              <p>These Terms shall be governed by and construed in accordance with the laws of the jurisdiction in which Stead operates, without regard to conflict-of-law principles. Any disputes arising from these Terms shall be resolved through binding arbitration or in the courts of competent jurisdiction.</p>
+
+              <h4 class="legal-h">13. Changes to Terms</h4>
+              <p>We reserve the right to modify these Terms at any time. Material changes will be communicated through the Service. Your continued use after such changes constitutes acceptance of the updated Terms.</p>
+            </div>
+          </Transition>
+
+          <!-- Data Processing -->
+          <button class="legal-toggle" :class="{ 'legal-toggle--open': expandedDoc === 'dpa' }" @click="toggleDoc('dpa')">
+            <div class="legal-toggle__text">
+              <span class="legal-toggle__title">Data Processing Agreement</span>
+              <span class="legal-toggle__hint">How your data is processed and by whom</span>
+            </div>
+            <span class="material-symbols-rounded legal-toggle__icon">expand_more</span>
+          </button>
+          <Transition name="legal-expand">
+            <div v-if="expandedDoc === 'dpa'" class="legal-body">
+              <p class="legal-updated">Last updated: April 21, 2026</p>
+
+              <h4 class="legal-h">1. Scope</h4>
+              <p>This Data Processing Agreement ("DPA") applies to all personal data processed by Stead on your behalf. Stead acts as the data processor; you (the user) are the data controller for the personal data you input into the Service.</p>
+
+              <h4 class="legal-h">2. Categories of Data</h4>
+              <ul>
+                <li><strong>Identity Data:</strong> email address, name, date of birth (optional), phone (optional)</li>
+                <li><strong>Household Data:</strong> tasks, expenses, income records, calendar events, journal entries, notes, contacts, documents, meal plans, habits, inventory, subscriptions, wishlists, and all associated metadata</li>
+                <li><strong>Technical Data:</strong> authentication tokens, session identifiers, timestamps</li>
+                <li><strong>Analytics Data (opt-in only):</strong> anonymous feature usage metrics with no personal identifiers</li>
+              </ul>
+
+              <h4 class="legal-h">3. Sub-processors</h4>
+              <p>The following sub-processors are used to deliver the Service:</p>
+              <ul>
+                <li><strong>Supabase, Inc.</strong> — Database hosting, authentication, and API services (AWS us-east-1)</li>
+                <li><strong>Cloudflare, Inc.</strong> — Content delivery, DNS, and DDoS protection (global edge network)</li>
+              </ul>
+              <p>We will notify you before adding new sub-processors. Each sub-processor is bound by contractual obligations to protect your data consistent with this DPA.</p>
+
+              <h4 class="legal-h">4. Security Measures</h4>
+              <ul>
+                <li>TLS 1.2+ encryption for all data in transit</li>
+                <li>AES-256 encryption for data at rest</li>
+                <li>Row Level Security (RLS) enforced at the database level — full tenant isolation</li>
+                <li>Bcrypt password hashing with minimum cost factor of 10</li>
+                <li>JWT-based authentication with short-lived access tokens and secure refresh tokens</li>
+                <li>No plaintext credentials stored anywhere in the system</li>
+                <li>Regular dependency audits and security patches</li>
+              </ul>
+
+              <h4 class="legal-h">5. Data Breach Notification</h4>
+              <p>In the event of a personal data breach, we will notify affected users without undue delay and no later than 72 hours after becoming aware of the breach. The notification will include the nature of the breach, the categories and approximate number of affected records, likely consequences, and measures taken to mitigate the breach.</p>
+
+              <h4 class="legal-h">6. Data Deletion</h4>
+              <p>Upon account deletion or at your request, we will permanently delete all personal data associated with your account within 30 days. This includes all household data where you are the sole member. Backups containing your data will be purged within 90 days of the deletion request.</p>
+
+              <h4 class="legal-h">7. Audit Rights</h4>
+              <p>You have the right to request information about our data processing practices and security measures. We will respond to reasonable audit requests within 30 days.</p>
+            </div>
+          </Transition>
+
+          <!-- Security Overview -->
+          <button class="legal-toggle" :class="{ 'legal-toggle--open': expandedDoc === 'security' }" @click="toggleDoc('security')">
+            <div class="legal-toggle__text">
+              <span class="legal-toggle__title">Security Overview</span>
+              <span class="legal-toggle__hint">Technical security measures protecting your data</span>
+            </div>
+            <span class="material-symbols-rounded legal-toggle__icon">expand_more</span>
+          </button>
+          <Transition name="legal-expand">
+            <div v-if="expandedDoc === 'security'" class="legal-body">
+              <p class="legal-updated">Last updated: April 21, 2026</p>
+
+              <h4 class="legal-h">Authentication</h4>
+              <p>All authentication is handled by Supabase Auth, which implements industry-standard security practices. Passwords are hashed using bcrypt. Sessions are managed via short-lived JWT access tokens (1 hour) paired with secure, HTTP-only refresh tokens. Multi-factor authentication support is available through Supabase Auth.</p>
+
+              <h4 class="legal-h">Data Isolation</h4>
+              <p>Every database table is protected by Row Level Security (RLS) policies that scope all queries to the authenticated user's household. This means:</p>
+              <ul>
+                <li>A user can only read, create, update, or delete data belonging to their own household</li>
+                <li>Even in the event of an application-level bug, the database will reject any query that attempts to access another household's data</li>
+                <li>Personal-scope data is further restricted to the individual owner</li>
+              </ul>
+
+              <h4 class="legal-h">Encryption</h4>
+              <ul>
+                <li><strong>In transit:</strong> All communication between your browser and our servers is encrypted using TLS 1.2 or higher. HSTS headers are enforced.</li>
+                <li><strong>At rest:</strong> Database storage is encrypted using AES-256. Backups are encrypted with the same standard.</li>
+              </ul>
+
+              <h4 class="legal-h">Infrastructure</h4>
+              <ul>
+                <li>Database hosted on Supabase (AWS infrastructure) with automated backups</li>
+                <li>Static assets served via Cloudflare Pages with global CDN, DDoS protection, and WAF</li>
+                <li>No server-side application code — the frontend communicates directly with the database API, reducing attack surface</li>
+              </ul>
+
+              <h4 class="legal-h">Local Data</h4>
+              <p>When local caching is enabled, data is stored in IndexedDB within your browser. This data:</p>
+              <ul>
+                <li>Never leaves your device</li>
+                <li>Is subject to your browser's own security sandbox</li>
+                <li>Can be cleared at any time using the "Clear cache" button above</li>
+                <li>Is automatically invalidated when you sign out</li>
+              </ul>
+
+              <h4 class="legal-h">Responsible Disclosure</h4>
+              <p>If you discover a security vulnerability, please report it to us responsibly. We commit to acknowledging receipt within 48 hours and providing an initial assessment within 7 business days.</p>
+            </div>
+          </Transition>
+        </div>
+      </div>
     </template>
 
     <!-- Member Form Drawer -->
@@ -1672,5 +1956,122 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
   .member__actions {
     opacity: 1;
   }
+}
+
+/* -- Legal documents -- */
+.legal-docs {
+  padding-bottom: var(--space-xs);
+}
+
+.legal-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-m);
+  width: 100%;
+  padding: var(--space-m) 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  transition: background var(--duration-fast) var(--easing-standard);
+}
+
+.legal-toggle + .legal-toggle {
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.legal-toggle__text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.legal-toggle__title {
+  font: var(--text-body-1);
+  color: var(--color-fg-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.legal-toggle__hint {
+  font: var(--text-caption);
+  color: var(--color-fg-tertiary);
+}
+
+.legal-toggle__icon {
+  font-size: 20px;
+  color: var(--color-fg-tertiary);
+  transition: transform var(--duration-fast) var(--easing-standard);
+  flex-shrink: 0;
+}
+
+.legal-toggle--open .legal-toggle__icon {
+  transform: rotate(180deg);
+}
+
+.legal-body {
+  padding: 0 0 var(--space-l);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.legal-body p,
+.legal-body ul {
+  font: var(--text-body-2);
+  color: var(--color-fg-secondary);
+  line-height: 1.65;
+  margin: 0 0 var(--space-s);
+}
+
+.legal-body ul {
+  padding-left: var(--space-l);
+}
+
+.legal-body li {
+  margin-bottom: var(--space-2xs);
+}
+
+.legal-body strong {
+  color: var(--color-fg-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.legal-h {
+  font: var(--text-body-1);
+  color: var(--color-fg-primary);
+  font-weight: var(--font-weight-semibold);
+  margin: var(--space-m) 0 var(--space-xs);
+}
+
+.legal-h:first-child {
+  margin-top: 0;
+}
+
+.legal-updated {
+  font: var(--text-caption);
+  color: var(--color-fg-tertiary);
+  margin-bottom: var(--space-m);
+  font-style: italic;
+}
+
+.legal-expand-enter-active {
+  transition: all var(--duration-normal) var(--easing-decelerate);
+  overflow: hidden;
+}
+
+.legal-expand-leave-active {
+  transition: all var(--duration-fast) var(--easing-accelerate);
+  overflow: hidden;
+}
+
+.legal-expand-enter-from,
+.legal-expand-leave-to {
+  opacity: 0;
+  max-height: 0;
+}
+
+.legal-expand-enter-to,
+.legal-expand-leave-from {
+  opacity: 1;
 }
 </style>
