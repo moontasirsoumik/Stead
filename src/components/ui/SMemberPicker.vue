@@ -67,7 +67,6 @@ function initials(name: string): string {
           :style="{ background: member.color }"
         >{{ initials(member.name) }}</span>
         <span class="member-chip__name">{{ member.name }}</span>
-        <span v-if="isSelected(member.id)" class="member-chip__check material-symbols-rounded">check</span>
       </button>
     </div>
     <p v-if="!selectableMembers.length" class="member-picker__empty">

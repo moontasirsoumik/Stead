@@ -204,7 +204,7 @@ onMounted(async () => {
       >
         <div class="income-row__source">{{ item.source }}</div>
         <div class="income-row__chips">
-          <div class="income-row__category">
+          <div v-if="item.category" class="income-row__category">
             <SBadge variant="success" size="sm">{{ item.category }}</SBadge>
           </div>
           <div class="income-row__date">{{ formatDate(item.date) }}</div>

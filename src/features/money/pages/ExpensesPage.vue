@@ -333,8 +333,11 @@ onMounted(async () => {
           <div class="expense-row__date">
             <SBadge variant="default" size="sm">{{ formatDate(expense.date) }}</SBadge>
           </div>
-          <div class="expense-row__category">
+          <div v-if="expense.category" class="expense-row__category">
             <SBadge variant="brand" size="sm">{{ expense.category }}</SBadge>
+          </div>
+          <div v-else class="expense-row__category">
+            <SBadge variant="default" size="sm" style="visibility: hidden">—</SBadge>
           </div>
         </div>
         <div class="expense-row__payer">

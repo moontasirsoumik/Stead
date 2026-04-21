@@ -21,6 +21,8 @@ export interface CalendarItem {
   status: string | null
   assigned_to: string | null
   original_id: string
+  owner_id: string | null
+  scope: DataScope | null
 }
 
 export const useCalendarStore = defineStore('calendar', () => {
@@ -110,6 +112,8 @@ export const useCalendarStore = defineStore('calendar', () => {
           status: null,
           assigned_to: ev.assigned_to,
           original_id: ev.id,
+          owner_id: ev.owner_id,
+          scope: ev.scope,
         })
       }
     }
@@ -134,6 +138,8 @@ export const useCalendarStore = defineStore('calendar', () => {
           status: task.status,
           assigned_to: task.assignee,
           original_id: task.id,
+          owner_id: null,
+          scope: null,
         })
       }
     }
@@ -156,6 +162,8 @@ export const useCalendarStore = defineStore('calendar', () => {
           status: rem.status,
           assigned_to: rem.assigned_to,
           original_id: rem.id,
+          owner_id: null,
+          scope: null,
         })
       }
     }
@@ -179,6 +187,8 @@ export const useCalendarStore = defineStore('calendar', () => {
           status: bill.status,
           assigned_to: bill.paid_by,
           original_id: bill.id,
+          owner_id: null,
+          scope: null,
         })
       }
     }

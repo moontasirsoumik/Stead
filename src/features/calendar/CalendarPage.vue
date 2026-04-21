@@ -273,6 +273,13 @@ function getMemberName(id: string | null): string | null {
   return householdStore.activeMembers.find((m) => m.id === id)?.name ?? null
 }
 
+function isSharedFromOther(item: CalendarItem): boolean {
+  return item.source === 'event'
+    && item.scope === 'personal'
+    && !!item.owner_id
+    && item.owner_id !== authStore.memberId
+}
+
 function formatTime(time: string | null): string {
   if (!time) return ''
   const [h, m] = time.split(':')
@@ -302,6 +309,8 @@ function openCreateDrawer() {
 
 function openEditDrawer(item: CalendarItem) {
   if (item.source !== 'event') return
+  // Block editing shared events from others
+  if (item.scope === 'personal' && item.owner_id && item.owner_id !== authStore.memberId) return
   const event = calendarStore.items.find((e) => e.id === item.original_id)
   if (!event) return
 
@@ -574,11 +583,12 @@ watch(() => appStore.isPersonal, loadData)
             :key="item.id"
             :class="[
               'day-item',
-              { 'day-item--clickable': item.source === 'event' },
+              { 'day-item--clickable': item.source === 'event' && !isSharedFromOther(item) },
+              { 'day-item--shared': isSharedFromOther(item) },
             ]"
             :style="{ '--stagger': idx }"
             class="page-enter"
-            @click="item.source === 'event' ? openEditDrawer(item) : undefined"
+            @click="item.source === 'event' && !isSharedFromOther(item) ? openEditDrawer(item) : undefined"
           >
             <span
               class="day-item__indicator"
@@ -596,6 +606,10 @@ watch(() => appStore.isPersonal, loadData)
                 <span v-if="getMemberName(item.assigned_to)" class="day-item__assignee">
                   {{ getMemberName(item.assigned_to) }}
                 </span>
+                <span v-if="isSharedFromOther(item)" class="day-item__shared-by">
+                  <span class="material-symbols-rounded day-item__shared-icon">share</span>
+                  {{ getMemberName(item.owner_id) }}
+                </span>
               </div>
             </div>
 
@@ -606,7 +620,7 @@ watch(() => appStore.isPersonal, loadData)
               {{ item.source }}
             </SBadge>
 
-            <div class="day-item__actions">
+            <div v-if="!isSharedFromOther(item)" class="day-item__actions">
               <button
                 :class="[
                   'day-item__action',
@@ -1082,6 +1096,31 @@ watch(() => appStore.isPersonal, loadData)
 .day-item__assignee {
   font: var(--text-caption);
   color: var(--color-fg-tertiary);
+}
+
+.day-item--shared {
+  opacity: 0.85;
+  border-left: 2px dashed var(--color-border-strong);
+  padding-left: var(--space-s);
+}
+
+.day-item__shared-by {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font: var(--text-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-brand-primary);
+}
+
+.day-item__shared-by::before {
+  content: '·';
+  margin-right: var(--space-2xs);
+  color: var(--color-fg-tertiary);
+}
+
+.day-item__shared-icon {
+  font-size: 12px;
 }
 
 .day-item__assignee::before {
