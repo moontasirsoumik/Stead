@@ -387,6 +387,7 @@ Wired 22 previously orphaned settings from `app.store.ts` to their feature pages
 | 2026-04-17 | **Database seeding & RLS fix**: Seeded 206+ rows across 23 tables (both household + personal scope). Fixed member `active=false` bug blocking RLS. Applied RLS policies for 10 new feature tables (wishlists, subscriptions, journal_entries, habits, habit_logs, contacts, documents, meal_plans, meals, expense_splits). Deleted duplicate empty household/member. All data now accessible via authenticated user. |
 | 2026-04-20 | **Phase 31 — Privacy & Sharing**: Frontend complete, DB migration pending. See Phase 31 details below. |
 | 2026-04-21 | **Deploy tooling**: Migrated package management and CI from npm to Bun, replaced `package-lock.json` with `bun.lock`, and documented a build-only production branch strategy. |
+| 2026-04-21 | **Deploy branch sync**: Updated `origin/deploy` to the current production-only Bun app tree, excluded docs/scripts/tests/migrations, and verified the stripped branch still passes `bun run build`. |
 
 ---
 
