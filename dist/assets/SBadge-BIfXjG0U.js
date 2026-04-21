@@ -1,0 +1,2 @@
+import{i as s,o as t,k as o,B as d,S as n}from"./vue-IOlP4cbt.js";import{_ as r}from"./index-CV51KSF3.js";const l=s({__name:"SBadge",props:{variant:{default:"default"},size:{default:"md"}},setup(a){return(e,c)=>(t(),o("span",{class:d(["sbadge",`sbadge--${a.variant}`,`sbadge--${a.size}`])},[n(e.$slots,"default",{},void 0)],2))}}),m=r(l,[["__scopeId","data-v-b24fadbb"]]);export{m as S};
+//# sourceMappingURL=SBadge-BIfXjG0U.js.map
