@@ -1487,23 +1487,20 @@ deploy ──────────── build-ready subset → Cloudflare Pa
 | Branch | Purpose | Contents | Cloudflare |
 |---|---|---|---|
 | `main` | Development trunk | Everything: plan.md, progress.md, docs/, .github/, tests/, src/, supabase/, etc. | — |
-| `preview` | Pre-production preview | Only files needed to build: src/, public/, supabase/, package.json, vite.config.ts, tsconfig.json, index.html, .env.example | Preview environment |
-| `deploy` | Production | Same as `preview` — fast-forward merge only | Production environment |
+| `preview` | Pre-production preview | Only files needed to build: src/, public/, index.html, package.json, bun.lock, vite.config.ts, tsconfig.json, tsconfig.node.json | Preview environment |
+| `deploy` | Production | Same as `preview` — build-only branch | Production environment |
 
 ### What goes on `preview`/`deploy` (build-essential only)
 
 ```
 src/
 public/
-supabase/
 index.html
 package.json
-package-lock.json
+bun.lock
 vite.config.ts
 tsconfig.json
 tsconfig.node.json
-.env.example
-.gitignore
 ```
 
 ### What stays on `main` only (NOT on preview/deploy)

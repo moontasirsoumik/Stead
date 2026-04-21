@@ -1,6 +1,6 @@
 # Stead — Implementation Progress Tracker
 
-> **Last updated:** 2026-04-20
+> **Last updated:** 2026-04-21
 > **Current Phase:** P31 — Privacy & Sharing (frontend complete, migration pending)
 
 ---
@@ -386,6 +386,7 @@ Wired 22 previously orphaned settings from `app.store.ts` to their feature pages
 | 2026-04-16 | Planned P15 (merge Tasks+Maintenance), P16 (merge Shopping+Inventory→Pantry), P17 (personal scope). Updated plan.md §25 and progress.md. |
 | 2026-04-17 | **Database seeding & RLS fix**: Seeded 206+ rows across 23 tables (both household + personal scope). Fixed member `active=false` bug blocking RLS. Applied RLS policies for 10 new feature tables (wishlists, subscriptions, journal_entries, habits, habit_logs, contacts, documents, meal_plans, meals, expense_splits). Deleted duplicate empty household/member. All data now accessible via authenticated user. |
 | 2026-04-20 | **Phase 31 — Privacy & Sharing**: Frontend complete, DB migration pending. See Phase 31 details below. |
+| 2026-04-21 | **Deploy tooling**: Migrated package management and CI from npm to Bun, replaced `package-lock.json` with `bun.lock`, and documented a build-only production branch strategy. |
 
 ---
 
@@ -467,7 +468,7 @@ Get token from: https://supabase.com/dashboard/account/tokens
 | P15-10 | Update router (remove /maintenance route) | ⬜ Not Started | `src/router/index.ts` |
 | P15-11 | Remove maintenance module files | ⬜ Not Started | Delete: `maintenance.model.ts`, `maintenance.schema.ts`, `maintenance.data.ts`, `maintenance.store.ts`, `MaintenancePage.vue` |
 | P15-12 | Update model/schema index exports | ⬜ Not Started | `src/models/index.ts`, `src/schemas/index.ts` |
-| P15-13 | Verify build + type-check | ⬜ Not Started | `npm run build` |
+| P15-13 | Verify build + type-check | ⬜ Not Started | `bun run build` |
 
 ---
 
@@ -485,7 +486,7 @@ Get token from: https://supabase.com/dashboard/account/tokens
 | P16-06 | Update NavRail + MobileNav (Pantry replaces Shopping+Inventory) | ⬜ Not Started | `NavRail.vue`, `MobileNav.vue` |
 | P16-07 | Update DashboardPage imports | ⬜ Not Started | `src/features/dashboard/DashboardPage.vue` |
 | P16-08 | Remove old feature folders | ⬜ Not Started | `src/features/shopping/`, `src/features/inventory/` |
-| P16-09 | Verify build + type-check | ⬜ Not Started | `npm run build` |
+| P16-09 | Verify build + type-check | ⬜ Not Started | `bun run build` |
 
 ---
 
@@ -507,4 +508,4 @@ Get token from: https://supabase.com/dashboard/account/tokens
 | P17-10 | Update NotesPage with scope toggle | ⬜ Not Started | `NotesPage.vue` |
 | P17-11 | Update DashboardPage with personal section | ⬜ Not Started | `DashboardPage.vue` |
 | P17-12 | Update Dexie DB indexes for scope | ⬜ Not Started | `src/services/cache/db.ts` |
-| P17-13 | Verify build + type-check | ⬜ Not Started | `npm run build` |
+| P17-13 | Verify build + type-check | ⬜ Not Started | `bun run build` |
