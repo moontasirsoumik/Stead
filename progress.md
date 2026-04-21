@@ -388,6 +388,7 @@ Wired 22 previously orphaned settings from `app.store.ts` to their feature pages
 | 2026-04-20 | **Phase 31 — Privacy & Sharing**: Frontend complete, DB migration pending. See Phase 31 details below. |
 | 2026-04-21 | **Deploy tooling**: Migrated package management and CI from npm to Bun, replaced `package-lock.json` with `bun.lock`, and documented a build-only production branch strategy. |
 | 2026-04-21 | **Deploy branch sync**: Updated `origin/deploy` to the current production-only Bun app tree, excluded docs/scripts/tests/migrations, and verified the stripped branch still passes `bun run build`. |
+| 2026-04-21 | **Auth dark mode fix deployed**: Implemented CSS token-based solution for auth panel contrast in dark mode. Synced to deploy branch and verified build passes (exit code 0). Ready for Cloudflare Pages deployment. |
 
 ---
 
