@@ -1,0 +1,52 @@
+/* ============================================================
+   Stead — Shadow Tokens  ·  "Refined Utility"
+   Flat design — all shadows disabled. Tokens preserved for
+   backward compatibility; every value resolves to none.
+   ============================================================ */
+
+:root {
+  --shadow-2: none;
+  --shadow-4: none;
+  --shadow-8: none;
+  --shadow-16: none;
+  --shadow-28: none;
+  --shadow-inset: none;
+  --shadow-brand: none;
+  --shadow-card: none;
+}
+
+:root[data-scope='personal'] {
+  --shadow-brand: none;
+}
+
+:root[data-theme='dark'] {
+  --shadow-2: none;
+  --shadow-4: none;
+  --shadow-8: none;
+  --shadow-16: none;
+  --shadow-28: none;
+  --shadow-inset: none;
+  --shadow-brand: none;
+  --shadow-card: none;
+}
+
+:root[data-theme='dark'][data-scope='personal'] {
+  --shadow-brand: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --shadow-2: none;
+    --shadow-4: none;
+    --shadow-8: none;
+    --shadow-16: none;
+    --shadow-28: none;
+    --shadow-inset: none;
+    --shadow-brand: none;
+    --shadow-card: none;
+  }
+
+  :root:not([data-theme='light'])[data-scope='personal'] {
+    --shadow-brand: none;
+  }
+}

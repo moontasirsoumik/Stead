@@ -1,0 +1,26 @@
+/* ============================================================
+   Stead — Layout Tokens  ·  "Refined Utility"
+   Compact sizing for information-dense interfaces.
+   ============================================================ */
+
+:root {
+  --bp-mobile: 640px;
+  --bp-tablet: 1024px;
+  --bp-desktop: 1280px;
+  --bp-wide: 1440px;
+
+  --width-sidebar-expanded: 256px;
+  --width-sidebar-collapsed: 64px;
+  --width-nav-collapsed: 56px;
+  --width-nav-expanded: 256px;
+  --width-content-max: 1440px;
+  --width-drawer: 420px;
+  --height-header: 52px;
+  --height-input: 40px;
+  --height-control-sm: 28px;
+  --height-control-md: 36px;
+  --height-control-lg: 44px;
+  --height-row-min: 48px;
+  --height-nav-item: 40px;
+  --height-mobile-nav: 64px;
+}

@@ -1,0 +1,59 @@
+/* ============================================================
+   Stead — Utility Classes  ·  "Refined Utility"
+   Minimal, token-based utility helpers.
+   ============================================================ */
+
+/* ── Visibility ── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Typography ── */
+.text-display { font: var(--text-display); }
+.text-title-1 { font: var(--text-title-1); }
+.text-title-2 { font: var(--text-title-2); }
+.text-title-3 { font: var(--text-title-3); }
+.text-subtitle-1 { font: var(--text-subtitle-1); }
+.text-body-1 { font: var(--text-body-1); }
+.text-body-1-strong { font: var(--text-body-1-strong); }
+.text-body-2 { font: var(--text-body-2); }
+.text-caption { font: var(--text-caption); }
+.text-label-lg { font: var(--text-label-lg); }
+.text-label-md { font: var(--text-label-md); }
+.text-label-sm { font: var(--text-label-sm); }
+
+/* ── Color ── */
+.text-secondary { color: var(--color-fg-secondary); }
+.text-tertiary { color: var(--color-fg-tertiary); }
+.text-muted { color: var(--color-fg-muted); }
+.text-brand { color: var(--color-brand-primary); }
+.text-success { color: var(--color-success); }
+.text-warning { color: var(--color-warning); }
+.text-error { color: var(--color-error); }
+
+/* ── Truncation ── */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Layout ── */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.gap-xs { gap: var(--space-xs); }
+.gap-s { gap: var(--space-s); }
+.gap-m { gap: var(--space-m); }
+.gap-l { gap: var(--space-l); }
+.gap-xl { gap: var(--space-xl); }

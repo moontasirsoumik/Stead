@@ -1,0 +1,16 @@
+/* ============================================================
+   Stead — Spacing Tokens  ·  "Refined Utility"
+   Tight 4px grid for compact, information-dense layouts.
+   ============================================================ */
+
+:root {
+  --space-2xs: 2px;
+  --space-xs: 4px;
+  --space-s: 8px;
+  --space-m: 12px;
+  --space-l: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+  --space-3xl: 44px;
+  --space-4xl: 60px;
+}
