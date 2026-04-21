@@ -1,2 +1,0 @@
-import{G as a}from"./vue-IOlP4cbt.js";import{u as d}from"./index-CV51KSF3.js";function m(){const s=d(),{user:e,session:o,householdId:t,memberId:r,loading:n,error:u,isAuthenticated:i,hasHousehold:h}=a(s);return{user:e,session:o,householdId:t,memberId:r,loading:n,error:u,isAuthenticated:i,hasHousehold:h,signIn:s.signIn,signUp:s.signUp,signOut:s.signOut,createHousehold:s.createHousehold}}export{m as u};
-//# sourceMappingURL=useAuth-CxLuJpMv.js.map
