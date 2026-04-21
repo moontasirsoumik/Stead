@@ -158,8 +158,15 @@ provide('openLegal', openLegal)
   --color-info: #3A6C9E;
   --color-info-bg: #EDF4FB;
 
-  /* Door bg — pinned to light-mode brand value per accent */
-  --door-brand-bg: var(--color-brand-primary);
+  /* Brand tokens — login state (household green) */
+  --color-brand-primary: #49662E;
+  --color-brand-hover: #3D5726;
+  --color-brand-pressed: #324A1E;
+  --color-brand-selected: #EFF5EA;
+  --color-brand-subtle: #DEE9D4;
+  --color-primary-container: #DEE9D4;
+  --color-on-primary-container: #2A3D1A;
+  --color-border-brand: #49662E;
 
   /* Door text — always white on saturated brand bg */
   --door-fg: #fff;
@@ -176,26 +183,16 @@ provide('openLegal', openLegal)
   overflow: hidden;
 }
 
-/* Door panel bg — pin to light-mode brand values so it never becomes a pastel
-   in dark theme. All other tokens above are already light-pinned. */
-:root[data-theme='dark'] .auth-shell                        { --door-brand-bg: #4A5578; }
-:root[data-theme='dark'][data-accent='green'] .auth-shell   { --door-brand-bg: #49662E; }
-:root[data-theme='dark'][data-accent='teal'] .auth-shell    { --door-brand-bg: #2E6B5E; }
-:root[data-theme='dark'][data-accent='blue'] .auth-shell    { --door-brand-bg: #1A56DB; }
-:root[data-theme='dark'][data-accent='purple'] .auth-shell  { --door-brand-bg: #7C3AED; }
-:root[data-theme='dark'][data-accent='rose'] .auth-shell    { --door-brand-bg: #E11D48; }
-:root[data-theme='dark'][data-accent='amber'] .auth-shell   { --door-brand-bg: #D97706; }
-:root[data-theme='dark'][data-scope='personal'] .auth-shell { --door-brand-bg: #2D7A6F; }
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .auth-shell                        { --door-brand-bg: #4A5578; }
-  :root:not([data-theme='light'])[data-accent='green'] .auth-shell   { --door-brand-bg: #49662E; }
-  :root:not([data-theme='light'])[data-accent='teal'] .auth-shell    { --door-brand-bg: #2E6B5E; }
-  :root:not([data-theme='light'])[data-accent='blue'] .auth-shell    { --door-brand-bg: #1A56DB; }
-  :root:not([data-theme='light'])[data-accent='purple'] .auth-shell  { --door-brand-bg: #7C3AED; }
-  :root:not([data-theme='light'])[data-accent='rose'] .auth-shell    { --door-brand-bg: #E11D48; }
-  :root:not([data-theme='light'])[data-accent='amber'] .auth-shell   { --door-brand-bg: #D97706; }
-  :root:not([data-theme='light'])[data-scope='personal'] .auth-shell { --door-brand-bg: #2D7A6F; }
+/* Signup state — switch to personal teal across the whole shell */
+.auth-shell--signup {
+  --color-brand-primary: #2D7A6F;
+  --color-brand-hover: #24665D;
+  --color-brand-pressed: #1C544C;
+  --color-brand-selected: #E8F5F2;
+  --color-brand-subtle: #CEEAE4;
+  --color-primary-container: #CEEAE4;
+  --color-on-primary-container: #1A3430;
+  --color-border-brand: #2D7A6F;
 }
 
 /* ── Forms layer: two halves side by side, always visible behind the door ── */
@@ -232,10 +229,10 @@ provide('openLegal', openLegal)
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--door-brand-bg);
+  background-color: #49662E;
   padding: var(--space-2xl);
   z-index: 2;
-  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.7s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform;
   overflow: hidden;
 }
@@ -260,6 +257,7 @@ provide('openLegal', openLegal)
 /* Signup: door slides right, covering login form → signup form visible on left */
 .auth-shell--signup .auth-door {
   transform: translateX(100%);
+  background-color: #2D7A6F;
 }
 
 /* ── Door content ── */
