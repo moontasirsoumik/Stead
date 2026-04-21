@@ -106,9 +106,44 @@ provide('openLegal', openLegal)
 <style scoped>
 /* ── Shell: relative container, full viewport ── */
 .auth-shell {
+  /* Door text tokens — light mode (white on dark brand bg) */
+  --door-fg: #fff;
+  --door-fg-muted: rgba(255, 255, 255, 0.7);
+  --door-fg-soft: rgba(255, 255, 255, 0.55);
+  --door-logo-bg: rgba(255, 255, 255, 0.15);
+  --door-border: rgba(255, 255, 255, 0.2);
+  --door-divider: rgba(255, 255, 255, 0.1);
+  --door-glow: rgba(255, 255, 255, 0.06);
+  --door-glow-soft: rgba(255, 255, 255, 0.04);
+
   position: relative;
   min-height: 100dvh;
   overflow: hidden;
+}
+
+/* Door text tokens — dark mode (dark on light pastel brand bg) */
+:root[data-theme='dark'] .auth-shell {
+  --door-fg: #111113;
+  --door-fg-muted: rgba(17, 17, 19, 0.72);
+  --door-fg-soft: rgba(17, 17, 19, 0.55);
+  --door-logo-bg: rgba(0, 0, 0, 0.10);
+  --door-border: rgba(0, 0, 0, 0.12);
+  --door-divider: rgba(0, 0, 0, 0.08);
+  --door-glow: rgba(0, 0, 0, 0.04);
+  --door-glow-soft: rgba(0, 0, 0, 0.02);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .auth-shell {
+    --door-fg: #111113;
+    --door-fg-muted: rgba(17, 17, 19, 0.72);
+    --door-fg-soft: rgba(17, 17, 19, 0.55);
+    --door-logo-bg: rgba(0, 0, 0, 0.10);
+    --door-border: rgba(0, 0, 0, 0.12);
+    --door-divider: rgba(0, 0, 0, 0.08);
+    --door-glow: rgba(0, 0, 0, 0.04);
+    --door-glow-soft: rgba(0, 0, 0, 0.02);
+  }
 }
 
 /* ── Forms layer: two halves side by side, always visible behind the door ── */
@@ -158,8 +193,8 @@ provide('openLegal', openLegal)
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse at 20% 80%, rgba(255, 255, 255, 0.06) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(255, 255, 255, 0.04) 0%, transparent 50%);
+    radial-gradient(ellipse at 20% 80%, var(--door-glow) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, var(--door-glow-soft) 0%, transparent 50%);
   pointer-events: none;
 }
 
@@ -196,10 +231,10 @@ provide('openLegal', openLegal)
   justify-content: center;
   width: 40px;
   height: 40px;
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--door-logo-bg);
+  border: 1px solid var(--door-border);
   border-radius: var(--radius-m);
-  color: #fff;
+  color: var(--door-fg);
   font-weight: var(--font-weight-bold);
   font-size: 18px;
   font-family: var(--font-family);
@@ -207,7 +242,7 @@ provide('openLegal', openLegal)
 
 .brand-name {
   font: var(--text-title-2);
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--door-fg-muted);
   letter-spacing: var(--tracking-wide);
 }
 
@@ -219,7 +254,7 @@ provide('openLegal', openLegal)
 
 .brand-headline {
   font: var(--text-display);
-  color: #fff;
+  color: var(--door-fg);
   margin: 0 0 var(--space-m);
   letter-spacing: var(--tracking-tight);
   line-height: 1.15;
@@ -227,7 +262,7 @@ provide('openLegal', openLegal)
 
 .brand-sub {
   font: var(--text-body-1);
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--door-fg-soft);
   line-height: 1.6;
   max-width: 340px;
 }
@@ -235,7 +270,7 @@ provide('openLegal', openLegal)
 .brand-features {
   position: relative;
   padding-top: var(--space-m);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--door-divider);
   min-height: 100px;
   overflow: hidden;
 }
@@ -254,12 +289,12 @@ provide('openLegal', openLegal)
 
 .brand-feature-icon {
   font-size: 18px;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--door-fg-soft);
 }
 
 .brand-feature-text {
   font: var(--text-body-2);
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--door-fg-soft);
 }
 
 /* ── Brand text transitions (simultaneous horizontal slide) ── */
