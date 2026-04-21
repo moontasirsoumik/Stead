@@ -104,12 +104,64 @@ provide('openLegal', openLegal)
 </template>
 
 <style scoped>
-/* ── Shell: relative container, full viewport ── */
+/* ── Shell: always light — no dark mode on the auth page whatsoever ──
+   Declaring all semantic tokens here as their light-mode values means every
+   child component inherits light values regardless of what :root[data-theme='dark']
+   sets. CSS custom properties resolve at the nearest ancestor that defines them. */
 .auth-shell {
-  /* Door bg — always the light-mode brand color (pinned, never lightens in dark mode) */
+  color-scheme: light;
+
+  /* Backgrounds */
+  --color-bg-primary: #FAFAF8;
+  --color-bg-secondary: #F4F4F2;
+  --color-bg-tertiary: #EDEDEB;
+  --color-bg-elevated: #FFFFFF;
+  --color-bg-wash: #F7F7F5;
+  --color-bg-overlay: rgba(0, 0, 0, 0.40);
+
+  /* Foreground */
+  --color-fg-primary: #1A1D26;
+  --color-fg-secondary: #555968;
+  --color-fg-tertiary: #787D8C;
+  --color-fg-disabled: #A8ABB4;
+  --color-fg-on-brand: #FFFFFF;
+  --color-fg-muted: #9498A4;
+
+  /* Borders */
+  --color-border-default: #E2E3E6;
+  --color-border-strong: #CDCED4;
+  --color-border-subtle: #EDEDEB;
+  --color-border-input: #D2D3D9;
+  --color-border-input-hover: #B5B7C0;
+
+  /* Surfaces */
+  --color-surface-card: #F4F4F2;
+  --color-surface-card-hover: #EDEDEB;
+  --color-surface-dialog: #FFFFFF;
+  --color-surface-input: #F2F2F0;
+  --color-surface-input-hover: #EAEAE8;
+
+  /* Outline */
+  --color-outline: #737888;
+  --color-outline-variant: #C8CAD0;
+
+  /* Status */
+  --color-error: #A04040;
+  --color-error-bg: #FDEEEE;
+  --color-error-fg: #813232;
+  --color-success: #3B7A52;
+  --color-success-bg: #EEF6F0;
+  --color-success-fg: #2E6140;
+  --color-warning: #8A6D1B;
+  --color-warning-bg: #FDF6E7;
+  --color-warning-fg: #6E5614;
+  --color-info: #3A6C9E;
+  --color-info-bg: #EDF4FB;
+
+  /* Door bg — pinned to light-mode brand value per accent */
   --door-brand-bg: var(--color-brand-primary);
 
-  /* Door text tokens — always white (door bg is always dark/saturated) */
+  /* Door text — always white on saturated brand bg */
   --door-fg: #fff;
   --door-fg-muted: rgba(255, 255, 255, 0.7);
   --door-fg-soft: rgba(255, 255, 255, 0.55);
@@ -124,8 +176,8 @@ provide('openLegal', openLegal)
   overflow: hidden;
 }
 
-/* Door bg — pin to light-mode brand values in dark theme so the panel
-   never becomes a washed-out pastel. Text stays white; no other changes needed. */
+/* Door panel bg — pin to light-mode brand values so it never becomes a pastel
+   in dark theme. All other tokens above are already light-pinned. */
 :root[data-theme='dark'] .auth-shell                        { --door-brand-bg: #4A5578; }
 :root[data-theme='dark'][data-accent='green'] .auth-shell   { --door-brand-bg: #49662E; }
 :root[data-theme='dark'][data-accent='teal'] .auth-shell    { --door-brand-bg: #2E6B5E; }
