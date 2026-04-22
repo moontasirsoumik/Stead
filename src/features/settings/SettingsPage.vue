@@ -340,7 +340,7 @@ const greetingModel = computed({ get: () => app.showDashboardGreeting, set: (v: 
 
 type WidgetKey = 'money' | 'tasks' | 'pantry' | 'reminders' | 'notes' | 'habits' | 'meals' | 'subscriptions' | 'wishlist'
 const WIDGET_LIST: { key: WidgetKey; label: string; icon: string }[] = [
-  { key: 'money', label: 'Money', icon: 'payments' },
+  { key: 'money', label: 'Finances', icon: 'payments' },
   { key: 'tasks', label: 'Tasks', icon: 'task_alt' },
   { key: 'pantry', label: 'Pantry', icon: 'kitchen' },
   { key: 'reminders', label: 'Reminders', icon: 'alarm' },
@@ -764,7 +764,7 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
 
       <div class="settings-section page-enter" :style="{ '--stagger': 3 }">
         <div class="card-header">
-          <SectionHeader title="Money & Budget" />
+          <SectionHeader title="Finances & Budget" />
         </div>
         <div class="card-body">
           <div class="row">

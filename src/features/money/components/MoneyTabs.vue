@@ -74,7 +74,7 @@ watch(activeTab, () => {
 </script>
 
 <template>
-  <nav ref="navRef" class="money-tabs" aria-label="Money sections" @scroll="saveScrollPosition">
+  <nav ref="navRef" class="money-tabs" aria-label="Finances sections" @scroll="saveScrollPosition">
     <div class="money-tabs__pill" :style="pillStyle" />
     <RouterLink
       v-for="(tab, i) in tabs"

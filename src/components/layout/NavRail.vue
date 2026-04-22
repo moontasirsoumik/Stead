@@ -26,7 +26,7 @@ function toggleExpand() {
 const householdOverview = [
   { to: '/', icon: 'dashboard', label: 'Dashboard' },
   { to: '/calendar', icon: 'calendar_month', label: 'Calendar' },
-  { to: '/money/expenses', icon: 'money', label: 'Money' },
+  { to: '/money/expenses', icon: 'money', label: 'Finances' },
 ] as const
 
 const householdManage = [
@@ -52,7 +52,7 @@ const householdReference = [
 const personalOverview = [
   { to: '/', icon: 'dashboard', label: 'Dashboard' },
   { to: '/calendar', icon: 'calendar_month', label: 'Calendar' },
-  { to: '/money/expenses', icon: 'money', label: 'Money' },
+  { to: '/money/expenses', icon: 'money', label: 'Finances' },
 ] as const
 
 const personalManage = [

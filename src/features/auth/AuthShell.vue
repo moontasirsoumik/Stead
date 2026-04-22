@@ -23,78 +23,73 @@ provide('openLegal', openLegal)
 
 <template>
   <div :class="['auth-shell', { 'auth-shell--signup': isSignup }]">
-    <!-- Both forms sit side by side behind the door -->
+    <!-- Forms + door: all in one container for mobile vertical slide -->
     <div class="auth-forms">
       <div class="auth-form-slot auth-form-slot--signup">
         <div class="form-inner">
-          <div class="mobile-brand">
-            <div class="mobile-logo">S</div>
-          </div>
           <SignupPage />
         </div>
       </div>
-      <div class="auth-form-slot auth-form-slot--login">
-        <div class="form-inner">
-          <div class="mobile-brand">
-            <div class="mobile-logo">S</div>
+
+      <!-- Sliding door (brand panel) -->
+      <div class="auth-door">
+        <div class="door-inner">
+          <div class="brand-top">
+            <div class="brand-logo">S</div>
+            <span class="brand-name">Stead</span>
           </div>
-          <LoginPage />
+
+          <div class="brand-copy">
+            <Transition :name="isSignup ? 'slide-left' : 'slide-right'">
+              <div v-if="!isSignup" key="login">
+                <h1 class="brand-headline">Your household,<br />beautifully organized.</h1>
+                <p class="brand-sub">Tasks, finances, calendars, journals — everything your home needs, in one place.</p>
+              </div>
+              <div v-else key="signup">
+                <h1 class="brand-headline">Run your home<br />like it runs itself.</h1>
+                <p class="brand-sub">Tasks, budgets, calendars, and more — one calm place for your entire household.</p>
+              </div>
+            </Transition>
+          </div>
+
+          <div class="brand-features">
+            <Transition :name="isSignup ? 'slide-left' : 'slide-right'">
+              <div v-if="!isSignup" key="login-feats" class="brand-feature-list">
+                <div class="brand-feature">
+                  <span class="material-symbols-rounded brand-feature-icon">lock</span>
+                  <span class="brand-feature-text">Private by default</span>
+                </div>
+                <div class="brand-feature">
+                  <span class="material-symbols-rounded brand-feature-icon">cloud_off</span>
+                  <span class="brand-feature-text">Works offline</span>
+                </div>
+                <div class="brand-feature">
+                  <span class="material-symbols-rounded brand-feature-icon">group</span>
+                  <span class="brand-feature-text">Built for families</span>
+                </div>
+              </div>
+              <div v-else key="signup-feats" class="brand-feature-list">
+                <div class="brand-feature">
+                  <span class="material-symbols-rounded brand-feature-icon">schedule</span>
+                  <span class="brand-feature-text">Set up in 2 minutes</span>
+                </div>
+                <div class="brand-feature">
+                  <span class="material-symbols-rounded brand-feature-icon">devices</span>
+                  <span class="brand-feature-text">Access anywhere</span>
+                </div>
+                <div class="brand-feature">
+                  <span class="material-symbols-rounded brand-feature-icon">shield</span>
+                  <span class="brand-feature-text">Your data stays yours</span>
+                </div>
+              </div>
+            </Transition>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Sliding door (brand panel) -->
-    <div class="auth-door">
-      <div class="door-inner">
-        <div class="brand-top">
-          <div class="brand-logo">S</div>
-          <span class="brand-name">Stead</span>
-        </div>
-
-        <div class="brand-copy">
-          <Transition :name="isSignup ? 'slide-left' : 'slide-right'">
-            <div v-if="!isSignup" key="login">
-              <h1 class="brand-headline">Your household,<br />beautifully organized.</h1>
-              <p class="brand-sub">Tasks, finances, calendars, journals — everything your home needs, in one place.</p>
-            </div>
-            <div v-else key="signup">
-              <h1 class="brand-headline">Run your home<br />like it runs itself.</h1>
-              <p class="brand-sub">Tasks, budgets, calendars, and more — one calm place for your entire household.</p>
-            </div>
-          </Transition>
-        </div>
-
-        <div class="brand-features">
-          <Transition :name="isSignup ? 'slide-left' : 'slide-right'">
-            <div v-if="!isSignup" key="login-feats" class="brand-feature-list">
-              <div class="brand-feature">
-                <span class="material-symbols-rounded brand-feature-icon">lock</span>
-                <span class="brand-feature-text">Private by default</span>
-              </div>
-              <div class="brand-feature">
-                <span class="material-symbols-rounded brand-feature-icon">cloud_off</span>
-                <span class="brand-feature-text">Works offline</span>
-              </div>
-              <div class="brand-feature">
-                <span class="material-symbols-rounded brand-feature-icon">group</span>
-                <span class="brand-feature-text">Built for families</span>
-              </div>
-            </div>
-            <div v-else key="signup-feats" class="brand-feature-list">
-              <div class="brand-feature">
-                <span class="material-symbols-rounded brand-feature-icon">schedule</span>
-                <span class="brand-feature-text">Set up in 2 minutes</span>
-              </div>
-              <div class="brand-feature">
-                <span class="material-symbols-rounded brand-feature-icon">devices</span>
-                <span class="brand-feature-text">Access anywhere</span>
-              </div>
-              <div class="brand-feature">
-                <span class="material-symbols-rounded brand-feature-icon">shield</span>
-                <span class="brand-feature-text">Your data stays yours</span>
-              </div>
-            </div>
-          </Transition>
+      <div class="auth-form-slot auth-form-slot--login">
+        <div class="form-inner">
+          <LoginPage />
         </div>
       </div>
     </div>
@@ -213,10 +208,6 @@ provide('openLegal', openLegal)
 .form-inner {
   width: 100%;
   max-width: 380px;
-}
-
-.mobile-brand {
-  display: none;
 }
 
 /* ── Sliding door: absolutely positioned, 50% wide, slides left↔right ── */
@@ -432,72 +423,174 @@ provide('openLegal', openLegal)
 
 /* ── Responsive: Mobile ── */
 @media (max-width: 640px) {
-  .auth-door {
-    display: none;
+  /*
+    Layout: [signup (100dvh−56px)] [door 56px] [login (100dvh−56px)]
+    Total = 200dvh − 56px. Viewport = 100dvh.
+    Login active:  translateY(-(100dvh − 56px))  → door at top, login below
+    Signup active: translateY(0)                  → signup above, door at bottom
+  */
+
+  .auth-shell {
+    height: 100dvh;
+    overflow: hidden;
   }
 
+  /* The track: tall vertical strip that slides */
   .auth-forms {
+    display: flex;
     flex-direction: column;
+    height: calc(200dvh - 56px);
+    /* Default (login): shift up so door sits at top + login fills below */
+    transform: translateY(calc(-100dvh + 56px));
+    transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .auth-shell--signup .auth-forms {
+    transform: translateY(0);
   }
 
   .auth-form-slot {
     width: 100%;
-    min-height: 100dvh;
-    padding: var(--space-xl) var(--space-l);
+    min-height: 0;
+    height: calc(100dvh - 56px);
+    flex-shrink: 0;
+    padding: var(--space-l);
+    display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  /* Signup first in visual order */
+  .auth-form-slot--signup {
+    order: 0;
+  }
+
+  .auth-form-slot--login {
+    order: 2;
   }
 
   .form-inner {
-    max-width: 400px;
+    max-width: 380px;
+    width: 100%;
   }
 
-  /* Show only the active form — with entry animation */
-  .auth-form-slot--signup {
-    display: none;
-  }
-
-  .auth-shell--signup .auth-form-slot--login {
-    display: none;
-  }
-
-  .auth-shell--signup .auth-form-slot--signup {
-    display: flex;
-  }
-
-  .auth-form-slot--login,
-  .auth-shell--signup .auth-form-slot--signup {
-    animation: mobile-form-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-
-  .mobile-brand {
-    display: flex;
-    margin-bottom: var(--space-xl);
-  }
-
-  .mobile-logo {
-    display: flex;
+  /* ── Door: inline in the flow, thin bar ── */
+  .auth-door {
+    position: relative;
+    width: 100%;
+    height: 56px;
+    flex-shrink: 0;
+    order: 1;
+    top: auto;
+    left: auto;
+    padding: 0 var(--space-l);
     align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    background: var(--color-brand-primary);
-    color: var(--color-fg-on-brand);
-    font-weight: var(--font-weight-bold);
-    font-size: 20px;
-    font-family: var(--font-family);
-    border-radius: var(--radius-m);
+    justify-content: flex-start;
+    background: linear-gradient(135deg, #49662E 0%, #3a5422 100%);
+    z-index: 2;
+    transition: background 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .auth-door::before {
+    display: none;
+  }
+
+  .auth-shell--signup .auth-door {
+    transform: none;
+    background: linear-gradient(135deg, #2D7A6F 0%, #21605a 100%);
+  }
+
+  /* ── Door content: horizontal logo + tagline ── */
+  .door-inner {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-m);
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .brand-logo {
+    width: 34px;
+    height: 34px;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+
+  .brand-name {
+    font: var(--text-subtitle-1);
+    color: var(--door-fg);
+    letter-spacing: var(--tracking-normal);
+  }
+
+  /* One-liner divider dot + tagline after the name */
+  .brand-name::after {
+    content: ' · Your household, organized.';
+    font: var(--text-body-2);
+    font-weight: var(--font-weight-regular);
+    color: var(--door-fg-soft);
+  }
+
+  .auth-shell--signup .brand-name::after {
+    content: ' · Run your home like it runs itself.';
+  }
+
+  .brand-copy,
+  .brand-features {
+    display: none;
+  }
+
+  /* ── Staggered form field entrance ── */
+  .auth-form-slot :deep(.auth-header) {
+    animation: m-field-in 0.5s var(--easing-spring) 0.1s both;
+  }
+
+  .auth-form-slot :deep(.auth-form > :nth-child(1)) {
+    animation: m-field-in 0.45s var(--easing-spring) 0.18s both;
+  }
+
+  .auth-form-slot :deep(.auth-form > :nth-child(2)) {
+    animation: m-field-in 0.45s var(--easing-spring) 0.24s both;
+  }
+
+  .auth-form-slot :deep(.auth-form > :nth-child(3)) {
+    animation: m-field-in 0.45s var(--easing-spring) 0.3s both;
+  }
+
+  .auth-form-slot :deep(.auth-form > :nth-child(4)) {
+    animation: m-field-in 0.45s var(--easing-spring) 0.36s both;
+  }
+
+  .auth-form-slot :deep(.auth-form > :nth-child(5)) {
+    animation: m-field-in 0.45s var(--easing-spring) 0.42s both;
+  }
+
+  .auth-form-slot :deep(.auth-form > :nth-child(6)) {
+    animation: m-field-in 0.45s var(--easing-spring) 0.48s both;
+  }
+
+  .auth-form-slot :deep(.auth-footer) {
+    animation: m-field-in 0.45s var(--easing-spring) 0.53s both;
   }
 }
 
-@keyframes mobile-form-enter {
+/* ── Mobile keyframes ── */
+@keyframes m-field-in {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .auth-form-slot :deep(.auth-header),
+  .auth-form-slot :deep(.auth-form > *),
+  .auth-form-slot :deep(.auth-footer) {
+    animation: none !important;
   }
 }
 </style>

@@ -450,7 +450,7 @@ watch(() => appStore.isPersonal, loadData)
     <!-- Header -->
     <PageHeader title="Calendar" subtitle="Your schedule at a glance">
       <template #actions>
-        <div class="cal-nav">
+        <div class="cal-nav cal-nav--desktop">
           <button class="cal-nav__btn" aria-label="Previous month" @click="prevMonth">
             <span class="material-symbols-rounded">chevron_left</span>
           </button>
@@ -463,12 +463,26 @@ watch(() => appStore.isPersonal, loadData)
           </button>
           <span class="cal-nav__label">{{ monthLabel }}</span>
         </div>
-        <SButton size="sm" @click="openCreateDrawer">
-          <span class="material-symbols-rounded" style="font-size: 18px; margin-right: 4px;">add</span>
-          Add Event
-        </SButton>
+        <SButton @click="openCreateDrawer">Add Event</SButton>
       </template>
     </PageHeader>
+
+    <!-- Mobile-only month nav (below header, above grid) -->
+    <div class="cal-nav cal-nav--mobile">
+      <span class="cal-nav__label">{{ monthLabel }}</span>
+      <div class="cal-nav__controls">
+        <button class="cal-nav__btn" aria-label="Previous month" @click="prevMonth">
+          <span class="material-symbols-rounded">chevron_left</span>
+        </button>
+        <button class="cal-nav__today" @click="goToToday">
+          <span class="material-symbols-rounded cal-nav__today-icon">today</span>
+          Today
+        </button>
+        <button class="cal-nav__btn" aria-label="Next month" @click="nextMonth">
+          <span class="material-symbols-rounded">chevron_right</span>
+        </button>
+      </div>
+    </div>
 
     <!-- Error -->
     <ErrorBanner
@@ -784,6 +798,11 @@ watch(() => appStore.isPersonal, loadData)
   display: flex;
   align-items: center;
   gap: var(--space-xs);
+}
+
+/* Mobile nav hidden on desktop; desktop nav hidden on mobile */
+.cal-nav--mobile {
+  display: none;
 }
 
 .cal-nav__btn {
@@ -1255,18 +1274,29 @@ watch(() => appStore.isPersonal, loadData)
 
 /* ── Responsive: Mobile ── */
 @media (max-width: 640px) {
-  .cal-nav {
-    flex-wrap: wrap;
-    gap: var(--space-2xs);
+  /* Hide desktop nav, show mobile nav */
+  .cal-nav--desktop {
+    display: none;
   }
 
-  .cal-nav__label {
-    order: -1;
-    width: 100%;
-    text-align: center;
+  .cal-nav--mobile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-s);
+    margin-bottom: var(--space-m);
+  }
+
+  .cal-nav--mobile .cal-nav__label {
     margin-left: 0;
     font: var(--text-body-1);
     font-weight: var(--font-weight-semibold);
+  }
+
+  .cal-nav__controls {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
   }
 
   .cal-grid__header-full {
