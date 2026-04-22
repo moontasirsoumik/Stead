@@ -442,7 +442,7 @@ provide('openLegal', openLegal)
     height: calc(200dvh - 56px);
     /* Default (login): shift up so door sits at top + login fills below */
     transform: translateY(calc(-100dvh + 56px));
-    transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 0.95s cubic-bezier(0.22, 0.68, 0.18, 1);
   }
 
   .auth-shell--signup .auth-forms {
@@ -488,7 +488,7 @@ provide('openLegal', openLegal)
     justify-content: flex-start;
     background: linear-gradient(135deg, #49662E 0%, #3a5422 100%);
     z-index: 2;
-    transition: background 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: background 0.95s cubic-bezier(0.22, 0.68, 0.18, 1);
   }
 
   .auth-door::before {
