@@ -247,6 +247,10 @@ onMounted(async () => {
 
     <PantryTabs />
 
+    <div class="pantry-mobile-actions">
+      <SButton @click="openCreateDrawer">Add Item</SButton>
+    </div>
+
     <div class="stats-bar page-enter" :style="{ '--stagger': 1 }">
       <div class="stats-bar__cell">
         <span class="stats-bar__label">Total Items</span>
@@ -329,6 +333,10 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.pantry-mobile-actions {
+  display: none;
+}
+
 /* ── Stats bar ── */
 .stats-bar {
   display: flex;
@@ -440,6 +448,8 @@ onMounted(async () => {
 }
 
 @media (max-width: 640px) {
+  :deep(.pageheader__actions) { display: none; }
+  .pantry-mobile-actions { display: flex; margin-bottom: var(--space-m); }
   .inv-table__header { display: none; }
   .inv-row {
     grid-template-columns: 1fr 5rem;

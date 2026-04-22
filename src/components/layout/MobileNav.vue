@@ -8,7 +8,7 @@ const appStore = useAppStore()
 
 const householdItems = [
   { to: '/', icon: 'dashboard', label: 'Home' },
-  { to: '/money/expenses', icon: 'account_balance_wallet', label: 'Money' },
+  { to: '/money/expenses', icon: 'account_balance_wallet', label: 'Finances' },
   { to: '/tasks', icon: 'checklist', label: 'Tasks' },
   { to: '/pantry/shopping', icon: 'shopping_cart', label: 'Pantry' },
   { to: '/notes', icon: 'sticky_note_2', label: 'Notes' },
@@ -16,7 +16,7 @@ const householdItems = [
 
 const personalItems = [
   { to: '/', icon: 'dashboard', label: 'Home' },
-  { to: '/money/expenses', icon: 'account_balance_wallet', label: 'Money' },
+  { to: '/money/expenses', icon: 'account_balance_wallet', label: 'Finances' },
   { to: '/tasks', icon: 'checklist', label: 'Tasks' },
   { to: '/habits', icon: 'fitness_center', label: 'Habits' },
   { to: '/wishlist', icon: 'favorite', label: 'Wishlist' },

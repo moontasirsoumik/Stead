@@ -11,6 +11,7 @@ const { signUp, error: authError, loading } = useAuth()
 const name = ref('')
 const email = ref('')
 const password = ref('')
+const passwordFocused = ref(false)
 const agreedToTerms = ref(false)
 
 const openLegal = inject<(doc: 'privacy' | 'terms') => void>('openLegal', () => {})
@@ -62,8 +63,10 @@ async function handleSubmit() {
           v-model="password"
           type="password"
           placeholder="Create a password"
-          hint="Must be at least 6 characters"
+          :hint="passwordFocused ? 'Must be at least 6 characters' : undefined"
           required
+          @focus="passwordFocused = true"
+          @blur="passwordFocused = false"
         >
           <template #prefix>
             <span class="material-symbols-rounded input-icon">lock</span>
