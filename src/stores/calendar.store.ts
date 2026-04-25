@@ -203,6 +203,30 @@ export const useCalendarStore = defineStore('calendar', () => {
     return allMonth.filter((item) => item.date === dateStr)
   }
 
+  /** Get items for a range of dates (inclusive). Spans month boundaries. */
+  function getItemsForDateRange(startDateStr: string, endDateStr: string): CalendarItem[] {
+    const result: CalendarItem[] = []
+    const seen = new Set<string>()
+
+    // Collect unique year-months in range
+    const startParts = startDateStr.split('-').map(Number)
+    const endParts = endDateStr.split('-').map(Number)
+    let y = startParts[0], m = startParts[1]
+    const endY = endParts[0], endM = endParts[1]
+
+    while (y < endY || (y === endY && m <= endM)) {
+      for (const item of getItemsForMonth(y, m)) {
+        if (item.date >= startDateStr && item.date <= endDateStr && !seen.has(item.id)) {
+          seen.add(item.id)
+          result.push(item)
+        }
+      }
+      if (m === 12) { m = 1; y++ } else { m++ }
+    }
+
+    return result.sort((a, b) => a.date.localeCompare(b.date) || (a.time ?? '').localeCompare(b.time ?? ''))
+  }
+
   const eventCount = computed(() => items.value.length)
 
   return {
@@ -215,6 +239,7 @@ export const useCalendarStore = defineStore('calendar', () => {
     remove,
     getItemsForMonth,
     getItemsForDate,
+    getItemsForDateRange,
     eventCount,
   }
 })

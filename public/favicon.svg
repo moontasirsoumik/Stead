@@ -1,4 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
-  <rect width="32" height="32" rx="8" fill="#4A5578"/>
-  <text x="16" y="22" text-anchor="middle" font-family="Plus Jakarta Sans, Segoe UI, system-ui, sans-serif" font-weight="700" font-size="18" fill="white">S</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="47 50 116 96">
+  <!-- Stead favicon — 2D diamond logo with fold bars -->
+  <defs>
+    <clipPath id="wc">
+      <rect x="0" y="61" width="210" height="74" />
+    </clipPath>
+  </defs>
+  <rect x="55" y="58" width="100" height="80" fill="#DDD5C8"/>
+  <rect x="55" y="80" width="100" height="58" fill="#9B5DE5"/>
+  <rect x="55" y="83" width="100" height="55" fill="#2A9D8F"/>
+  <rect x="55" y="58" width="100" height="58" fill="#E9C46A"/>
+  <rect x="55" y="58" width="100" height="55" fill="#264653"/>
+  <rect x="55" y="58" width="55" height="80" fill="#E07A5F" clip-path="url(#wc)"/>
+  <polygon points="110,58 55,98 110,138" fill="#F2CC8F" clip-path="url(#wc)"/>
+  <rect x="100" y="58" width="55" height="80" fill="#3D85C6" clip-path="url(#wc)"/>
+  <polygon points="100,58 155,98 100,138" fill="#81B29A" clip-path="url(#wc)"/>
 </svg>
