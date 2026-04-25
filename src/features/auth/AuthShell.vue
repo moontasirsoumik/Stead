@@ -1,14 +1,26 @@
 <script setup lang="ts">
-import { computed, provide, ref } from 'vue'
+import { computed, onMounted, provide, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import LoginPage from './LoginPage.vue'
 import SignupPage from './SignupPage.vue'
 import LegalOverlay from './LegalPage.vue'
+import SteadHeroAnimation from '@/components/ui/SteadHeroAnimation.vue'
+import SteadLogo from '@/components/ui/SteadLogo.vue'
 
 const route = useRoute()
 const isSignup = computed(() => route.name === 'signup')
 
 const legalDoc = ref<'privacy' | 'terms' | null>(null)
+const animDone = ref(false)
+const isMobile = ref(false)
+
+onMounted(() => {
+  isMobile.value = window.matchMedia('(max-width: 640px)').matches
+})
+
+function onHeroDone() {
+  animDone.value = true
+}
 
 function openLegal(doc: 'privacy' | 'terms') {
   legalDoc.value = doc
@@ -22,7 +34,7 @@ provide('openLegal', openLegal)
 </script>
 
 <template>
-  <div :class="['auth-shell', { 'auth-shell--signup': isSignup }]">
+  <div :class="['auth-shell', { 'auth-shell--signup': isSignup, 'auth-shell--anim-done': animDone }]">
     <!-- Forms + door: all in one container for mobile vertical slide -->
     <div class="auth-forms">
       <div class="auth-form-slot auth-form-slot--signup">
@@ -32,14 +44,20 @@ provide('openLegal', openLegal)
       </div>
 
       <!-- Sliding door (brand panel) -->
-      <div class="auth-door">
+      <div :class="['auth-door', { 'auth-door--settled': animDone }]">
         <div class="door-inner">
-          <div class="brand-top">
-            <div class="brand-logo">S</div>
-            <span class="brand-name">Stead</span>
+          <!-- Mobile-only: compact brand bar (visible after animation settles) -->
+          <div :class="['mobile-brand', { 'mobile-brand--visible': animDone }]">
+            <SteadLogo :size="32" />
+            <span class="mobile-brand-name">Stead</span>
+            <span class="mobile-brand-tagline">Your household, organized.</span>
           </div>
 
-          <div class="brand-copy">
+          <div class="brand-hero">
+            <SteadHeroAnimation :mobile="isMobile" @done="onHeroDone" />
+          </div>
+
+          <div :class="['brand-copy', { 'brand-copy--visible': animDone }]">
             <Transition :name="isSignup ? 'slide-left' : 'slide-right'">
               <div v-if="!isSignup" key="login">
                 <h1 class="brand-headline">Your household,<br />beautifully organized.</h1>
@@ -52,7 +70,7 @@ provide('openLegal', openLegal)
             </Transition>
           </div>
 
-          <div class="brand-features">
+          <div :class="['brand-features', { 'brand-features--visible': animDone }]">
             <Transition :name="isSignup ? 'slide-left' : 'slide-right'">
               <div v-if="!isSignup" key="login-feats" class="brand-feature-list">
                 <div class="brand-feature">
@@ -257,40 +275,36 @@ provide('openLegal', openLegal)
   max-width: 400px;
   display: flex;
   flex-direction: column;
-  gap: var(--space-2xl);
+  align-items: flex-start;
+  gap: var(--space-l);
 }
 
-.brand-top {
+.brand-hero {
   display: flex;
   align-items: center;
-  gap: var(--space-s);
+  justify-content: flex-start;
 }
 
-.brand-logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: var(--door-logo-bg);
-  border: 1px solid var(--door-border);
-  border-radius: var(--radius-m);
-  color: var(--door-fg);
-  font-weight: var(--font-weight-bold);
-  font-size: 18px;
-  font-family: var(--font-family);
-}
-
-.brand-name {
-  font: var(--text-title-2);
-  color: var(--door-fg-muted);
-  letter-spacing: var(--tracking-wide);
+/* Mobile-only brand bar — hidden on desktop/tablet */
+.mobile-brand {
+  display: none;
 }
 
 .brand-copy {
   position: relative;
-  min-height: 120px;
+  min-height: 0;
   overflow: hidden;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.brand-copy--visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
 .brand-headline {
@@ -312,8 +326,19 @@ provide('openLegal', openLegal)
   position: relative;
   padding-top: var(--space-m);
   border-top: 1px solid var(--door-divider);
-  min-height: 100px;
+  min-height: 0;
   overflow: hidden;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s,
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+  pointer-events: none;
+}
+
+.brand-features--visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
 .brand-feature-list {
@@ -410,6 +435,10 @@ provide('openLegal', openLegal)
     display: none;
   }
 
+  .brand-hero {
+    display: none;
+  }
+
   .brand-features {
     min-height: auto;
   }
@@ -424,10 +453,11 @@ provide('openLegal', openLegal)
 /* ── Responsive: Mobile ── */
 @media (max-width: 640px) {
   /*
-    Layout: [signup (100dvh−56px)] [door 56px] [login (100dvh−56px)]
-    Total = 200dvh − 56px. Viewport = 100dvh.
-    Login active:  translateY(-(100dvh − 56px))  → door at top, login below
-    Signup active: translateY(0)                  → signup above, door at bottom
+    Mobile layout:
+    Phase 1 (animation): Door is 100dvh, covers entire viewport.
+      Forms track offset hides signup above, door fills screen.
+    Phase 2 (settled): Door shrinks to 56px, login form slides up.
+      Track: [signup 100dvh-56px] [door 56px] [login 100dvh-56px]
   */
 
   .auth-shell {
@@ -439,11 +469,22 @@ provide('openLegal', openLegal)
   .auth-forms {
     display: flex;
     flex-direction: column;
-    height: calc(200dvh - 56px);
-    /* Default (login): shift up so door sits at top + login fills below */
+    /*
+     * During animation: signup=calc(100dvh-56px), door=100dvh, login=calc(100dvh-56px)
+     * Need to skip signup to show door: translateY(-(100dvh - 56px))
+     * Door top = viewport top + 56px. Door is 100dvh tall. Close enough.
+     * (The 56px gap at top won't show because auth-shell has overflow:hidden
+     *  and the door has the same green background as the shell bg we set.)
+     */
     transform: translateY(calc(-100dvh + 56px));
     transition: transform 0.95s cubic-bezier(0.22, 0.68, 0.18, 1);
   }
+
+  /*
+   * After animation: door=56px. Track is now standard.
+   * Same transform value works because door shrank from 100dvh to 56px,
+   * eating 100dvh-56px from the track. Now login slot aligns below door.
+   */
 
   .auth-shell--signup .auth-forms {
     transform: translateY(0);
@@ -474,23 +515,7 @@ provide('openLegal', openLegal)
     width: 100%;
   }
 
-  /* ── Door: inline in the flow, thin bar ── */
-  .auth-door {
-    position: relative;
-    width: 100%;
-    height: 56px;
-    flex-shrink: 0;
-    order: 1;
-    top: auto;
-    left: auto;
-    padding: 0 var(--space-l);
-    align-items: center;
-    justify-content: flex-start;
-    background: linear-gradient(135deg, #49662E 0%, #3a5422 100%);
-    z-index: 2;
-    transition: background 0.95s cubic-bezier(0.22, 0.68, 0.18, 1);
-  }
-
+  /* ── Door: starts full-screen for animation, settled state below ── */
   .auth-door::before {
     display: none;
   }
@@ -500,43 +525,107 @@ provide('openLegal', openLegal)
     background: linear-gradient(135deg, #2D7A6F 0%, #21605a 100%);
   }
 
-  /* ── Door content: horizontal logo + tagline ── */
+  /* ── Door content: centered during animation, row when settled ── */
   .door-inner {
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: var(--space-m);
     max-width: 100%;
     width: 100%;
+    height: 100%;
+    transition: all 0.6s ease;
   }
 
-  .brand-logo {
-    width: 34px;
-    height: 34px;
-    font-size: 15px;
-    flex-shrink: 0;
-  }
-
-  .brand-name {
-    font: var(--text-subtitle-1);
-    color: var(--door-fg);
-    letter-spacing: var(--tracking-normal);
-  }
-
-  /* One-liner divider dot + tagline after the name */
-  .brand-name::after {
-    content: ' · Your household, organized.';
-    font: var(--text-body-2);
-    font-weight: var(--font-weight-regular);
-    color: var(--door-fg-soft);
-  }
-
-  .auth-shell--signup .brand-name::after {
-    content: ' · Run your home like it runs itself.';
+  .auth-door--settled .door-inner {
+    flex-direction: row;
+    justify-content: flex-start;
+    height: auto;
   }
 
   .brand-copy,
   .brand-features {
     display: none;
+  }
+
+  /* ── Mobile brand bar: hidden until door settles ── */
+  .mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    pointer-events: none;
+  }
+
+  .mobile-brand--visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .mobile-brand-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .mobile-brand-tagline {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.55);
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  /* Dot separator between name and tagline */
+  .mobile-brand-name::after {
+    content: ' ·';
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  /* ── Door: starts full-screen, shrinks to 56px bar after animation ── */
+  .auth-door {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: 100%;
+    height: 100dvh;
+    flex-shrink: 0;
+    order: 1;
+    padding: 0 var(--space-l);
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #49662E 0%, #3a5422 100%);
+    z-index: 2;
+    transition: height 0.8s cubic-bezier(0.22, 0.68, 0.18, 1);
+    will-change: height;
+    overflow: hidden;
+  }
+
+  .auth-door--settled {
+    height: 56px;
+  }
+
+  /* Hide animation content once door is fully settled */
+  .auth-door--settled .brand-hero {
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    transition: none; /* Instant — prevent visible jump when pulled from flex flow */
+  }
+
+  .brand-hero {
+    display: flex !important;
+    transition: opacity 0.3s ease;
+    /* Allow animation to overflow within the full-screen door */
+    overflow: visible;
+  }
+
+  .brand-hero :deep(.hero-container) {
+    height: 220px; /* Full scene height on mobile so 3D house isn't clipped */
   }
 
   /* ── Staggered form field entrance ── */

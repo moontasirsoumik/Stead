@@ -327,6 +327,7 @@
 | P14-01 | Write unit tests (data services, stores, utils) | ✅ Done | `src/utils/__tests__/format.test.ts`, `src/services/data/__tests__/base.data.test.ts` |
 | P14-02 | Write E2E tests (critical flows) | ⬜ Not Started | `tests/e2e/` |
 | P14-03 | Accessibility audit | ✅ Done | SButton, SIconButton, SInput a11y fixes |
+| P14-LP-01 | Tighten landing prototype logo lockup | ✅ Done | `logo-origami.html` |
 
 ---
 

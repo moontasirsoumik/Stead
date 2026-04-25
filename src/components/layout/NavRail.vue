@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { useAppStore } from '@/stores/app.store'
 import NavItem from './NavItem.vue'
+import SteadLogo from '@/components/ui/SteadLogo.vue'
 
 const props = defineProps<{
   collapsed?: boolean
@@ -89,7 +90,7 @@ const extraItems = computed(() =>
   <div :class="['rail', { 'rail--personal': appStore.isPersonal, 'rail--expanded': expanded || props.isMobile }]">
     <!-- Brand -->
     <RouterLink to="/" class="rail__brand" title="Stead Home" @click="$emit('navigate')">
-      <span class="rail__monogram">S</span>
+      <SteadLogo :size="20" class="rail__monogram" />
       <span class="rail__brand-label">Stead</span>
     </RouterLink>
 
@@ -190,8 +191,7 @@ const extraItems = computed(() =>
   height: 36px;
   flex-shrink: 0;
   text-decoration: none;
-  padding: 0 12px;
-  align-self: stretch;
+  padding-left: 6px;
   margin: 0 0 6px;
   overflow: hidden;
 }
@@ -200,14 +200,9 @@ const extraItems = computed(() =>
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
+  width: 32px;    /* matches NavItem pill */
   min-width: 32px;
   height: 32px;
-  background: var(--color-primary-container);
-  color: var(--color-on-primary-container);
-  font-weight: var(--font-weight-bold);
-  font-size: 14px;
-  border-radius: var(--radius-s);
 }
 
 .rail__brand-label {

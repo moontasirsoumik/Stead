@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import SIconButton from '@/components/ui/SIconButton.vue'
 import SAvatar from '@/components/ui/SAvatar.vue'
+import SteadLogo from '@/components/ui/SteadLogo.vue'
 
 defineEmits<{
   'toggle-nav': []
@@ -17,7 +18,7 @@ defineEmits<{
       </SIconButton>
 
       <RouterLink to="/" class="header__brand">
-        <span class="header__logo" aria-hidden="true">S</span>
+        <SteadLogo :size="28" />
         <span class="header__title">Stead</span>
       </RouterLink>
     </div>
@@ -71,18 +72,7 @@ defineEmits<{
   text-decoration: none;
 }
 
-.header__logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: var(--color-brand-primary);
-  color: var(--color-fg-on-brand);
-  font-weight: 700;
-  font-size: 13px;
-  border-radius: var(--radius-s);
-}
+
 
 .header__title {
   font: var(--text-title-3);

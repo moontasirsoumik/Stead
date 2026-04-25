@@ -261,7 +261,7 @@ onMounted(() => {
       <div v-else-if="recentExpenses.length" class="dash-table">
         <div v-for="exp in recentExpenses" :key="exp.id" class="dash-row">
           <span class="dash-row__name">{{ truncate(exp.description, 30) }}</span>
-          <span class="dash-row__badge"><SBadge v-if="exp.category" variant="default" size="sm">{{ exp.category }}</SBadge></span>
+          <span class="dash-row__badge"><SBadge variant="default" size="sm">{{ exp.category }}</SBadge></span>
           <span class="dash-row__trailing">{{ formatRelativeDate(exp.date) }}</span>
           <span class="dash-row__amount">{{ formatCents(exp.amount) }}</span>
         </div>
