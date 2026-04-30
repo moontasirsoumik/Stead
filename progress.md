@@ -328,6 +328,7 @@
 | P14-02 | Write E2E tests (critical flows) | ⬜ Not Started | `tests/e2e/` |
 | P14-03 | Accessibility audit | ✅ Done | SButton, SIconButton, SInput a11y fixes |
 | P14-LP-01 | Tighten landing prototype logo lockup | ✅ Done | `logo-origami.html` |
+| P14-09 | Redesign Finance Overview page | ✅ Done | `src/features/money/pages/FinanceOverviewPage.vue` |
 
 ---
 

@@ -154,7 +154,8 @@ onMounted(async () => {
       <LoadingSkeleton :lines="5" />
     </div>
 
-    <div v-else-if="budgetCards.length" class="budgets-table">
+    <template v-else-if="budgetCards.length">
+      <div class="budgets-table">
       <div class="budgets-table__header">
         <span class="budgets-table__th">Category</span>
         <span class="budgets-table__th budgets-table__th--center">Progress</span>
@@ -190,6 +191,7 @@ onMounted(async () => {
         <div class="budget-row__percent">{{ Math.round(card.percent) }}%</div>
       </div>
     </div>
+    </template>
 
     <div v-else class="empty-section page-enter" :style="{ '--stagger': 2 }">
       <EmptyState
@@ -231,6 +233,7 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+/* ── Budget Table ── */
 .budgets-table {
   display: flex;
   flex-direction: column;

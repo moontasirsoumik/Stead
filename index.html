@@ -11,8 +11,8 @@
     <meta property="og:title" content="Stead — Household Management" />
     <meta property="og:description" content="Tasks, finances, calendars, journals — everything your home needs, in one calm place." />
     <meta property="og:image" content="/og-image.png" />
-    <meta property="og:image:width" content="600" />
-    <meta property="og:image:height" content="600" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Stead — Your household, beautifully organized" />
 
     <!-- Twitter Card -->
@@ -22,10 +22,18 @@
     <meta name="twitter:image" content="/og-image.png" />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <!-- Self-hosted fonts: preload critical subsets -->
+    <link rel="preload" href="/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/material-symbols-rounded.woff2" as="font" type="font/woff2" crossorigin />
     <title>Stead</title>
+    <script>
+      // Resolve theme synchronously before first paint
+      (function() {
+        var pref = localStorage.getItem('stead-theme-preference') || 'system';
+        var isDark = pref === 'dark' || (pref === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (isDark) document.documentElement.dataset.theme = 'dark';
+      })();
+    </script>
   </head>
   <body>
     <div id="app"></div>

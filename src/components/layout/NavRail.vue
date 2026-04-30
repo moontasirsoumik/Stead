@@ -2,7 +2,6 @@
 import { computed, ref } from 'vue'
 import { useAppStore } from '@/stores/app.store'
 import NavItem from './NavItem.vue'
-import SteadLogo from '@/components/ui/SteadLogo.vue'
 
 const props = defineProps<{
   collapsed?: boolean
@@ -88,12 +87,6 @@ const extraItems = computed(() =>
 
 <template>
   <div :class="['rail', { 'rail--personal': appStore.isPersonal, 'rail--expanded': expanded || props.isMobile }]">
-    <!-- Brand -->
-    <RouterLink to="/" class="rail__brand" title="Stead Home" @click="$emit('navigate')">
-      <SteadLogo :size="20" class="rail__monogram" />
-      <span class="rail__brand-label">Stead</span>
-    </RouterLink>
-
     <!-- Main nav -->
     <nav class="rail__nav" aria-label="Main navigation">
       <div class="rail__group">
@@ -181,45 +174,6 @@ const extraItems = computed(() =>
 /* ── Expanded state ── */
 .rail--expanded {
   width: 200px;
-}
-
-/* ── Brand ── */
-.rail__brand {
-  display: flex;
-  align-items: center;
-  gap: var(--space-s);
-  height: 36px;
-  flex-shrink: 0;
-  text-decoration: none;
-  padding-left: 6px;
-  margin: 0 0 6px;
-  overflow: hidden;
-}
-
-.rail__monogram {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;    /* matches NavItem pill */
-  min-width: 32px;
-  height: 32px;
-}
-
-.rail__brand-label {
-  font: var(--text-body-1);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-nav-fg);
-  white-space: nowrap;
-  width: 0;
-  opacity: 0;
-  overflow: hidden;
-  transition: opacity var(--duration-fast) var(--easing-standard),
-    width var(--duration-normal) var(--easing-standard);
-}
-
-.rail--expanded .rail__brand-label {
-  width: auto;
-  opacity: 1;
 }
 
 /* ── Nav ── */

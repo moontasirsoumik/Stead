@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ref, onMounted, onUpdated } from 'vue'
+
 export type BadgeVariant = 'default' | 'brand' | 'success' | 'warning' | 'error' | 'info'
 export type BadgeSize = 'sm' | 'md'
 
@@ -12,10 +14,20 @@ withDefaults(
     size: 'md',
   },
 )
+
+const badgeEl = ref<HTMLElement | null>(null)
+const isEmpty = ref(false)
+
+function checkEmpty() {
+  isEmpty.value = !badgeEl.value?.textContent?.trim()
+}
+
+onMounted(checkEmpty)
+onUpdated(checkEmpty)
 </script>
 
 <template>
-  <span :class="['sbadge', `sbadge--${variant}`, `sbadge--${size}`]">
+  <span ref="badgeEl" :class="['sbadge', `sbadge--${variant}`, `sbadge--${size}`, { 'sbadge--empty': isEmpty }]">
     <slot />
   </span>
 </template>
@@ -72,5 +84,12 @@ withDefaults(
 .sbadge--info {
   background: var(--color-info-bg);
   color: var(--color-info);
+}
+
+.sbadge--empty {
+  background: transparent;
+  border-color: transparent;
+  color: transparent;
+  pointer-events: none;
 }
 </style>

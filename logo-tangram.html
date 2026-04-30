@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stead — Tangram Logo Variations</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    background: #F4F4F2;
+    color: #1A1D26;
+    padding: 48px 24px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 800;
+    color: #4A5578;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #787D8C;
+    font-size: 14px;
+    margin-bottom: 48px;
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+  }
+
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+
+  .controls button {
+    padding: 8px 20px;
+    border: 1px solid #E8E8E6;
+    border-radius: 8px;
+    background: #FAFAF8;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: #555968;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .controls button:hover { border-color: #4A5578; color: #4A5578; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    max-width: 1300px;
+    margin: 0 auto;
+  }
+
+  .card {
+    background: #FAFAF8;
+    border: 1px solid #E8E8E6;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 12px 18px;
+    gap: 14px;
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: pointer;
+  }
+
+  .card:hover {
+    border-color: #4A5578;
+    transform: translateY(-2px);
+  }
+
+  .logo-wrap {
+    width: 96px;
+    height: 96px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-wrap svg { width: 100%; height: 100%; }
+
+  .label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #555968;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  .num { font-size: 10px; color: #A8ABB4; font-weight: 700; }
+
+  .idea {
+    font-size: 10px;
+    color: #787D8C;
+    font-weight: 400;
+    font-style: italic;
+    display: block;
+    margin-top: 2px;
+  }
+
+  .section-label {
+    grid-column: 1 / -1;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #787D8C;
+    padding: 16px 0 0;
+    border-top: 1px solid #E8E8E6;
+    margin-top: 8px;
+  }
+
+  .section-label:first-child { border-top: none; margin-top: 0; }
+
+  body.dark { background: #1A1D26; }
+  body.dark .card { background: #262C40; border-color: #363D52; }
+  body.dark .card:hover { border-color: #6B7AA0; }
+  body.dark .label { color: #C8CAD0; }
+  body.dark .idea { color: #787D8C; }
+  body.dark .num { color: #555968; }
+  body.dark .section-label { color: #555968; border-color: #363D52; }
+  body.dark .subtitle { color: #555968; }
+  body.dark h1 { color: #8B96B8; }
+  body.dark .controls button { background: #262C40; border-color: #363D52; color: #787D8C; }
+
+  body.white { background: #FFFFFF; }
+  body.white .card { background: #FFFFFF; border-color: #EDEDEB; }
+</style>
+</head>
+<body>
+
+<h1>Stead — Tangram Variations</h1>
+<p class="subtitle">The core idea: irregular geometric pieces that tessellate into a unified whole — "many parts, one home." 30 variations across color, composition, and form.</p>
+
+<div class="controls">
+  <button onclick="document.body.className=''">Light</button>
+  <button onclick="document.body.className='white'">White</button>
+  <button onclick="document.body.className='dark'">Dark</button>
+</div>
+
+<div class="grid">
+
+  <!-- ═══ BRAND INDIGO COMPOSITIONS ═══ -->
+  <div class="section-label">Brand Indigo — Composition Variations</div>
+
+  <!-- 1. Settle (reference) -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="12,12 48,12 12,48" fill="#4A5578"/>
+        <polygon points="48,12 84,12 84,48" fill="#3D4868"/>
+        <polygon points="12,48 12,84 30,66" fill="#6B7AA0"/>
+        <polygon points="12,84 48,84 30,66" fill="#8B96B8"/>
+        <polygon points="48,12 48,48 30,66 12,48" fill="#DDE0ED"/>
+        <polygon points="48,48 84,48 84,84 48,84" fill="#ECEEF5"/>
+        <polygon points="48,12 84,48 48,48" fill="#555968"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">01</span><br>Settle<span class="idea">Reference — pieces fill a square</span></span>
+  </div>
+
+  <!-- 2. Diamond Tilt -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <g transform="rotate(45 48 48)">
+          <polygon points="18,18 48,18 18,48" fill="#4A5578"/>
+          <polygon points="48,18 78,18 78,48" fill="#3D4868"/>
+          <polygon points="18,48 18,78 33,63" fill="#6B7AA0"/>
+          <polygon points="18,78 48,78 33,63" fill="#8B96B8"/>
+          <polygon points="48,18 48,48 33,63 18,48" fill="#DDE0ED"/>
+          <polygon points="48,48 78,48 78,78 48,78" fill="#ECEEF5"/>
+          <polygon points="48,18 78,48 48,48" fill="#555968"/>
+        </g>
+      </svg>
+    </div>
+    <span class="label"><span class="num">02</span><br>Diamond Tilt<span class="idea">Rotated 45° — dynamic energy</span></span>
+  </div>
+
+  <!-- 3. Exploded Drift -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="6,4 38,7 9,38" fill="#4A5578"/>
+        <polygon points="54,3 90,8 87,42" fill="#3D4868"/>
+        <polygon points="3,52 5,84 22,68" fill="#6B7AA0"/>
+        <polygon points="8,90 42,87 26,70" fill="#8B96B8"/>
+        <polygon points="40,11 43,46 27,62 11,44" fill="#DDE0ED"/>
+        <rect x="50" y="48" width="38" height="38" fill="#ECEEF5" transform="rotate(3 69 67)"/>
+        <polygon points="46,9 82,44 48,43" fill="#555968"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">03</span><br>Exploded Drift<span class="idea">Pieces drifting apart — before order</span></span>
+  </div>
+
+  <!-- 4. Pinwheel -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="48,48 48,10 10,10" fill="#4A5578"/>
+        <polygon points="48,48 86,10 86,48" fill="#3D4868"/>
+        <polygon points="48,48 86,86 48,86" fill="#6B7AA0"/>
+        <polygon points="48,48 10,86 10,48" fill="#8B96B8"/>
+        <polygon points="48,10 86,10 48,48" fill="#DDE0ED"/>
+        <polygon points="86,48 86,86 48,48" fill="#ECEEF5"/>
+        <polygon points="48,86 10,86 48,48" fill="#C8CAD0"/>
+        <polygon points="10,48 10,10 48,48" fill="#E2E3E6"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">04</span><br>Pinwheel<span class="idea">Eight triangles spinning from center</span></span>
+  </div>
+
+  <!-- 5. Staircase -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="8,8 32,8 8,32" fill="#4A5578"/>
+        <polygon points="32,8 56,8 32,32" fill="#3D4868"/>
+        <polygon points="32,32 56,32 32,56" fill="#6B7AA0"/>
+        <polygon points="56,32 80,32 56,56" fill="#8B96B8"/>
+        <polygon points="56,56 80,56 56,80" fill="#555968"/>
+        <rect x="8" y="32" width="24" height="24" fill="#DDE0ED"/>
+        <rect x="32" y="56" width="24" height="24" fill="#ECEEF5"/>
+        <rect x="56" y="80" width="24" height="8" rx="2" fill="#C8CAD0"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">05</span><br>Staircase<span class="idea">Ascending steps — structure building upward</span></span>
+  </div>
+
+  <!-- ═══ WARM PALETTES ═══ -->
+  <div class="section-label">Warm Palettes</div>
+
+  <!-- 6. Terracotta -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="12,12 48,12 12,48" fill="#9C6644"/>
+        <polygon points="48,12 84,12 84,48" fill="#7F5539"/>
+        <polygon points="12,48 12,84 30,66" fill="#C08B6E"/>
+        <polygon points="12,84 48,84 30,66" fill="#DDB892"/>
+        <polygon points="48,12 48,48 30,66 12,48" fill="#EDE0D4"/>
+        <polygon points="48,48 84,48 84,84 48,84" fill="#F5EBE0"/>
+        <polygon points="48,12 84,48 48,48" fill="#6B4226"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">06</span><br>Terracotta<span class="idea">Warm clay — handmade, grounded</span></span>
+  </div>
+
+  <!-- 7. Amber & Slate Split -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="12,48 48,12 48,48" fill="#D4A03C"/>
+        <polygon points="48,12 84,48 48,48" fill="#B8860B"/>
+        <polygon points="12,48 48,48 48,84" fill="#4A5578"/>
+        <polygon points="48,48 84,48 48,84" fill="#3D4868"/>
+        <polygon points="12,48 12,12 48,12" fill="#F0D78C"/>
+        <polygon points="48,84 84,48 84,84" fill="#6B7AA0"/>
+        <circle cx="48" cy="48" r="4" fill="#FAFAF8"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">07</span><br>Amber & Slate<span class="idea">Warm meets cool at the center</span></span>
+  </div>
+
+  <!-- 8. Embers -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="12,12 48,12 12,48" fill="#2C1810"/>
+        <polygon points="48,12 84,12 84,48" fill="#5C2018"/>
+        <polygon points="48,12 84,48 48,48" fill="#8B3A2A"/>
+        <polygon points="48,12 48,48 30,66 12,48" fill="#C45A3C"/>
+        <polygon points="12,48 12,84 30,66" fill="#E07B54"/>
+        <polygon points="12,84 48,84 30,66" fill="#F0A06C"/>
+        <polygon points="48,48 84,48 84,84 48,84" fill="#F8D0A8"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">08</span><br>Embers<span class="idea">Dark coal to glowing fire — hearth warmth</span></span>
+  </div>
+
+  <!-- 9. Golden Hour -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="12,12 48,12 12,48" fill="#4A5578"/>
+        <polygon points="48,12 84,12 84,48" fill="#6E5A82"/>
+        <polygon points="12,48 12,84 30,66" fill="#9C6B8A"/>
+        <polygon points="12,84 48,84 30,66" fill="#C8846E"/>
+        <polygon points="48,12 48,48 30,66 12,48" fill="#E6A670"/>
+        <polygon points="48,48 84,48 84,84 48,84" fill="#F4D4A0"/>
+        <polygon points="48,12 84,48 48,48" fill="#3D3868"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">09</span><br>Golden Hour<span class="idea">Indigo to amber — dusk homecoming</span></span>
+  </div>
+
+  <!-- 10. Desert Sand -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="8,48 48,8 48,48" fill="#C2956B"/>
+        <polygon points="48,8 88,48 48,48" fill="#A67B5B"/>
+        <polygon points="48,48 88,48 88,88" fill="#8B6B4A"/>
+        <polygon points="8,48 48,48 48,88" fill="#D4B896"/>
+        <polygon points="48,88 88,88 48,48" fill="#E8D5BE"/>
+        <polygon points="8,48 8,88 48,88" fill="#F0E6D8"/>
+        <rect x="42" y="42" width="12" height="12" rx="2" fill="#6B4226"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">10</span><br>Desert Sand<span class="idea">Sun-baked warmth — shelter from elements</span></span>
+  </div>
+
+  <!-- ═══ COOL / OCEAN PALETTES ═══ -->
+  <div class="section-label">Cool / Ocean Palettes</div>
+
+  <!-- 11. Deep Current -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="12,12 48,12 12,48" fill="#1B4965"/>
+        <polygon points="48,12 84,12 84,48" fill="#2D6A8F"/>
+        <polygon points="12,48 12,84 30,66" fill="#3A8FB7"/>
+        <polygon points="12,84 48,84 30,66" fill="#62B6CB"/>
+        <polygon points="48,12 48,48 30,66 12,48" fill="#BEE9E8"/>
+        <polygon points="48,48 84,48 84,84 48,84" fill="#E0FBFC"/>
+        <polygon points="48,12 84,48 48,48" fill="#144B6A"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">11</span><br>Deep Current<span class="idea">Ocean depth to surface — structure beneath</span></span>
+  </div>
+
+  <!-- 12. Glacier -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="48,8 84,44 48,44" fill="#4A5578"/>
+        <polygon points="48,8 12,44 48,44" fill="#6B7AA0"/>
+        <polygon points="12,44 36,84 48,44" fill="#8AAFC8"/>
+        <polygon points="48,44 60,84 84,44" fill="#A8D0E6"/>
+        <polygon points="36,84 60,84 48,44" fill="#D4E8F4"/>
+        <polygon points="12,44 12,84 36,84" fill="#E8F2F8"/>
+        <polygon points="60,84 84,84 84,44" fill="#F0F6FA"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">12</span><br>Glacier<span class="idea">Crystalline — cold precision, sharp geometry</span></span>
+  </div>
+
+  <!-- 13. Tidal Teal -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="12,12 48,12 12,48" fill="#1A535C"/>
+        <polygon points="48,12 84,12 84,48" fill="#4ECDC4"/>
+        <polygon points="12,48 12,84 30,66" fill="#2E8B7A"/>
+        <polygon points="12,84 48,84 30,66" fill="#7EDCD2"/>
+        <rect x="48" y="48" width="36" height="36" fill="#C7F0EC"/>
+        <polygon points="48,12 48,48 30,66 12,48" fill="#A8E6CF"/>
+        <polygon points="48,12 84,48 48,48" fill="#1A535C" opacity="0.6"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">13</span><br>Tidal Teal<span class="idea">Calm energy — organized movement</span></span>
+  </div>
+
+  <!-- ═══ BOTANICAL / FOREST ═══ -->
+  <div class="section-label">Botanical / Forest</div>
+
+  <!-- 14. Canopy -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="12,12 48,12 12,48" fill="#2D5016"/>
+        <polygon points="48,12 84,12 84,48" fill="#3B6B24"/>
+        <polygon points="12,48 12,84 30,66" fill="#5A8F3C"/>
+        <polygon points="12,84 48,84 30,66" fill="#7CB45E"/>
+        <polygon points="48,12 48,48 30,66 12,48" fill="#A8D48A"/>
+        <polygon points="48,48 84,48 84,84 48,84" fill="#D4EDBE"/>
+        <polygon points="48,12 84,48 48,48" fill="#1C3A0E"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">14</span><br>Canopy<span class="idea">Forest layers — deep to dappled light</span></span>
+  </div>
+
+  <!-- 15. Moss & Stone -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="12,12 48,12 12,48" fill="#4A5578"/>
+        <polygon points="48,12 84,12 84,48" fill="#5B6B4A"/>
+        <polygon points="12,48 12,84 30,66" fill="#7A8C5A"/>
+        <polygon points="12,84 48,84 30,66" fill="#96A87A"/>
+        <polygon points="48,12 48,48 30,66 12,48" fill="#B5C49A"/>
+        <polygon points="48,48 84,48 84,84 48,84" fill="#D8E4C4"/>
+        <polygon points="48,12 84,48 48,48" fill="#3D4C38"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">15</span><br>Moss & Stone<span class="idea">Indigo anchors green — nature meets structure</span></span>
+  </div>
+
+  <!-- 16. Autumn Leaf -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="12,12 48,12 12,48" fill="#8B4513"/>
+        <polygon points="48,12 84,12 84,48" fill="#D2691E"/>
+        <polygon points="12,48 12,84 30,66" fill="#CD853F"/>
+        <polygon points="12,84 48,84 30,66" fill="#DAA520"/>
+        <polygon points="48,12 48,48 30,66 12,48" fill="#F4C430"/>
+        <polygon points="48,48 84,48 84,84 48,84" fill="#FAEBD7"/>
+        <polygon points="48,12 84,48 48,48" fill="#A0522D"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">16</span><br>Autumn Leaf<span class="idea">Harvest tones — seasonal, cyclical, rooted</span></span>
+  </div>
+
+  <!-- ═══ DUSK / EVENING ═══ -->
+  <div class="section-label">Dusk / Evening</div>
+
+  <!-- 17. Plum Dusk -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="48,12 84,48 48,48" fill="#2D1B4E"/>
+        <polygon points="12,12 48,12 48,48 12,48" fill="#4A3070"/>
+        <polygon points="48,12 84,12 84,48" fill="#6A4C93"/>
+        <polygon points="12,48 30,66 12,84" fill="#8E6EB0"/>
+        <polygon points="12,84 48,84 30,66" fill="#B497D6"/>
+        <polygon points="48,48 84,48 84,84 48,84" fill="#D8C5EE"/>
+        <circle cx="48" cy="48" r="5" fill="#F0E8FC"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">17</span><br>Plum Dusk<span class="idea">Deep purple twilight — evening quiet</span></span>
+  </div>
+
+  <!-- 18. Indigo Night -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="12,12 48,12 12,48" fill="#0D0D2B"/>
+        <polygon points="48,12 84,12 84,48" fill="#1A1A45"/>
+        <polygon points="12,48 12,84 30,66" fill="#2A2A60"/>
+        <polygon points="12,84 48,84 30,66" fill="#4A5578"/>
+        <polygon points="48,12 48,48 30,66 12,48" fill="#6B7AA0"/>
+        <polygon points="48,48 84,48 84,84 48,84" fill="#8B96B8"/>
+        <polygon points="48,12 84,48 48,48" fill="#141438"/>
+        <!-- Star dots -->
+        <circle cx="24" cy="24" r="1.5" fill="#F0D78C"/>
+        <circle cx="68" cy="28" r="1" fill="#F0D78C" opacity="0.6"/>
+        <circle cx="60" cy="18" r="1.2" fill="#F0D78C" opacity="0.8"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">18</span><br>Indigo Night<span class="idea">Midnight blue with star accents — safety in darkness</span></span>
+  </div>
+
+  <!-- ═══ SPECIAL TREATMENTS ═══ -->
+  <div class="section-label">Special Treatments</div>
+
+  <!-- 19. Kintsugi -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="12,12 48,12 12,48" fill="#4A5578"/>
+        <polygon points="48,12 84,12 84,48" fill="#3D4868"/>
+        <polygon points="12,48 12,84 30,66" fill="#6B7AA0"/>
+        <polygon points="12,84 48,84 30,66" fill="#8B96B8"/>
+        <polygon points="48,12 48,48 30,66 12,48" fill="#DDE0ED"/>
+        <polygon points="48,48 84,48 84,84 48,84" fill="#ECEEF5"/>
+        <polygon points="48,12 84,48 48,48" fill="#555968"/>
+        <line x1="48" y1="12" x2="48" y2="84" stroke="#D4A03C" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="12" y1="48" x2="84" y2="48" stroke="#D4A03C" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="48" y1="12" x2="84" y2="48" stroke="#D4A03C" stroke-width="2" stroke-linecap="round"/>
+        <line x1="12" y1="48" x2="48" y2="84" stroke="#D4A03C" stroke-width="2" stroke-linecap="round"/>
+        <line x1="30" y1="66" x2="12" y2="84" stroke="#D4A03C" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">19</span><br>Kintsugi<span class="idea">Gold seams where pieces join — beauty in repair</span></span>
+  </div>
+
+  <!-- 20. Outline Only -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="12,12 48,12 12,48" stroke="#4A5578" stroke-width="2" fill="none"/>
+        <polygon points="48,12 84,12 84,48" stroke="#4A5578" stroke-width="2" fill="none"/>
+        <polygon points="12,48 12,84 30,66" stroke="#6B7AA0" stroke-width="2" fill="none"/>
+        <polygon points="12,84 48,84 30,66" stroke="#8B96B8" stroke-width="2" fill="none"/>
+        <polygon points="48,12 48,48 30,66 12,48" stroke="#C8CAD0" stroke-width="1.5" fill="none"/>
+        <polygon points="48,48 84,48 84,84 48,84" stroke="#C8CAD0" stroke-width="1.5" fill="none"/>
+        <polygon points="48,12 84,48 48,48" stroke="#555968" stroke-width="2" fill="none"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">20</span><br>Wire Frame<span class="idea">Outlines only — blueprint, planning phase</span></span>
+  </div>
+
+  <!-- 21. Negative Invert -->
+  <div class="card" style="background: #4A5578;">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="12,12 48,12 12,48" fill="#FAFAF8"/>
+        <polygon points="48,12 84,12 84,48" fill="#ECEEF5"/>
+        <polygon points="12,48 12,84 30,66" fill="#DDE0ED"/>
+        <polygon points="12,84 48,84 30,66" fill="#C8CAD0"/>
+        <polygon points="48,12 48,48 30,66 12,48" fill="#8B96B8"/>
+        <polygon points="48,48 84,48 84,84 48,84" fill="#6B7AA0"/>
+        <polygon points="48,12 84,48 48,48" fill="#F4F4F2"/>
+      </svg>
+    </div>
+    <span class="label" style="color:#DDE0ED;"><span class="num" style="color:#8B96B8;">21</span><br>Reversed<span class="idea" style="color:#8B96B8;">Light on dark — for dark backgrounds</span></span>
+  </div>
+
+  <!-- ═══ SHAPE REINTERPRETATIONS ═══ -->
+  <div class="section-label">Shape Reinterpretations</div>
+
+  <!-- 22. Hex Tangram -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="48,8 82,28 48,48" fill="#4A5578"/>
+        <polygon points="82,28 82,68 48,48" fill="#3D4868"/>
+        <polygon points="82,68 48,88 48,48" fill="#6B7AA0"/>
+        <polygon points="48,88 14,68 48,48" fill="#8B96B8"/>
+        <polygon points="14,68 14,28 48,48" fill="#C8846E"/>
+        <polygon points="14,28 48,8 48,48" fill="#E6A670"/>
+        <circle cx="48" cy="48" r="4" fill="#FAFAF8"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">22</span><br>Hex Slice<span class="idea">Six slices in a hexagon — community, cells</span></span>
+  </div>
+
+  <!-- 23. Circular Pie -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <circle cx="48" cy="48" r="36" fill="#ECEEF5"/>
+        <path d="M48 12A36 36 0 0 1 84 48L48 48Z" fill="#4A5578"/>
+        <path d="M84 48A36 36 0 0 1 48 84L48 48Z" fill="#6B7AA0"/>
+        <path d="M48 84A36 36 0 0 1 12 48L48 48Z" fill="#3B7A52"/>
+        <path d="M12 48A36 36 0 0 1 48 12L48 48Z" fill="#D4A03C"/>
+        <circle cx="48" cy="48" r="8" fill="#FAFAF8"/>
+        <circle cx="48" cy="48" r="3" fill="#4A5578"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">23</span><br>Pie Tangram<span class="idea">Circle quarters — seasonal, cyclical rhythm</span></span>
+  </div>
+
+  <!-- 24. Mondrian Grid -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <rect x="8" y="8" width="50" height="26" rx="3" fill="#4A5578"/>
+        <rect x="62" y="8" width="26" height="26" rx="3" fill="#D4A03C"/>
+        <rect x="8" y="38" width="26" height="50" rx="3" fill="#6B7AA0"/>
+        <rect x="38" y="38" width="26" height="24" rx="3" fill="#3B7A52"/>
+        <rect x="68" y="38" width="20" height="24" rx="3" fill="#DDE0ED"/>
+        <rect x="38" y="66" width="50" height="22" rx="3" fill="#8B96B8"/>
+        <rect x="38" y="66" width="24" height="22" rx="3" fill="#E6A670"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">24</span><br>Grid Tangram<span class="idea">Rectangular pieces — different sizes, perfect fit</span></span>
+  </div>
+
+  <!-- 25. Isometric Cube -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="48,12 80,28 48,44 16,28" fill="#8B96B8"/>
+        <polygon points="16,28 48,44 48,76 16,60" fill="#4A5578"/>
+        <polygon points="80,28 48,44 48,76 80,60" fill="#6B7AA0"/>
+        <polygon points="48,12 64,20 48,28 32,20" fill="#C8846E"/>
+        <polygon points="32,20 48,28 48,44 16,28" fill="#DDE0ED"/>
+        <polygon points="64,20 80,28 48,44 48,28" fill="#E6A670"/>
+        <line x1="48" y1="44" x2="48" y2="76" stroke="#3D4868" stroke-width="1.5"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">25</span><br>Isometric<span class="idea">3D cube from tangram slices — depth, solidity</span></span>
+  </div>
+
+  <!-- 26. Chevron Stack -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="48,8 80,28 48,28" fill="#4A5578"/>
+        <polygon points="48,8 16,28 48,28" fill="#3D4868"/>
+        <polygon points="48,28 80,48 48,48" fill="#6B7AA0"/>
+        <polygon points="48,28 16,48 48,48" fill="#8B96B8"/>
+        <polygon points="48,48 80,68 48,68" fill="#D4A03C"/>
+        <polygon points="48,48 16,68 48,68" fill="#E6B84D"/>
+        <polygon points="48,68 80,88 48,88" fill="#F0D78C"/>
+        <polygon points="48,68 16,88 48,88" fill="#F8E8B4"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">26</span><br>Chevron Stack<span class="idea">Nesting arrows — layers of care</span></span>
+  </div>
+
+  <!-- 27. Negative Center -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="12,12 42,12 42,42 12,42" fill="#4A5578"/>
+        <polygon points="54,12 84,12 84,42 54,42" fill="#3D4868"/>
+        <polygon points="12,54 42,54 42,84 12,84" fill="#6B7AA0"/>
+        <polygon points="54,54 84,54 84,84 54,84" fill="#8B96B8"/>
+        <polygon points="42,12 54,12 48,42" fill="#D4A03C"/>
+        <polygon points="84,42 84,54 54,48" fill="#E6A670"/>
+        <polygon points="54,84 42,84 48,54" fill="#C8846E"/>
+        <polygon points="12,54 12,42 42,48" fill="#F0D78C"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">27</span><br>Four Rooms<span class="idea">Four quadrants bridged — shared center space</span></span>
+  </div>
+
+  <!-- 28. Arrow Tangram -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="48,6 84,42 66,42" fill="#4A5578"/>
+        <polygon points="48,6 12,42 30,42" fill="#3D4868"/>
+        <polygon points="30,42 66,42 66,56 30,56" fill="#6B7AA0"/>
+        <polygon points="30,56 48,90 30,90" fill="#8B96B8"/>
+        <polygon points="66,56 48,90 66,90" fill="#DDE0ED"/>
+        <polygon points="30,90 66,90 48,90" fill="#ECEEF5"/>
+        <polygon points="48,42 66,42 66,56 48,56" fill="#D4A03C"/>
+        <polygon points="30,42 48,42 48,56 30,56" fill="#E6A670"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">28</span><br>Arrow<span class="idea">Upward direction — purpose, progress</span></span>
+  </div>
+
+  <!-- ═══ MULTI-CHROMATIC ═══ -->
+  <div class="section-label">Multi-Chromatic</div>
+
+  <!-- 29. Full Spectrum -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="12,12 48,12 12,48" fill="#4A5578"/>
+        <polygon points="48,12 84,12 84,48" fill="#3B7A52"/>
+        <polygon points="12,48 12,84 30,66" fill="#D4A03C"/>
+        <polygon points="12,84 48,84 30,66" fill="#A04040"/>
+        <polygon points="48,12 48,48 30,66 12,48" fill="#3A6C9E"/>
+        <polygon points="48,48 84,48 84,84 48,84" fill="#6E5A82"/>
+        <polygon points="48,12 84,48 48,48" fill="#C8846E"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">29</span><br>Spectrum<span class="idea">Every color, one shape — diversity in unity</span></span>
+  </div>
+
+  <!-- 30. Muted Rainbow -->
+  <div class="card">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 96 96" fill="none">
+        <polygon points="12,12 48,12 12,48" fill="#5C6B8A"/>
+        <polygon points="48,12 84,12 84,48" fill="#6B8A7A"/>
+        <polygon points="12,48 12,84 30,66" fill="#8A7A5C"/>
+        <polygon points="12,84 48,84 30,66" fill="#8A5C6B"/>
+        <polygon points="48,12 48,48 30,66 12,48" fill="#7A8A6B"/>
+        <polygon points="48,48 84,48 84,84 48,84" fill="#6B5C8A"/>
+        <polygon points="48,12 84,48 48,48" fill="#8A6B5C"/>
+      </svg>
+    </div>
+    <span class="label"><span class="num">30</span><br>Muted Spectrum<span class="idea">Desaturated tones — sophisticated, understated</span></span>
+  </div>
+
+</div>
+
+</body>
+</html>

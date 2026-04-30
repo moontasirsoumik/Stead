@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-78 -112 156 158" width="300">
+  <!-- Stead Logo — 3D House (isometric origami house) -->
+  <!-- Viewing angle: rotateX(58°) rotateZ(-32°), perspective 900px -->
+
+  <!-- Roof back (gold) — partially visible behind roof front -->
+  <polygon points="-46,-73.2 43.9,-98.4 20.3,-77 -65.6,-52.2"
+    fill="#E9C46A" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+
+  <!-- Tri-left (beige gable triangle) -->
+  <polygon points="-65.3,-51.9 -46.2,-73.3 -23.3,-16.1"
+    fill="#F2CC8F" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+
+  <!-- Wall left (salmon) -->
+  <polygon points="-65.3,-51.9 -63.2,-3.9 -22.5,33.9 -23.3,-16.1"
+    fill="#E07A5F" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+
+  <!-- Wall front (teal) -->
+  <polygon points="-22.5,32.8 64,2.8 66.2,-45.6 -23.3,-17.3"
+    fill="#2A9D8F" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+
+  <!-- Roof front (purple) — closest to camera -->
+  <polygon points="-23.7,-17.4 65.8,-45.7 42.8,-100.1 -47.1,-75"
+    fill="#9B5DE5" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+</svg>

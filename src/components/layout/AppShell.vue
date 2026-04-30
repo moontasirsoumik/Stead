@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/auth.store'
 import { useRouter } from 'vue-router'
 import NavRail from './NavRail.vue'
 import SAvatar from '@/components/ui/SAvatar.vue'
+import SteadLogo from '@/components/ui/SteadLogo.vue'
 
 const appStore = useAppStore()
 const householdStore = useHouseholdStore()
@@ -74,6 +75,11 @@ async function handleSignOut() {
         <button v-if="isMobile" class="shell__menu-btn" aria-label="Open menu" @click="openMobile">
           <span class="material-symbols-rounded">menu</span>
         </button>
+        <RouterLink to="/" class="shell__brand">
+          <SteadLogo :size="20" />
+          <span class="shell__brand-label">Stead</span>
+        </RouterLink>
+        <span class="shell__topbar-divider" />
         <button class="shell__scope-chip" @click="appStore.toggleScope()">
           <span class="material-symbols-rounded shell__scope-chip-icon">{{ scopeIcon }}</span>
           <span class="shell__scope-chip-label">{{ scopeLabel }}</span>
@@ -242,6 +248,30 @@ async function handleSignOut() {
 }
 
 /* ── Scope chip ── */
+/* ── Brand in top bar ── */
+.shell__brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.shell__brand-label {
+  font: var(--text-body-1);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-fg-primary);
+  letter-spacing: var(--tracking-tight);
+  line-height: 1;
+}
+
+.shell__topbar-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--color-border-subtle);
+  flex-shrink: 0;
+}
+
 .shell__scope-chip {
   display: inline-flex;
   align-items: center;

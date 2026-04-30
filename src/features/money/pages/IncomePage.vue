@@ -182,7 +182,7 @@ onMounted(async () => {
       :style="{ '--stagger': 2 }"
     />
 
-    <div v-if="incomeStore.loading && !incomeStore.items.length" class="page-enter" :style="{ '--stagger': 3 }">
+    <div v-if="incomeStore.loading && !incomeStore.items.length" class="page-enter" :style="{ '--stagger': 4 }">
       <LoadingSkeleton :lines="5" />
     </div>
 
@@ -283,6 +283,7 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+/* ── Income Table ── */
 .income-table {
   display: flex;
   flex-direction: column;

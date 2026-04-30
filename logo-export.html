@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Stead Logo Export</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1a1a2e; display: flex; flex-wrap: wrap; gap: 60px; padding: 60px; justify-content: center; }
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+  .card h3 { font-family: system-ui; color: #333; font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; }
+  .card .dim { font-family: monospace; color: #888; font-size: 11px; }
+
+  /* ── Shared scene ── */
+  .scene {
+    width: 280px;
+    height: 220px;
+    perspective: 900px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .house {
+    transform-style: preserve-3d;
+    position: relative;
+  }
+
+  .floor {
+    position: relative;
+    width: 100px;
+    height: 80px;
+    background: #DDD5C8;
+    transform-style: preserve-3d;
+    background-image: linear-gradient(170deg, rgba(255,255,255,0.1) 0%, transparent 40%, rgba(0,0,0,0.03) 100%);
+  }
+
+  .face {
+    position: absolute;
+    transform-style: preserve-3d;
+    backface-visibility: visible;
+    background-image: linear-gradient(170deg, rgba(255,255,255,0.12) 0%, transparent 40%, rgba(0,0,0,0.04) 100%);
+    background-blend-mode: overlay;
+  }
+
+  .wall-front { left: 0; top: 100%; transform-origin: left top; width: 100px; height: 55px; background-color: #2A9D8F; }
+  .wall-back  { left: 0; bottom: 100%; transform-origin: left bottom; width: 100px; height: 55px; background-color: #264653; }
+  .wall-left  { right: 100%; top: 0; transform-origin: right top; width: 55px; height: 80px; background-color: #E07A5F; }
+  .wall-right { left: 100%; top: 0; transform-origin: left top; width: 55px; height: 80px; background-color: #3D85C6; }
+  .roof-back  { left: 0; bottom: 100%; transform-origin: left bottom; width: 100px; height: 58px; background-color: #E9C46A; }
+  .roof-front { left: 0; top: 100%; transform-origin: left top; width: 100px; height: 58px; background-color: #9B5DE5; }
+  .tri-left   { right: 100%; top: 0; transform-origin: right top; width: 41px; height: 80px; background-color: #F2CC8F; clip-path: polygon(100% 0%, 0% 50%, 100% 100%); }
+  .tri-right  { left: 100%; top: 0; transform-origin: left top; width: 41px; height: 80px; background-color: #81B29A; clip-path: polygon(0% 0%, 100% 50%, 0% 100%); }
+
+  /* ═══ A: 3D House ═══ */
+  #house-3d .house { transform: rotateX(58deg) rotateZ(-32deg); }
+  #house-3d .wall-front { transform: rotateX(90deg); }
+  #house-3d .wall-back  { transform: rotateX(-90deg); }
+  #house-3d .wall-left  { transform: rotateY(90deg); }
+  #house-3d .wall-right { transform: rotateY(-90deg); }
+  #house-3d .roof-back  { transform: rotateX(-45deg); }
+  #house-3d .roof-front { transform: rotateX(45deg); }
+
+  /* ═══ B: Flat paper net ═══ */
+  #house-flat .house { transform: rotateX(58deg) rotateZ(-32deg); }
+  /* Walls unfolded flat (0deg from hinges) = default */
+
+  /* ═══ C: Folded diamond (3D perspective) ═══ */
+  #house-folded .house { transform: rotateX(58deg) rotateZ(-32deg); }
+  #house-folded .roof-front { transform: translateZ(0.5px) rotateX(180deg); }
+  #house-folded .wall-front { transform: translateZ(1px) rotateX(180deg); }
+  #house-folded .roof-back  { transform: translateZ(0.5px) rotateX(-180deg); }
+  #house-folded .wall-back  { transform: translateZ(2px) rotateX(-180deg); }
+  #house-folded .wall-left  { transform: translateZ(3px) rotateY(180deg); }
+  #house-folded .tri-left   { transform: translateZ(-0.5px) rotateY(-180deg); }
+  #house-folded .wall-right { transform: translateZ(4px) rotateY(-180deg); }
+  #house-folded .tri-right  { transform: translateZ(-0.5px) rotateY(180deg); }
+
+  /* ═══ D: Folded diamond (2D logo - top down) ═══ */
+  #house-2d .house { transform: rotateX(0deg) rotateZ(0deg); }
+  #house-2d .roof-front { transform: translateZ(0.5px) rotateX(180deg); }
+  #house-2d .wall-front { transform: translateZ(1px) rotateX(180deg); }
+  #house-2d .roof-back  { transform: translateZ(0.5px) rotateX(-180deg); }
+  #house-2d .wall-back  { transform: translateZ(2px) rotateX(-180deg); }
+  #house-2d .wall-left  { transform: translateZ(3px) rotateY(180deg); }
+  #house-2d .tri-left   { transform: translateZ(-0.5px) rotateY(-180deg); }
+  #house-2d .wall-right { transform: translateZ(4px) rotateY(-180deg); }
+  #house-2d .tri-right  { transform: translateZ(-0.5px) rotateY(180deg); }
+
+  /* Dark card variant for contrast */
+  .card.dark { background: #264653; }
+  .card.dark h3 { color: rgba(255,255,255,0.8); }
+  .card.dark .dim { color: rgba(255,255,255,0.4); }
+</style>
+</head>
+<body>
+
+<div class="card" id="card-3d">
+  <h3>A — 3D House</h3>
+  <div class="scene" id="house-3d">
+    <div class="house">
+      <div class="floor">
+        <div class="face wall-front">
+          <div class="face roof-front"></div>
+        </div>
+        <div class="face wall-back">
+          <div class="face roof-back"></div>
+        </div>
+        <div class="face wall-left">
+          <div class="face tri-left"></div>
+        </div>
+        <div class="face wall-right">
+          <div class="face tri-right"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="dim">Isometric origami house</span>
+</div>
+
+<div class="card" id="card-flat">
+  <h3>B — Flat Paper Net</h3>
+  <div class="scene" id="house-flat">
+    <div class="house">
+      <div class="floor">
+        <div class="face wall-front">
+          <div class="face roof-front"></div>
+        </div>
+        <div class="face wall-back">
+          <div class="face roof-back"></div>
+        </div>
+        <div class="face wall-left">
+          <div class="face tri-left"></div>
+        </div>
+        <div class="face wall-right">
+          <div class="face tri-right"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="dim">Unfolded paper net (isometric view)</span>
+</div>
+
+<div class="card" id="card-folded">
+  <h3>C — Folded Diamond (3D)</h3>
+  <div class="scene" id="house-folded">
+    <div class="house">
+      <div class="floor">
+        <div class="face wall-front">
+          <div class="face roof-front"></div>
+        </div>
+        <div class="face wall-back">
+          <div class="face roof-back"></div>
+        </div>
+        <div class="face wall-left">
+          <div class="face tri-left"></div>
+        </div>
+        <div class="face wall-right">
+          <div class="face tri-right"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="dim">All pieces folded onto floor (isometric)</span>
+</div>
+
+<div class="card dark" id="card-2d">
+  <h3>D — Logo (2D)</h3>
+  <div class="scene" id="house-2d">
+    <div class="house">
+      <div class="floor">
+        <div class="face wall-front">
+          <div class="face roof-front"></div>
+        </div>
+        <div class="face wall-back">
+          <div class="face roof-back"></div>
+        </div>
+        <div class="face wall-left">
+          <div class="face tri-left"></div>
+        </div>
+        <div class="face wall-right">
+          <div class="face tri-right"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="dim">Top-down 2D diamond logo</span>
+</div>
+
+</body>
+</html>

@@ -11,6 +11,7 @@ import { useRoute } from 'vue-router'
 const route = useRoute()
 
 const tabs = [
+  { name: 'money-overview', label: 'Overview', path: '/money/overview' },
   { name: 'expenses', label: 'Expenses', path: '/money/expenses' },
   { name: 'income', label: 'Income', path: '/money/income' },
   { name: 'bills', label: 'Bills', path: '/money/bills' },

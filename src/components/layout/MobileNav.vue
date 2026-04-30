@@ -28,7 +28,8 @@ const items = computed(() =>
 
 function isActive(to: string): boolean {
   if (to === '/') return route.path === '/'
-  return route.path.startsWith(to)
+  const baseSegment = '/' + to.split('/').filter(Boolean)[0]
+  return route.path.startsWith(baseSegment)
 }
 </script>
 

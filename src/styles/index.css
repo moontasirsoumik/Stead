@@ -3,6 +3,7 @@
    Import order: tokens → reset → global → utilities
    ============================================================ */
 
+@import './fonts.css';
 @import '../tokens/index.css';
 @import './reset.css';
 @import './global.css';

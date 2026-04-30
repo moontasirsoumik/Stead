@@ -35,8 +35,13 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'money',
         component: () => import('@/features/money/MoneyLayout.vue'),
-        redirect: '/money/expenses',
+        redirect: '/money/overview',
         children: [
+          {
+            path: 'overview',
+            name: 'money-overview',
+            component: () => import('@/features/money/pages/FinanceOverviewPage.vue'),
+          },
           {
             path: 'expenses',
             name: 'expenses',

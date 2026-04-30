@@ -17,7 +17,9 @@ const route = useRoute()
 
 function isActive(): boolean {
   if (props.to === '/') return route.path === '/'
-  return route.path.startsWith(props.to)
+  // Match on the base path segment (e.g. /money/* matches /money/expenses)
+  const baseSegment = '/' + props.to.split('/').filter(Boolean)[0]
+  return route.path.startsWith(baseSegment)
 }
 
 const materialIcon = computed(() => {
