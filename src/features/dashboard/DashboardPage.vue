@@ -18,6 +18,7 @@ import { useRemindersStore } from '@/stores/reminders.store'
 import { useNotesStore } from '@/stores/notes.store'
 import { useSavingsStore } from '@/stores/savings.store'
 import { useWishlistStore } from '@/stores/wishlist.store'
+import { useBoardsStore } from '@/stores/boards.store'
 import { formatCents, formatRelativeDate } from '@/utils/format'
 import type { TaskPriority } from '@/models/enums'
 import type { BadgeVariant } from '@/components/ui/SBadge.vue'
@@ -35,6 +36,7 @@ const reminders = useRemindersStore()
 const notes = useNotesStore()
 const savings = useSavingsStore()
 const wishlist = useWishlistStore()
+const boards = useBoardsStore()
 
 const greeting = computed(() => {
   const hour = new Date().getHours()
@@ -113,6 +115,16 @@ const wishlistItems = computed(() =>
   wishlist.wantedItems.slice(0, 5),
 )
 
+// Boards widget — top boards with progress
+const recentBoards = computed(() =>
+  boards.boards.slice(0, 5).map((b) => {
+    const items = boards.getItemsForBoard(b.id)
+    const total = items.length
+    const checked = items.filter((i) => i.is_checked).length
+    return { ...b, total, checked }
+  }),
+)
+
 // Maintenance widget — overdue + upcoming max 5 (now from tasks store)
 const maintenanceAlerts = computed(() => {
   const combined = [...tasks.overdueMaintenanceTasks, ...tasks.upcomingMaintenanceTasks]
@@ -169,6 +181,8 @@ onMounted(() => {
   notes.fetchNotes(hid)
   savings.loadGoals(hid)
   wishlist.fetchItems(hid)
+  boards.fetchBoards(hid)
+  boards.fetchBoardItems(hid)
 })
 </script>
 
@@ -395,6 +409,23 @@ onMounted(() => {
         <p v-else class="dash-empty">Your wishlist is empty — start dreaming!</p>
       </section>
     </template>
+
+    <!-- Boards widget (both scopes) -->
+    <section v-if="app.dashboardWidgets.boards" class="dash-section">
+      <div class="dash-section__header">
+        <h3 class="dash-section__title">Boards ({{ recentBoards.length }})</h3>
+        <RouterLink to="/boards" class="dash-section__link">View all</RouterLink>
+      </div>
+      <div v-if="recentBoards.length" class="dash-table">
+        <div v-for="board in recentBoards" :key="board.id" class="dash-row">
+          <span class="dash-row__name">{{ board.name }}</span>
+          <span class="dash-row__badge"><SBadge variant="default" size="sm">{{ board.total }} items</SBadge></span>
+          <span class="dash-row__trailing"></span>
+          <span v-if="board.total" class="dash-row__amount">{{ board.checked }}/{{ board.total }}</span>
+        </div>
+      </div>
+      <p v-else class="dash-empty">No boards yet — create one to organize anything!</p>
+    </section>
   </PageContainer>
 </template>
 
