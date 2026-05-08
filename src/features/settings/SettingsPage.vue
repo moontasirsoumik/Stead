@@ -338,16 +338,14 @@ const highContrastModel = computed({ get: () => app.highContrast, set: (v: boole
 const dashDensityStr = computed({ get: () => app.dashboardDensity, set: (v: string) => app.setDashboardDensity(v as DashboardDensity) })
 const greetingModel = computed({ get: () => app.showDashboardGreeting, set: (v: boolean) => app.setShowDashboardGreeting(v) })
 
-type WidgetKey = 'money' | 'tasks' | 'pantry' | 'reminders' | 'notes' | 'habits' | 'meals' | 'subscriptions' | 'wishlist'
+type WidgetKey = 'money' | 'tasks' | 'pantry' | 'reminders' | 'notes' | 'boards' | 'wishlist'
 const WIDGET_LIST: { key: WidgetKey; label: string; icon: string }[] = [
   { key: 'money', label: 'Finances', icon: 'payments' },
   { key: 'tasks', label: 'Tasks', icon: 'task_alt' },
   { key: 'pantry', label: 'Pantry', icon: 'kitchen' },
   { key: 'reminders', label: 'Reminders', icon: 'alarm' },
   { key: 'notes', label: 'Notes', icon: 'sticky_note_2' },
-  { key: 'habits', label: 'Habits', icon: 'self_improvement' },
-  { key: 'meals', label: 'Meals', icon: 'restaurant' },
-  { key: 'subscriptions', label: 'Subscriptions', icon: 'card_membership' },
+  { key: 'boards', label: 'Boards', icon: 'dashboard_customize' },
   { key: 'wishlist', label: 'Wishlist', icon: 'redeem' },
 ]
 
@@ -408,8 +406,6 @@ const confirmDeleteModel = computed({ get: () => app.confirmBeforeDelete, set: (
 const autoRestockModel = computed({ get: () => app.autoAddRestock, set: (v: boolean) => app.setAutoAddRestock(v) })
 const grocerySortStr = computed({ get: () => app.defaultGrocerySort, set: (v: string) => app.setDefaultGrocerySort(v as 'name' | 'category' | 'status') })
 const stockIndicatorsModel = computed({ get: () => app.showStockIndicators, set: (v: boolean) => app.setShowStockIndicators(v) })
-const servingsStr = computed({ get: () => String(app.defaultServings), set: (v: string) => app.setDefaultServings(parseInt(v, 10)) })
-const mealCalModel = computed({ get: () => app.showMealCalendar, set: (v: boolean) => app.setShowMealCalendar(v) })
 const snoozeStr = computed({ get: () => String(app.defaultSnoozeMinutes), set: (v: string) => app.setDefaultSnoozeMinutes(parseInt(v, 10)) })
 const reminderSoundModel = computed({ get: () => app.reminderSound, set: (v: boolean) => app.setReminderSound(v) })
 const noteViewStr = computed({ get: () => app.defaultNoteView, set: (v: string) => app.setDefaultNoteView(v as DefaultView) })
@@ -892,37 +888,6 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
         </div>
       </div>
 
-      <div class="settings-section page-enter" :style="{ '--stagger': 4 }">
-        <div class="card-header">
-          <SectionHeader title="Meals" />
-        </div>
-        <div class="card-body">
-          <div class="row">
-            <div class="row__label"><span class="row__name">Default servings</span></div>
-            <SSelect
-              v-model="servingsStr"
-              :options="[
-                { value: '1', label: '1' },
-                { value: '2', label: '2' },
-                { value: '3', label: '3' },
-                { value: '4', label: '4' },
-                { value: '5', label: '5' },
-                { value: '6', label: '6' },
-                { value: '7', label: '7' },
-                { value: '8', label: '8' },
-              ]"
-            />
-          </div>
-          <div class="row">
-            <div class="row__label">
-              <span class="row__name">Meal calendar</span>
-              <span class="row__hint">Calendar view for planning</span>
-            </div>
-            <SToggle v-model="mealCalModel" />
-          </div>
-        </div>
-      </div>
-
       <div class="settings-section page-enter" :style="{ '--stagger': 5 }">
         <div class="card-header">
           <SectionHeader title="Reminders" />
@@ -1350,7 +1315,7 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
               <h4 class="legal-h">2. Categories of Data</h4>
               <ul>
                 <li><strong>Identity Data:</strong> email address, name, date of birth (optional), phone (optional)</li>
-                <li><strong>Household Data:</strong> tasks, expenses, income records, calendar events, journal entries, notes, contacts, documents, meal plans, habits, inventory, subscriptions, wishlists, and all associated metadata</li>
+                <li><strong>Household Data:</strong> tasks, expenses, income records, calendar events, journal entries, notes, contacts, documents, boards, inventory, wishlists, and all associated metadata</li>
                 <li><strong>Technical Data:</strong> authentication tokens, session identifiers, timestamps</li>
                 <li><strong>Analytics Data (opt-in only):</strong> anonymous feature usage metrics with no personal identifiers</li>
               </ul>

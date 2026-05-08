@@ -1,7 +1,7 @@
 # Stead — Implementation Progress Tracker
 
-> **Last updated:** 2026-04-21
-> **Current Phase:** P31 — Privacy & Sharing (frontend complete, migration pending)
+> **Last updated:** 2026-05-09
+> **Current Phase:** P32 — Feature Generalization (Boards replace Meals/Habits/Subscriptions)
 
 ---
 
@@ -45,6 +45,7 @@
 | P29 | Calendar Feature | ✅ Done | 2026-04-18 | 2026-04-18 | Full calendar page with month grid, aggregates tasks/reminders/bills, standalone event CRUD, day detail panel, DB migration applied |
 | P30 | Settings Wiring | ✅ Done | 2026-04-18 | 2026-04-18 | Wired 22 orphaned settings to feature pages — see details below |
 | P31 | Privacy & Sharing | 🟡 In Progress | 2026-04-20 | — | Frontend complete, DB migration pending — see details below |
+| P32 | Feature Generalization | ✅ Done | 2026-05-09 | 2026-05-09 | Boards replaces Meals + Habits + Subscriptions — see details below |
 
 ---
 
@@ -513,3 +514,34 @@ Get token from: https://supabase.com/dashboard/account/tokens
 | P17-11 | Update DashboardPage with personal section | ⬜ Not Started | `DashboardPage.vue` |
 | P17-12 | Update Dexie DB indexes for scope | ⬜ Not Started | `src/services/cache/db.ts` |
 | P17-13 | Verify build + type-check | ⬜ Not Started | `bun run build` |
+
+---
+
+## Phase 32 — Feature Generalization (Boards replace Meals/Habits/Subscriptions)
+
+**Rationale:** Meals, Habits, and Subscriptions were too niche/specific. Replaced with a single general-purpose "Boards" feature that can serve unlimited use cases (meal planning, daily routines, project lists, workout splits, packing lists, etc.).
+
+### Changes
+
+| ID | Task | Status | Files |
+|---|---|---|---|
+| P32-01 | Create Board model + BoardItem model | ✅ Done | `src/models/board.model.ts` |
+| P32-02 | Create Board + BoardItem Zod schemas | ✅ Done | `src/schemas/board.schema.ts` |
+| P32-03 | Create boards data service | ✅ Done | `src/services/data/boards.data.ts` |
+| P32-04 | Create boards Pinia store | ✅ Done | `src/stores/boards.store.ts` |
+| P32-05 | Create BoardsPage (board index with card grid) | ✅ Done | `src/features/boards/BoardsPage.vue` |
+| P32-06 | Create BoardDetailPage (item checklist, groups, quick-add) | ✅ Done | `src/features/boards/BoardDetailPage.vue` |
+| P32-07 | Remove Meals module (model, schema, store, data, page) | ✅ Done | Deleted 5 files + feature dir |
+| P32-08 | Remove Habits module (model, schema, store, data, page) | ✅ Done | Deleted 5 files + feature dir |
+| P32-09 | Remove Subscriptions module (model, schema, store, data, page) | ✅ Done | Deleted 5 files + feature dir |
+| P32-10 | Remove MealType, HabitFrequency, SubscriptionFrequency, SubscriptionStatus from enums | ✅ Done | `src/models/enums.ts` |
+| P32-11 | Update models/index.ts and schemas/index.ts exports | ✅ Done | Both index files |
+| P32-12 | Update Dexie DB — drop old tables, add boards/board_items (v8) | ✅ Done | `src/services/cache/db.ts` |
+| P32-13 | Update router — remove old routes, add /boards and /boards/:id | ✅ Done | `src/router/index.ts` |
+| P32-14 | Update NavRail — replace Meals/Habits/Subscriptions with Boards | ✅ Done | `NavRail.vue` |
+| P32-15 | Update MobileNav — replace Habits with Boards | ✅ Done | `MobileNav.vue` |
+| P32-16 | Update Dashboard — remove subscriptions/habits widgets | ✅ Done | `DashboardPage.vue` |
+| P32-17 | Update app.store — remove meals settings, update widget keys | ✅ Done | `app.store.ts` |
+| P32-18 | Update Settings — remove Meals section, update widget list | ✅ Done | `SettingsPage.vue` |
+| P32-19 | Create DB migration 015 (drop old tables, create boards) | ✅ Done | `supabase/migrations/015_boards_replace_meals_habits_subs.sql` |
+| P32-20 | Verify type-check + build passes | ✅ Done | `vue-tsc --noEmit` + `vite build` |

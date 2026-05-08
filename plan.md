@@ -47,7 +47,12 @@ Build a modern, polished, local-first household management SPA for a family. Dep
 5. **Inventory** — household stock tracking with human-readable statuses
 6. **Reminders** — date-based alerts linked to entities
 7. **Notes** — freeform notes with categories and pinning
-8. **Maintenance** — home/vehicle maintenance tracking (deferred to Phase 13)
+8. **Boards** — general-purpose lists/checklists (replaces Meals, Habits, Subscriptions) — both household and personal scope
+9. **Calendar** — month grid aggregating events, tasks, reminders, bills
+10. **Wishlist** — personal want-list with prices and statuses
+11. **Journal** — personal journal entries with mood tracking
+12. **Contacts** — service providers and household contacts
+13. **Documents** — warranties, contracts, receipts
 
 ### Non-Negotiable Constraints
 

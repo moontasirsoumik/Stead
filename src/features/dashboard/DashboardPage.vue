@@ -18,8 +18,6 @@ import { useRemindersStore } from '@/stores/reminders.store'
 import { useNotesStore } from '@/stores/notes.store'
 import { useSavingsStore } from '@/stores/savings.store'
 import { useWishlistStore } from '@/stores/wishlist.store'
-import { useSubscriptionsStore } from '@/stores/subscriptions.store'
-import { useHabitsStore } from '@/stores/habits.store'
 import { formatCents, formatRelativeDate } from '@/utils/format'
 import type { TaskPriority } from '@/models/enums'
 import type { BadgeVariant } from '@/components/ui/SBadge.vue'
@@ -37,8 +35,6 @@ const reminders = useRemindersStore()
 const notes = useNotesStore()
 const savings = useSavingsStore()
 const wishlist = useWishlistStore()
-const subscriptions = useSubscriptionsStore()
-const habits = useHabitsStore()
 
 const greeting = computed(() => {
   const hour = new Date().getHours()
@@ -116,12 +112,6 @@ const pinned = computed(() =>
 const wishlistItems = computed(() =>
   wishlist.wantedItems.slice(0, 5),
 )
-const activeSubscriptions = computed(() =>
-  subscriptions.activeSubscriptions.slice(0, 5),
-)
-const activeHabits = computed(() =>
-  habits.activeHabits.slice(0, 5),
-)
 
 // Maintenance widget — overdue + upcoming max 5 (now from tasks store)
 const maintenanceAlerts = computed(() => {
@@ -163,12 +153,6 @@ function truncate(text: string, max: number): string {
   return text.slice(0, max).trimEnd() + '…'
 }
 
-const isLoading = computed(() =>
-  tasks.loading || bills.loading || expenses.loading || income.loading
-  || shopping.loading || inventory.loading || reminders.loading || notes.loading
-  || savings.loading,
-)
-
 onMounted(() => {
   const hid = auth.householdId
   if (!hid) return
@@ -185,9 +169,6 @@ onMounted(() => {
   notes.fetchNotes(hid)
   savings.loadGoals(hid)
   wishlist.fetchItems(hid)
-  subscriptions.fetchSubscriptions(hid)
-  habits.fetchHabits(hid)
-  habits.fetchLogs(hid)
 })
 </script>
 
@@ -412,41 +393,6 @@ onMounted(() => {
           </div>
         </div>
         <p v-else class="dash-empty">Your wishlist is empty — start dreaming!</p>
-      </section>
-
-      <section v-if="app.dashboardWidgets.subscriptions" class="dash-section">
-        <div class="dash-section__header">
-          <h3 class="dash-section__title">Subscriptions</h3>
-          <RouterLink to="/subscriptions" class="dash-section__link">View all</RouterLink>
-        </div>
-        <template v-if="activeSubscriptions.length">
-          <p class="dash-section__count">{{ formatCents(subscriptions.monthlyTotal) }}/mo</p>
-          <div class="dash-table">
-            <div v-for="sub in activeSubscriptions" :key="sub.id" class="dash-row">
-              <span class="dash-row__name">{{ sub.name }}</span>
-              <span class="dash-row__badge"><SBadge variant="info" size="sm">{{ sub.frequency }}</SBadge></span>
-              <span class="dash-row__trailing"></span>
-              <span class="dash-row__amount">{{ formatCents(sub.amount) }}</span>
-            </div>
-          </div>
-        </template>
-        <p v-else class="dash-empty">No subscriptions tracked</p>
-      </section>
-
-      <section v-if="app.dashboardWidgets.habits" class="dash-section">
-        <div class="dash-section__header">
-          <h3 class="dash-section__title">Habits Today</h3>
-          <RouterLink to="/habits" class="dash-section__link">View all</RouterLink>
-        </div>
-        <div v-if="activeHabits.length" class="dash-table">
-          <div v-for="habit in activeHabits" :key="habit.id" class="dash-row">
-            <span class="dash-row__name">{{ habit.name }}</span>
-            <span class="dash-row__badge"><SBadge variant="default" size="sm">{{ habit.frequency }}</SBadge></span>
-            <span class="dash-row__trailing"></span>
-            <span class="dash-row__amount"></span>
-          </div>
-        </div>
-        <p v-else class="dash-empty">No habits yet — build your first one!</p>
       </section>
     </template>
   </PageContainer>

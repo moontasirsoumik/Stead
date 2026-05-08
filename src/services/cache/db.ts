@@ -13,12 +13,10 @@ import type { InventoryItem } from '@/models/inventory.model'
 import type { Reminder } from '@/models/reminder.model'
 import type { Note } from '@/models/note.model'
 import type { WishlistItem } from '@/models/wishlist.model'
-import type { Subscription } from '@/models/subscription.model'
 import type { JournalEntry } from '@/models/journal.model'
-import type { Habit, HabitLog } from '@/models/habit.model'
 import type { Contact } from '@/models/contact.model'
 import type { HouseholdDocument } from '@/models/document.model'
-import type { MealPlan, Meal } from '@/models/meal.model'
+import type { Board, BoardItem } from '@/models/board.model'
 import type { ExpenseSplit } from '@/models/expense-split.model'
 import type { CalendarEvent } from '@/models/calendar-event.model'
 import type { EntityShare } from '@/models/entity-share.model'
@@ -39,14 +37,11 @@ class SteadDatabase extends Dexie {
   reminders!: Table<Reminder, string>
   notes!: Table<Note, string>
   wishlists!: Table<WishlistItem, string>
-  subscriptions!: Table<Subscription, string>
   journal_entries!: Table<JournalEntry, string>
-  habits!: Table<Habit, string>
-  habit_logs!: Table<HabitLog, string>
   contacts!: Table<Contact, string>
   documents!: Table<HouseholdDocument, string>
-  meal_plans!: Table<MealPlan, string>
-  meals!: Table<Meal, string>
+  boards!: Table<Board, string>
+  board_items!: Table<BoardItem, string>
   calendar_events!: Table<CalendarEvent, string>
   entity_shares!: Table<EntityShare, string>
 
@@ -83,14 +78,9 @@ class SteadDatabase extends Dexie {
     })
     this.version(4).stores({
       wishlists: 'id, household_id, owner_id, status',
-      subscriptions: 'id, household_id, owner_id, status',
       journal_entries: 'id, household_id, owner_id, entry_date',
-      habits: 'id, household_id, owner_id',
-      habit_logs: 'id, habit_id, log_date',
       contacts: 'id, household_id',
       documents: 'id, household_id, doc_type',
-      meal_plans: 'id, household_id, week_start',
-      meals: 'id, meal_plan_id, household_id',
     })
     this.version(5).stores({
       expense_splits: 'id, expense_id, household_id, member_id, settled',
@@ -104,6 +94,15 @@ class SteadDatabase extends Dexie {
       notes: 'id, household_id, pinned, scope, owner_id, visibility',
       tasks: 'id, household_id, status, due_date, assignee, task_type, scope, owner_id, visibility',
       wishlists: 'id, household_id, owner_id, status, visibility',
+    })
+    this.version(8).stores({
+      subscriptions: null,
+      habits: null,
+      habit_logs: null,
+      meal_plans: null,
+      meals: null,
+      boards: 'id, household_id, owner_id, scope, position',
+      board_items: 'id, board_id, household_id, group_name, position',
     })
   }
 }

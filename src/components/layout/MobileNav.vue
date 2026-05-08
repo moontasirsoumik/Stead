@@ -18,7 +18,7 @@ const personalItems = [
   { to: '/', icon: 'dashboard', label: 'Home' },
   { to: '/money/expenses', icon: 'account_balance_wallet', label: 'Finances' },
   { to: '/tasks', icon: 'checklist', label: 'Tasks' },
-  { to: '/habits', icon: 'fitness_center', label: 'Habits' },
+  { to: '/boards', icon: 'dashboard_customize', label: 'Boards' },
   { to: '/wishlist', icon: 'favorite', label: 'Wishlist' },
 ] as const
 

@@ -83,9 +83,7 @@ export const useAppStore = defineStore('app', () => {
     pantry: true,
     reminders: true,
     notes: true,
-    habits: true,
-    meals: true,
-    subscriptions: true,
+    boards: true,
     wishlist: true,
   })
 
@@ -111,10 +109,6 @@ export const useAppStore = defineStore('app', () => {
   const autoAddRestock = ref(true)
   const defaultGrocerySort = ref<'name' | 'category' | 'status'>('category')
   const showStockIndicators = ref(true)
-
-  /* ── Meals ── */
-  const defaultServings = ref(2)
-  const showMealCalendar = ref(true)
 
   /* ── Reminders ── */
   const defaultSnoozeMinutes = ref(30)
@@ -231,12 +225,6 @@ export const useAppStore = defineStore('app', () => {
 
     const storedStockIndicators = restore('stock-indicators')
     if (storedStockIndicators) showStockIndicators.value = storedStockIndicators !== 'false'
-
-    const storedServings = restore('default-servings')
-    if (storedServings) defaultServings.value = parseInt(storedServings, 10) || 2
-
-    const storedMealCal = restore('meal-calendar')
-    if (storedMealCal) showMealCalendar.value = storedMealCal !== 'false'
 
     const storedSnooze = restore('default-snooze')
     if (storedSnooze) defaultSnoozeMinutes.value = parseInt(storedSnooze, 10) || 30
@@ -361,7 +349,7 @@ export const useAppStore = defineStore('app', () => {
 
   /* ── Generic preference setter ── */
   function setPref<K extends string>(key: K, value: string, target: { value: unknown }) {
-    target.value = key === 'auto-archive-days' || key === 'default-snooze' || key === 'default-servings'
+    target.value = key === 'auto-archive-days' || key === 'default-snooze'
       ? parseInt(value, 10)
       : value === 'true' ? true : value === 'false' ? false : value
     persist(key, value)
@@ -388,8 +376,6 @@ export const useAppStore = defineStore('app', () => {
   function setAutoAddRestock(v: boolean) { autoAddRestock.value = v; persist('auto-add-restock', String(v)) }
   function setDefaultGrocerySort(v: 'name' | 'category' | 'status') { defaultGrocerySort.value = v; persist('grocery-sort', v) }
   function setShowStockIndicators(v: boolean) { showStockIndicators.value = v; persist('stock-indicators', String(v)) }
-  function setDefaultServings(v: number) { defaultServings.value = v; persist('default-servings', String(v)) }
-  function setShowMealCalendar(v: boolean) { showMealCalendar.value = v; persist('meal-calendar', String(v)) }
   function setDefaultSnoozeMinutes(v: number) { defaultSnoozeMinutes.value = v; persist('default-snooze', String(v)) }
   function setReminderSound(v: boolean) { reminderSound.value = v; persist('reminder-sound', String(v)) }
   function setDefaultNoteView(v: DefaultView) { defaultNoteView.value = v; persist('default-note-view', v) }
@@ -477,9 +463,6 @@ export const useAppStore = defineStore('app', () => {
     autoAddRestock, setAutoAddRestock,
     defaultGrocerySort, setDefaultGrocerySort,
     showStockIndicators, setShowStockIndicators,
-    /* Meals */
-    defaultServings, setDefaultServings,
-    showMealCalendar, setShowMealCalendar,
     /* Reminders */
     defaultSnoozeMinutes, setDefaultSnoozeMinutes,
     reminderSound, setReminderSound,

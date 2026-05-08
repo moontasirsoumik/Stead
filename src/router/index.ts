@@ -129,13 +129,6 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/features/wishlist/WishlistPage.vue'),
       },
 
-      /* Subscriptions (personal) */
-      {
-        path: 'subscriptions',
-        name: 'subscriptions',
-        component: () => import('@/features/subscriptions/SubscriptionsPage.vue'),
-      },
-
       /* Journal (personal) */
       {
         path: 'journal',
@@ -143,11 +136,16 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/features/journal/JournalPage.vue'),
       },
 
-      /* Habits (personal) */
+      /* Boards (both scopes) */
       {
-        path: 'habits',
-        name: 'habits',
-        component: () => import('@/features/habits/HabitsPage.vue'),
+        path: 'boards',
+        name: 'boards',
+        component: () => import('@/features/boards/BoardsPage.vue'),
+      },
+      {
+        path: 'boards/:id',
+        name: 'board-detail',
+        component: () => import('@/features/boards/BoardDetailPage.vue'),
       },
 
       /* Contacts (household) */
@@ -162,13 +160,6 @@ const routes: RouteRecordRaw[] = [
         path: 'documents',
         name: 'documents',
         component: () => import('@/features/documents/DocumentsPage.vue'),
-      },
-
-      /* Meals (household) */
-      {
-        path: 'meals',
-        name: 'meals',
-        component: () => import('@/features/meals/MealsPage.vue'),
       },
 
       /* Settings */

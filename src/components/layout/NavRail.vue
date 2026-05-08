@@ -36,7 +36,7 @@ const householdManage = [
 ] as const
 
 const householdPlan = [
-  { to: '/meals', icon: 'restaurant', label: 'Meals' },
+  { to: '/boards', icon: 'dashboard_customize', label: 'Boards' },
 ] as const
 
 const householdThink = [
@@ -57,7 +57,7 @@ const personalOverview = [
 
 const personalManage = [
   { to: '/tasks', icon: 'tasks', label: 'Tasks' },
-  { to: '/habits', icon: 'fitness_center', label: 'Habits' },
+  { to: '/boards', icon: 'dashboard_customize', label: 'Boards' },
 ] as const
 
 const personalThink = [
@@ -67,7 +67,6 @@ const personalThink = [
 
 const personalStuff = [
   { to: '/wishlist', icon: 'favorite', label: 'Wishlist' },
-  { to: '/subscriptions', icon: 'subscriptions', label: 'Subscriptions' },
 ] as const
 
 // Dynamic computed nav
