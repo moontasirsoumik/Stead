@@ -1,7 +1,7 @@
 # Stead — Implementation Progress Tracker
 
 > **Last updated:** 2026-05-09
-> **Current Phase:** P33 — Dashboard Boards widget + DB migration prep
+> **Current Phase:** P33 — Complete (Dashboard widget + DB migrations applied)
 
 ---
 
@@ -44,9 +44,9 @@
 | P28e | UI Fixes Round 4 | ✅ Done | 2026-04-18 | 2026-04-18 | Reminders layout fix, sidebar scope toggle removal, mobile nav changes (sidebar-only), emoji→Material Symbols replacement |
 | P29 | Calendar Feature | ✅ Done | 2026-04-18 | 2026-04-18 | Full calendar page with month grid, aggregates tasks/reminders/bills, standalone event CRUD, day detail panel, DB migration applied |
 | P30 | Settings Wiring | ✅ Done | 2026-04-18 | 2026-04-18 | Wired 22 orphaned settings to feature pages — see details below |
-| P31 | Privacy & Sharing | 🟡 In Progress | 2026-04-20 | — | Frontend complete, DB migration pending — see details below |
+| P31 | Privacy & Sharing | ✅ Done | 2026-04-20 | 2026-05-09 | Frontend complete, DB migration 013 applied |
 | P32 | Feature Generalization | ✅ Done | 2026-05-09 | 2026-05-09 | Boards replaces Meals + Habits + Subscriptions — see details below |
-| P33 | Dashboard + Migrations | 🟡 In Progress | 2026-05-09 | — | Boards dashboard widget added. DB migrations 013+015 pending (need Supabase token) |
+| P33 | Dashboard + Migrations | ✅ Done | 2026-05-09 | 2026-05-09 | Boards dashboard widget added. DB migrations 013+015 applied |
 
 ---
 
