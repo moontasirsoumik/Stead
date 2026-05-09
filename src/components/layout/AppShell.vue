@@ -100,26 +100,24 @@ async function handleSignOut() {
           <SAvatar :name="userName" size="sm" />
         </div>
         <div v-if="accountMenuOpen" class="account-menu-backdrop" @click="accountMenuOpen = false" />
-        <Transition name="menu-pop">
-          <div v-if="accountMenuOpen" class="account-menu">
-            <div class="account-menu__header">
-              <SAvatar :name="userName" size="md" />
-              <div class="account-menu__info">
-                <span class="account-menu__name">{{ userName }}</span>
-                <span class="account-menu__email">{{ userEmail }}</span>
-              </div>
+        <div v-if="accountMenuOpen" class="account-menu">
+          <div class="account-menu__header">
+            <SAvatar :name="userName" size="md" />
+            <div class="account-menu__info">
+              <span class="account-menu__name">{{ userName }}</span>
+              <span class="account-menu__email">{{ userEmail }}</span>
             </div>
-            <div class="account-menu__divider" />
-            <RouterLink to="/settings" class="account-menu__item" @click="accountMenuOpen = false">
-              <span class="material-symbols-rounded">settings</span>
-              Settings
-            </RouterLink>
-            <button class="account-menu__item" @click="handleSignOut">
-              <span class="material-symbols-rounded">logout</span>
-              Sign out
-            </button>
           </div>
-        </Transition>
+          <div class="account-menu__divider" />
+          <RouterLink to="/settings" class="account-menu__item" @click="accountMenuOpen = false">
+            <span class="material-symbols-rounded">settings</span>
+            Settings
+          </RouterLink>
+          <button class="account-menu__item" @click="handleSignOut">
+            <span class="material-symbols-rounded">logout</span>
+            Sign out
+          </button>
+        </div>
       </div>
     </header>
 
@@ -133,9 +131,7 @@ async function handleSignOut() {
       <!-- Content -->
       <main class="shell__content">
         <RouterView v-slot="{ Component, route }">
-          <Transition name="route" mode="out-in">
-            <component :is="Component" :key="route.matched[1]?.path ?? route.path" />
-          </Transition>
+          <component :is="Component" :key="route.matched[1]?.path ?? route.path" />
         </RouterView>
       </main>
     </div>
@@ -221,6 +217,7 @@ async function handleSignOut() {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
+  scrollbar-gutter: stable;
   padding: 16px;
   min-width: 0;
 }
@@ -369,29 +366,12 @@ async function handleSignOut() {
   box-shadow: var(--shadow-lg);
   z-index: 100;
   padding: var(--space-s);
-  transform-origin: top right;
+  animation: menu-enter var(--duration-fast) var(--easing-standard);
 }
 
-.menu-pop-enter-active {
-  transition:
-    opacity var(--duration-fast) var(--easing-out),
-    transform var(--duration-fast) var(--easing-out);
-}
-
-.menu-pop-leave-active {
-  transition:
-    opacity 80ms var(--easing-out),
-    transform 80ms var(--easing-out);
-}
-
-.menu-pop-enter-from {
-  opacity: 0;
-  transform: scale(0.98) translateY(-2px);
-}
-
-.menu-pop-leave-to {
-  opacity: 0;
-  transform: scale(0.99) translateY(-1px);
+@keyframes menu-enter {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .account-menu__header {

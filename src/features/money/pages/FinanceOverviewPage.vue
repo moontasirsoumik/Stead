@@ -127,6 +127,29 @@ const spendingMix = computed(() => {
     }))
 })
 
+const incomeSources = computed(() => {
+  if (monthIncomeTotal.value === 0) return []
+
+  const sourceTotals: Record<string, { amount: number; count: number }> = {}
+  for (const entry of currentMonthIncome.value) {
+    const key = entry.source || 'Other'
+    if (!sourceTotals[key]) sourceTotals[key] = { amount: 0, count: 0 }
+    sourceTotals[key].amount += entry.amount
+    sourceTotals[key].count += 1
+  }
+
+  return Object.entries(sourceTotals)
+    .sort((left, right) => right[1].amount - left[1].amount)
+    .slice(0, 6)
+    .map(([source, data]) => ({
+      source,
+      amount: data.amount,
+      count: data.count,
+      share: Math.round((data.amount / monthIncomeTotal.value) * 100),
+      width: Math.max(8, Math.round((data.amount / monthIncomeTotal.value) * 100)),
+    }))
+})
+
 const budgetWatchItems = computed(() =>
   scopedBudgets.value
     .map((budget) => {
@@ -322,6 +345,69 @@ const hasAnyData = computed(() =>
   scopedBudgets.value.length > 0,
 )
 
+// ── Visualization: 6-month trend line ──
+const trendLine = computed(() => {
+  const reversed = [...monthlyCadence.value].reverse()
+  const maxVal = Math.max(1, ...reversed.flatMap(m => [m.income, m.expense]))
+  const points = reversed.map((m, i) => {
+    const x = 30 + i * 52
+    return {
+      x,
+      incY: 10 + (1 - m.income / maxVal) * 80,
+      expY: 10 + (1 - m.expense / maxVal) * 80,
+      label: m.label,
+    }
+  })
+  const incomePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.incY}`).join(' ')
+  const expensePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.expY}`).join(' ')
+  const incomeArea = incomePath + ` L${points[points.length - 1].x},95 L${points[0].x},95 Z`
+  const expenseArea = expensePath + ` L${points[points.length - 1].x},95 L${points[0].x},95 Z`
+  return { points, incomePath, expensePath, incomeArea, expenseArea }
+})
+
+// ── Visualization: Daily spend heatmap (current month) ──
+const spendHeatmap = computed(() => {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth()
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const today = now.getDate()
+
+  const dailyTotals: number[] = []
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+    const total = scopedExpenses.value
+      .filter(e => e.date.slice(0, 10) === dateStr)
+      .reduce((s, e) => s + e.amount, 0)
+    dailyTotals.push(total)
+  }
+  const max = Math.max(1, ...dailyTotals)
+
+  // Build weeks (Sun-Sat rows)
+  const firstDayOfWeek = new Date(year, month, 1).getDay()
+  const cells: Array<{ day: number; intensity: number; amount: number; isFuture: boolean } | null> = []
+
+  // Pad the start
+  for (let i = 0; i < firstDayOfWeek; i++) cells.push(null)
+  for (let d = 1; d <= daysInMonth; d++) {
+    cells.push({
+      day: d,
+      intensity: dailyTotals[d - 1] > 0 ? Math.max(0.15, dailyTotals[d - 1] / max) : 0,
+      amount: dailyTotals[d - 1],
+      isFuture: d > today,
+    })
+  }
+  // Pad the end to complete the last week
+  while (cells.length % 7 !== 0) cells.push(null)
+
+  // Split into weeks
+  const weeks: typeof cells[] = []
+  for (let i = 0; i < cells.length; i += 7) {
+    weeks.push(cells.slice(i, i + 7))
+  }
+  return weeks
+})
+
 onMounted(async () => {
   const householdId = authStore.householdId
   if (!householdId) {
@@ -344,20 +430,22 @@ onMounted(async () => {
 
 <template>
   <PageContainer>
-    <PageHeader title="Finances" subtitle="Household overview" />
+    <PageHeader title="Finances" subtitle="Household overview" class="page-enter" :style="{ '--stagger': 0 }" />
     <MoneyTabs />
 
-    <LoadingSkeleton v-if="loading" :lines="10" />
+    <LoadingSkeleton v-if="loading" :lines="10" class="page-enter" :style="{ '--stagger': 2 }" />
 
     <EmptyState
       v-else-if="!hasAnyData"
       title="No financial data yet"
       subtitle="Start by adding expenses, income, budgets, or bills from the other tabs."
       icon="empty"
+      class="page-enter" :style="{ '--stagger': 2 }"
     />
 
     <div v-else class="finance-overview">
-      <section class="overview-rail">
+      <!-- Stats rail -->
+      <section class="overview-rail page-enter" :style="{ '--stagger': 2 }">
         <article
           v-for="card in overviewCards"
           :key="card.label"
@@ -371,7 +459,8 @@ onMounted(async () => {
       </section>
 
       <section class="overview-grid">
-        <article class="panel panel--cashflow">
+        <!-- Cashflow panel with trend line chart -->
+        <article class="panel panel--cashflow page-enter" :style="{ '--stagger': 3 }">
           <header class="panel__header">
             <div>
               <span class="panel__eyebrow">Cashflow</span>
@@ -379,6 +468,40 @@ onMounted(async () => {
             </div>
             <div class="panel__context">{{ currentPeriodLabel }} · {{ scopeLabel }}</div>
           </header>
+
+          <!-- Trend Line Chart -->
+          <div class="trend-chart-shell">
+            <svg viewBox="0 0 310 110" class="trend-chart" role="img" aria-label="6-month income vs expense trend">
+              <!-- Grid -->
+              <line x1="30" y1="95" x2="290" y2="95" stroke="var(--color-border-subtle)" stroke-width="1" />
+              <line x1="30" y1="50" x2="290" y2="50" stroke="var(--color-border-subtle)" stroke-width="0.5" stroke-dasharray="4 4" />
+              <line x1="30" y1="10" x2="290" y2="10" stroke="var(--color-border-subtle)" stroke-width="0.5" stroke-dasharray="4 4" />
+              <!-- Income area -->
+              <path :d="trendLine.incomeArea" class="trend-fill trend-fill--income" />
+              <!-- Expense area -->
+              <path :d="trendLine.expenseArea" class="trend-fill trend-fill--expense" />
+              <!-- Income line -->
+              <path :d="trendLine.incomePath" fill="none" class="trend-stroke trend-stroke--income" />
+              <!-- Expense line -->
+              <path :d="trendLine.expensePath" fill="none" class="trend-stroke trend-stroke--expense" />
+              <!-- Dots + labels -->
+              <g v-for="pt in trendLine.points" :key="pt.label">
+                <circle :cx="pt.x" :cy="pt.incY" r="3" class="trend-dot trend-dot--income" />
+                <circle :cx="pt.x" :cy="pt.expY" r="3" class="trend-dot trend-dot--expense" />
+                <text :x="pt.x" y="108" text-anchor="middle" class="trend-month-label">{{ pt.label }}</text>
+              </g>
+            </svg>
+            <div class="trend-chart-legend">
+              <span class="trend-legend-item">
+                <span class="trend-legend-dot trend-legend-dot--income"></span>
+                Income
+              </span>
+              <span class="trend-legend-item">
+                <span class="trend-legend-dot trend-legend-dot--expense"></span>
+                Spending
+              </span>
+            </div>
+          </div>
 
           <div class="flow-summary">
             <div class="flow-stat">
@@ -433,7 +556,7 @@ onMounted(async () => {
           </div>
         </article>
 
-        <article class="panel">
+        <article class="panel page-enter" :style="{ '--stagger': 4 }">
           <header class="panel__header">
             <div>
               <span class="panel__eyebrow">Spending</span>
@@ -461,7 +584,53 @@ onMounted(async () => {
           </div>
         </article>
 
-        <article class="panel">
+        <!-- Daily Spend Heatmap -->
+        <article class="panel page-enter" :style="{ '--stagger': 5 }">
+          <header class="panel__header">
+            <div>
+              <span class="panel__eyebrow">Activity</span>
+              <h2 class="panel__title">Daily spend</h2>
+            </div>
+            <div class="panel__context">{{ currentPeriodLabel }}</div>
+          </header>
+
+          <div v-if="!currentMonthExpenses.length" class="panel__empty">No expense data to map this month.</div>
+
+          <div v-else class="heatmap">
+            <div class="heatmap__days">
+              <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+            </div>
+            <div class="heatmap__grid">
+              <div v-for="(week, wi) in spendHeatmap" :key="wi" class="heatmap__week">
+                <div
+                  v-for="(cell, ci) in week"
+                  :key="`${wi}-${ci}`"
+                  class="heatmap__cell"
+                  :class="{
+                    'heatmap__cell--empty': !cell,
+                    'heatmap__cell--future': cell?.isFuture,
+                    'heatmap__cell--zero': cell && !cell.isFuture && cell.amount === 0,
+                  }"
+                  :style="cell && !cell.isFuture && cell.amount > 0 ? { opacity: cell.intensity, background: 'var(--color-brand-primary)' } : undefined"
+                  :title="cell ? `Day ${cell.day}: ${formatCents(cell.amount)}` : ''"
+                >
+                  <span v-if="cell" class="heatmap__day-num">{{ cell.day }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="heatmap__scale">
+              <span class="heatmap__scale-label">Less</span>
+              <span class="heatmap__scale-dot" style="opacity: 0.15"></span>
+              <span class="heatmap__scale-dot" style="opacity: 0.35"></span>
+              <span class="heatmap__scale-dot" style="opacity: 0.6"></span>
+              <span class="heatmap__scale-dot" style="opacity: 0.85"></span>
+              <span class="heatmap__scale-dot" style="opacity: 1"></span>
+              <span class="heatmap__scale-label">More</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel page-enter" :style="{ '--stagger': 6 }">
           <header class="panel__header">
             <div>
               <span class="panel__eyebrow">Budgets</span>
@@ -470,10 +639,21 @@ onMounted(async () => {
             <button class="panel__link" @click="router.push('/money/budgets')">View budgets</button>
           </header>
 
-          <div class="panel__summary" v-if="scopedBudgets.length">
-            <span>{{ formatCents(budgetMetrics.trackedSpent) }} used</span>
-            <span>of {{ formatCents(budgetMetrics.totalBudget) }}</span>
-            <span>{{ budgetMetrics.atRisk }} at risk</span>
+          <div class="summary-strip" v-if="scopedBudgets.length">
+            <div class="summary-chip">
+              <span class="summary-chip__value">{{ formatCents(budgetMetrics.trackedSpent) }}</span>
+              <span class="summary-chip__label">Spent</span>
+            </div>
+            <span class="summary-strip__divider"></span>
+            <div class="summary-chip">
+              <span class="summary-chip__value">{{ formatCents(budgetMetrics.totalBudget) }}</span>
+              <span class="summary-chip__label">Budgeted</span>
+            </div>
+            <span class="summary-strip__divider"></span>
+            <div class="summary-chip">
+              <span class="summary-chip__value" :class="budgetMetrics.atRisk > 0 ? 'summary-chip__value--warn' : ''">{{ budgetMetrics.atRisk }}</span>
+              <span class="summary-chip__label">At risk</span>
+            </div>
           </div>
 
           <div v-if="!budgetWatchItems.length" class="panel__empty">No budgets set for this month.</div>
@@ -502,7 +682,7 @@ onMounted(async () => {
           </div>
         </article>
 
-        <article class="panel">
+        <article class="panel page-enter" :style="{ '--stagger': 7 }">
           <header class="panel__header">
             <div>
               <span class="panel__eyebrow">Bills</span>
@@ -511,9 +691,16 @@ onMounted(async () => {
             <button class="panel__link" @click="router.push('/money/bills')">View bills</button>
           </header>
 
-          <div class="panel__summary" v-if="billsSummary.total">
-            <span>{{ formatCents(billsSummary.dueNow) }} due now</span>
-            <span>{{ formatCents(billsSummary.monthlyTotal) }} monthly total</span>
+          <div class="summary-strip" v-if="billsSummary.total">
+            <div class="summary-chip">
+              <span class="summary-chip__value" :class="billsSummary.dueNow > 0 ? 'summary-chip__value--accent' : ''">{{ formatCents(billsSummary.dueNow) }}</span>
+              <span class="summary-chip__label">Due now</span>
+            </div>
+            <span class="summary-strip__divider"></span>
+            <div class="summary-chip">
+              <span class="summary-chip__value">{{ formatCents(billsSummary.monthlyTotal) }}</span>
+              <span class="summary-chip__label">Monthly total</span>
+            </div>
           </div>
 
           <div class="status-strip">
@@ -550,7 +737,36 @@ onMounted(async () => {
           </div>
         </article>
 
-        <article class="panel panel--full">
+        <!-- Income sources -->
+        <article class="panel page-enter" :style="{ '--stagger': 8 }">
+          <header class="panel__header">
+            <div>
+              <span class="panel__eyebrow">Income</span>
+              <h2 class="panel__title">Sources</h2>
+            </div>
+            <button class="panel__link" @click="router.push('/money/income')">View income</button>
+          </header>
+
+          <div v-if="!incomeSources.length" class="panel__empty">No income recorded this month yet.</div>
+
+          <div v-else class="source-list">
+            <div v-for="item in incomeSources" :key="item.source" class="source-row">
+              <div class="source-row__top">
+                <div>
+                  <div class="source-row__label">{{ item.source }}</div>
+                  <div class="source-row__meta">{{ item.count }} {{ item.count === 1 ? 'entry' : 'entries' }}</div>
+                </div>
+                <div class="source-row__value">{{ formatCents(item.amount) }}</div>
+              </div>
+              <div class="source-row__track">
+                <span class="source-row__fill" :style="{ width: `${item.width}%` }" />
+              </div>
+              <div class="source-row__foot">{{ item.share }}% of month income</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel panel--full page-enter" :style="{ '--stagger': 9 }">
           <header class="panel__header">
             <div>
               <span class="panel__eyebrow">Ledger</span>
@@ -606,15 +822,16 @@ onMounted(async () => {
   gap: var(--space-s);
 }
 
+/* ── Stats rail ── */
 .overview-rail {
   display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: var(--space-s);
 }
 
 @media (min-width: 620px) {
   .overview-rail {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -749,20 +966,56 @@ onMounted(async () => {
   color: var(--color-fg-primary);
 }
 
-.panel__summary {
+.summary-strip {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-s);
+  align-items: center;
+  gap: var(--space-m);
   padding: var(--space-s) var(--space-m);
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-m);
   background: var(--color-surface-container-low);
-  font: var(--text-caption);
-  color: var(--color-fg-secondary);
+}
+
+.summary-strip__divider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--color-border-subtle);
+  flex-shrink: 0;
+}
+
+.summary-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+
+.summary-chip__value {
+  font: var(--text-body-1-strong);
+  font-family: var(--font-mono);
+  color: var(--color-fg-primary);
+  letter-spacing: var(--tracking-tight);
+}
+
+.summary-chip__value--warn {
+  color: var(--color-warning-fg);
+}
+
+.summary-chip__value--accent {
+  color: var(--color-brand-primary);
+}
+
+.summary-chip__label {
+  font: var(--text-label-sm);
+  color: var(--color-fg-tertiary);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
 }
 
 .panel__empty {
-  padding: var(--space-l) 0;
+  padding: var(--space-s) 0;
   text-align: center;
   font: var(--text-caption);
   color: var(--color-fg-tertiary);
@@ -960,6 +1213,64 @@ onMounted(async () => {
   background: var(--color-brand-primary);
 }
 
+/* ── Income sources ── */
+.source-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+}
+
+.source-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--space-s) var(--space-m);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-m);
+  background: var(--color-surface-container-low);
+}
+
+.source-row__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-s);
+}
+
+.source-row__label {
+  font: var(--text-body-2);
+  color: var(--color-fg-primary);
+}
+
+.source-row__meta,
+.source-row__foot {
+  font: var(--text-caption);
+  color: var(--color-fg-tertiary);
+}
+
+.source-row__value {
+  font: var(--text-label-md);
+  font-family: var(--font-mono);
+  color: var(--color-success-fg);
+  text-align: right;
+}
+
+.source-row__track {
+  display: block;
+  width: 100%;
+  height: 8px;
+  overflow: hidden;
+  border-radius: var(--radius-circle);
+  background: var(--color-surface-container);
+}
+
+.source-row__fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-success);
+}
+
 .budget-row__status {
   display: flex;
   flex-direction: column;
@@ -1097,7 +1408,178 @@ onMounted(async () => {
   background: var(--color-surface-container);
 }
 
+/* ── Trend Line Chart ── */
+.trend-chart-shell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-s);
+}
+
+.trend-chart {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.trend-fill--income {
+  fill: var(--color-success);
+  opacity: 0.1;
+}
+
+.trend-fill--expense {
+  fill: var(--color-error);
+  opacity: 0.06;
+}
+
+.trend-stroke--income {
+  stroke: var(--color-success);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.7;
+}
+
+.trend-stroke--expense {
+  stroke: var(--color-error);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.45;
+}
+
+.trend-dot--income {
+  fill: var(--color-success);
+  opacity: 0.8;
+}
+
+.trend-dot--expense {
+  fill: var(--color-error);
+  opacity: 0.55;
+}
+
+.trend-month-label {
+  font-size: 9px;
+  fill: var(--color-fg-tertiary);
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-medium);
+}
+
+.trend-chart-legend {
+  display: flex;
+  gap: var(--space-m);
+  justify-content: flex-end;
+}
+
+.trend-legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  font: var(--text-caption);
+  color: var(--color-fg-tertiary);
+}
+
+.trend-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.trend-legend-dot--income { background: var(--color-success); opacity: 0.7; }
+.trend-legend-dot--expense { background: var(--color-error); opacity: 0.45; }
+
+/* ── Daily Spend Heatmap ── */
+.heatmap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+}
+
+.heatmap__days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  text-align: center;
+  font: var(--text-label-sm);
+  color: var(--color-fg-tertiary);
+  letter-spacing: var(--tracking-caps);
+}
+
+.heatmap__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.heatmap__week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.heatmap__cell {
+  aspect-ratio: 1;
+  border-radius: var(--radius-s);
+  background: var(--color-bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 28px;
+}
+
+.heatmap__cell--empty {
+  background: transparent;
+}
+
+.heatmap__cell--future {
+  background: var(--color-bg-tertiary);
+  opacity: 0.4;
+}
+
+.heatmap__cell--zero {
+  background: var(--color-bg-tertiary);
+}
+
+.heatmap__day-num {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-fg-tertiary);
+  line-height: 1;
+  mix-blend-mode: luminosity;
+}
+
+.heatmap__cell:not(.heatmap__cell--empty):not(.heatmap__cell--future):not(.heatmap__cell--zero) .heatmap__day-num {
+  color: var(--color-fg-on-brand);
+  mix-blend-mode: normal;
+}
+
+.heatmap__scale {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.heatmap__scale-label {
+  font: var(--text-caption);
+  color: var(--color-fg-tertiary);
+  font-size: 10px;
+}
+
+.heatmap__scale-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-s);
+  background: var(--color-brand-primary);
+}
+
 @media (max-width: 639px) {
+  .overview-rail {
+    grid-template-columns: 1fr 1fr;
+  }
+
   .status-strip {
     grid-template-columns: 1fr;
   }

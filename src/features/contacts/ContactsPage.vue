@@ -190,7 +190,7 @@ onMounted(async () => {
       <LoadingSkeleton :lines="5" />
     </div>
 
-    <div v-else-if="!filteredItems.length" class="empty-section page-enter empty-fade" :style="{ '--stagger': 2 }">
+    <div v-else-if="!filteredItems.length" class="empty-section page-enter" :style="{ '--stagger': 2 }">
       <EmptyState
         v-if="!contactsStore.items.length"
         title="No contacts saved yet"
@@ -211,10 +211,9 @@ onMounted(async () => {
         <span class="contact-table__th contact-table__th--right">Actions</span>
       </div>
       <div
-        v-for="(contact, idx) in filteredItems"
+        v-for="contact in filteredItems"
         :key="contact.id"
-        class="contact-row row-enter"
-        :style="{ '--row-i': idx }"
+        class="contact-row"
         @click="openEditDrawer(contact)"
       >
         <div class="contact-row__name-col">

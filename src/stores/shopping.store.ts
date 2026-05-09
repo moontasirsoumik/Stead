@@ -75,6 +75,14 @@ export const useShoppingStore = defineStore('shopping', () => {
     return update(id, { status: nextStatus[item.status] })
   }
 
+  async function markDone(id: string, memberId: string | null) {
+    return update(id, { status: 'bought', done_by: memberId })
+  }
+
+  async function unmarkDone(id: string) {
+    return update(id, { status: 'needed', done_by: null })
+  }
+
   async function clearBought() {
     const boughtItems = items.value.filter((i) => i.status === 'bought')
     for (const item of boughtItems) {
@@ -115,6 +123,14 @@ export const useShoppingStore = defineStore('shopping', () => {
     items.value.filter((i) => i.status === 'in_cart').length,
   )
 
+  const activeItems = computed(() =>
+    items.value.filter((i) => i.status !== 'bought'),
+  )
+
+  const archivedItems = computed(() =>
+    items.value.filter((i) => i.status === 'bought'),
+  )
+
   return {
     items,
     loading,
@@ -124,10 +140,14 @@ export const useShoppingStore = defineStore('shopping', () => {
     update,
     remove,
     toggleStatus,
+    markDone,
+    unmarkDone,
     clearBought,
     groupedByCategory,
     groupedByStatus,
     neededCount,
     inCartCount,
+    activeItems,
+    archivedItems,
   }
 })

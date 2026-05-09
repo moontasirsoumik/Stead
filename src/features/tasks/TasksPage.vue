@@ -332,19 +332,19 @@ onMounted(async () => {
     <div class="stats-row page-enter" :style="{ '--stagger': 1 }">
       <div class="stat-cell">
         <span class="stat-cell__label">Total</span>
-        <span class="stat-cell__value stat-pop" :style="{ '--stat-i': 0 }">{{ tasksStore.items.length }}</span>
+        <span class="stat-cell__value">{{ tasksStore.items.length }}</span>
       </div>
       <div class="stat-cell">
         <span class="stat-cell__label">Due Today</span>
-        <span class="stat-cell__value stat-pop" :style="{ '--stat-i': 1 }">{{ tasksStore.dueToday.length }}</span>
+        <span class="stat-cell__value">{{ tasksStore.dueToday.length }}</span>
       </div>
       <div class="stat-cell">
         <span class="stat-cell__label">Overdue</span>
-        <span class="stat-cell__value stat-pop" :class="{ 'stat-cell__value--warn': tasksStore.overdueTasks.length > 0 }" :style="{ '--stat-i': 2 }">{{ tasksStore.overdueTasks.length }}</span>
+        <span class="stat-cell__value" :class="{ 'stat-cell__value--warn': tasksStore.overdueTasks.length > 0 }">{{ tasksStore.overdueTasks.length }}</span>
       </div>
       <div class="stat-cell">
         <span class="stat-cell__label">Maintenance</span>
-        <span class="stat-cell__value stat-pop" :style="{ '--stat-i': 3 }">{{ tasksStore.maintenanceTasks.length }}</span>
+        <span class="stat-cell__value">{{ tasksStore.maintenanceTasks.length }}</span>
       </div>
     </div>
 
@@ -363,7 +363,7 @@ onMounted(async () => {
     </div>
 
     <!-- Empty state -->
-    <div v-else-if="!filteredItems.length" class="page-enter empty-fade" :style="{ '--stagger': 3 }">
+    <div v-else-if="!filteredItems.length" class="page-enter" :style="{ '--stagger': 3 }">
       <EmptyState v-if="!tasksStore.items.length" title="All clear!" subtitle="No tasks right now. Add one to keep the household running smoothly." icon="success" action-label="Add task" @action="openCreateDrawer" />
       <EmptyState v-else title="No matches" subtitle="Try adjusting your filters or search term." icon="search" />
     </div>
@@ -381,7 +381,7 @@ onMounted(async () => {
             <span class="task-table__th task-table__th--center">Assignee</span>
             <span class="task-table__th task-table__th--right">Actions</span>
           </div>
-          <div v-for="(task, idx) in group.tasks" :key="task.id" class="task-row-wrapper row-enter" :style="{ '--row-i': idx }" role="listitem">
+          <div v-for="task in group.tasks" :key="task.id" class="task-row-wrapper" role="listitem">
             <div class="task-row" @click="toggleExpand(task.id)">
               <div class="task-row__title-col">
                 <span class="task-row__title">{{ task.title }}</span>

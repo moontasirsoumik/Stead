@@ -257,8 +257,8 @@ onMounted(async () => {
       <div
         v-for="(goal, idx) in scopedGoals"
         :key="goal.id"
-        class="goal-block page-enter row-enter"
-        :style="{ '--stagger': 3 + idx, '--row-i': idx }"
+        class="goal-block page-enter"
+        :style="{ '--stagger': 3 + idx }"
       >
         <div class="goal-row" @click="openEditGoal(goal)">
           <div class="goal-row__name">{{ goal.name }}</div>
@@ -300,7 +300,7 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div v-else class="empty-section page-enter empty-fade" :style="{ '--stagger': 3 }">
+    <div v-else class="empty-section page-enter" :style="{ '--stagger': 3 }">
       <EmptyState
         title="No savings goals"
         subtitle="Set a goal and watch your progress grow"

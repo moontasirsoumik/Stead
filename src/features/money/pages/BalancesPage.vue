@@ -81,17 +81,17 @@ onMounted(async () => {
       <div class="stats-bar page-enter" :style="{ '--stagger': 2 }">
         <div class="stats-bar__cell">
           <span class="stats-bar__label">Net balance</span>
-          <span class="stats-bar__value stat-pop" :class="netBalance >= 0 ? 'net-positive' : 'net-negative'" :style="{ '--stat-i': 0 }">
+          <span class="stats-bar__value" :class="netBalance >= 0 ? 'net-positive' : 'net-negative'">
             {{ netBalance >= 0 ? '+' : '' }}{{ formatCents(Math.abs(netBalance)) }}
           </span>
         </div>
         <div class="stats-bar__cell">
           <span class="stats-bar__label">You owe</span>
-          <span class="stats-bar__value stat-pop net-negative" :style="{ '--stat-i': 1 }">{{ formatCents(totalIOwe) }}</span>
+          <span class="stats-bar__value net-negative">{{ formatCents(totalIOwe) }}</span>
         </div>
         <div class="stats-bar__cell">
           <span class="stats-bar__label">Owed to you</span>
-          <span class="stats-bar__value stat-pop net-positive" :style="{ '--stat-i': 2 }">{{ formatCents(totalTheyOwe) }}</span>
+          <span class="stats-bar__value net-positive">{{ formatCents(totalTheyOwe) }}</span>
         </div>
       </div>
 
@@ -103,7 +103,7 @@ onMounted(async () => {
       >
         <h3 class="balance-section__title">Owed to you</h3>
         <div class="balance-list">
-          <div v-for="(group, idx) in theyOwe" :key="group.member_id" class="balance-row row-enter" :style="{ '--row-i': idx }">
+          <div v-for="group in theyOwe" :key="group.member_id" class="balance-row">
             <SAvatar
               :name="getMemberName(group.member_id)"
               :color="getMemberColor(group.member_id)"
@@ -131,7 +131,7 @@ onMounted(async () => {
       >
         <h3 class="balance-section__title">You owe</h3>
         <div class="balance-list">
-          <div v-for="(group, idx) in iOwe" :key="group.member_id" class="balance-row row-enter" :style="{ '--row-i': idx }">
+          <div v-for="group in iOwe" :key="group.member_id" class="balance-row">
             <SAvatar
               :name="getMemberName(group.member_id)"
               :color="getMemberColor(group.member_id)"
@@ -152,7 +152,7 @@ onMounted(async () => {
       <!-- Empty -->
       <div
         v-if="!theyOwe.length && !iOwe.length"
-        class="empty-section page-enter empty-fade"
+        class="empty-section page-enter"
         :style="{ '--stagger': 3 }"
       >
         <EmptyState

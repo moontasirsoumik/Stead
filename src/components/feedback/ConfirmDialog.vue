@@ -139,7 +139,7 @@ async function handleConfirm() {
 
 .dialog-enter-from .dialog {
   opacity: 0;
-  transform: scale(0.98);
+  transform: scale(0.96);
 }
 
 .dialog-leave-to {
@@ -148,6 +148,6 @@ async function handleConfirm() {
 
 .dialog-leave-to .dialog {
   opacity: 0;
-  transform: scale(0.99);
+  transform: scale(0.98);
 }
 </style>

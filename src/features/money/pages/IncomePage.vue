@@ -198,8 +198,8 @@ onMounted(async () => {
       <div
         v-for="(item, idx) in scopedSorted"
         :key="item.id"
-        class="income-row page-enter row-enter"
-        :style="{ '--stagger': 3 + idx, '--row-i': idx }"
+        class="income-row page-enter"
+        :style="{ '--stagger': 3 + idx }"
         @click="openEdit(item)"
       >
         <div class="income-row__source">{{ item.source }}</div>
@@ -219,7 +219,7 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div v-else class="empty-section page-enter empty-fade" :style="{ '--stagger': 3 }">
+    <div v-else class="empty-section page-enter" :style="{ '--stagger': 3 }">
       <EmptyState
         title="No income recorded"
         subtitle="Add income entries to track your household earnings"

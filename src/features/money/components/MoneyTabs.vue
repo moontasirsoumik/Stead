@@ -1,6 +1,5 @@
 <script lang="ts">
-// Module-level — shared across all MoneyTabs instances so pill animates across remounts
-let sharedPillPosition: { width: string; transform: string } | null = null
+// Module-level — preserve scroll position across remounts
 let sharedScrollLeft = 0
 </script>
 
@@ -47,25 +46,14 @@ function updatePill(animate: boolean) {
       ? 'transform 300ms cubic-bezier(0.4, 0, 0, 1), width 300ms cubic-bezier(0.4, 0, 0, 1)'
       : 'none',
   }
-  sharedPillPosition = { width: w, transform: tx }
 }
 
 onMounted(() => {
   nextTick(() => {
     restoreScrollPosition()
-    if (sharedPillPosition) {
-      // Start at the previous tab's pill position (no transition)
-      pillStyle.value = { ...sharedPillPosition, transition: 'none' }
-      // Then animate to the current tab
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          updatePill(true)
-        })
-      })
-    } else {
-      // First ever mount — position instantly
-      updatePill(false)
-    }
+    // Always snap to the current tab instantly on mount — no cross-route animation.
+    // This avoids layout-shift glitches when the sidebar width is transitioning.
+    updatePill(false)
   })
 })
 

@@ -97,18 +97,6 @@ withDefaults(
   color: var(--color-fg-on-brand);
 }
 
-.scheckbox__check path {
-  stroke-dasharray: 12;
-  stroke-dashoffset: 12;
-  animation: check-draw 150ms var(--easing-out) forwards;
-}
-
-@keyframes check-draw {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
 .scheckbox__label {
   font: var(--text-body-1);
   color: var(--color-fg-primary);

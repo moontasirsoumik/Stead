@@ -225,7 +225,7 @@ onMounted(async () => {
       <LoadingSkeleton :lines="5" />
     </div>
 
-    <div v-else-if="!filteredItems.length" class="empty-section page-enter empty-fade" :style="{ '--stagger': 3 }">
+    <div v-else-if="!filteredItems.length" class="empty-section page-enter" :style="{ '--stagger': 3 }">
       <EmptyState
         v-if="!documentsStore.items.length"
         title="No documents tracked"
@@ -247,7 +247,7 @@ onMounted(async () => {
         <span class="doc-table__th doc-table__th--right">Ref #</span>
         <span class="doc-table__th doc-table__th--right">Actions</span>
       </div>
-      <div v-for="(doc, idx) in filteredItems" :key="doc.id" class="doc-row row-enter" :style="{ '--row-i': idx }" role="listitem" @click="openEditDrawer(doc)">
+      <div v-for="doc in filteredItems" :key="doc.id" class="doc-row" role="listitem" @click="openEditDrawer(doc)">
         <div class="doc-row__name-col">
           <span class="doc-row__title">{{ doc.title }}</span>
           <span v-if="doc.issuer" class="doc-row__issuer">{{ doc.issuer }}</span>

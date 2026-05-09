@@ -216,8 +216,8 @@ onMounted(async () => {
       <div
         v-for="(bill, idx) in billsStore.items"
         :key="bill.id"
-        class="bill-row page-enter row-enter"
-        :style="{ '--stagger': 3 + idx, '--row-i': idx }"
+        class="bill-row page-enter"
+        :style="{ '--stagger': 3 + idx }"
         @click="openEdit(bill)"
       >
         <div class="bill-row__name">
@@ -239,7 +239,7 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div v-else class="empty-section page-enter empty-fade" :style="{ '--stagger': 3 }">
+    <div v-else class="empty-section page-enter" :style="{ '--stagger': 3 }">
       <EmptyState
         title="No bills set up"
         subtitle="Add your recurring bills to stay on top of payments"

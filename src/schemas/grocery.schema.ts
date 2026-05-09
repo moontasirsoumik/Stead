@@ -11,4 +11,5 @@ export const grocerySchema = householdEntitySchema.extend({
   status: z.enum(['needed', 'in_cart', 'bought', 'skipped']),
   preferred_store: z.string().nullable(),
   note: z.string().nullable(),
+  done_by: z.string().uuid().nullable(),
 })

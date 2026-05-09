@@ -194,15 +194,15 @@ onMounted(async () => {
     <div class="stats-bar page-enter" :style="{ '--stagger': 1 }">
       <div class="stats-bar__cell">
         <span class="stats-bar__label">Active</span>
-        <span class="stats-bar__value stat-pop" :style="{ '--stat-i': 0 }">{{ remindersStore.activeReminders.length }}</span>
+        <span class="stats-bar__value">{{ remindersStore.activeReminders.length }}</span>
       </div>
       <div class="stats-bar__cell">
         <span class="stats-bar__label">Overdue</span>
-        <span class="stats-bar__value stat-pop" :style="{ '--stat-i': 1 }">{{ remindersStore.overdueReminders.length }}</span>
+        <span class="stats-bar__value">{{ remindersStore.overdueReminders.length }}</span>
       </div>
       <div class="stats-bar__cell">
         <span class="stats-bar__label">This Week</span>
-        <span class="stats-bar__value stat-pop" :style="{ '--stat-i': 2 }">{{ remindersStore.upcomingReminders.length }}</span>
+        <span class="stats-bar__value">{{ remindersStore.upcomingReminders.length }}</span>
       </div>
     </div>
 
@@ -216,7 +216,7 @@ onMounted(async () => {
       <LoadingSkeleton :lines="5" />
     </div>
 
-    <div v-else-if="!filteredItems.length" class="empty-section page-enter empty-fade" :style="{ '--stagger': 3 }">
+    <div v-else-if="!filteredItems.length" class="empty-section page-enter" :style="{ '--stagger': 3 }">
       <EmptyState v-if="!remindersStore.items.length" title="No reminders" subtitle="Set reminders for important dates and recurring events." icon="empty" action-label="Add reminder" @action="openCreateDrawer" />
       <EmptyState v-else title="No matches" subtitle="Try adjusting your filters or search term." icon="search" />
     </div>
@@ -230,7 +230,7 @@ onMounted(async () => {
         <span class="reminder-table__th reminder-table__th--center">Assigned</span>
         <span class="reminder-table__th reminder-table__th--right">Actions</span>
       </div>
-      <div v-for="(reminder, idx) in sortedItems" :key="reminder.id" :class="['reminder-row', 'row-enter', { 'reminder-row--overdue': isOverdue(reminder) }]" :style="{ '--row-i': idx }" role="listitem" @click="openEditDrawer(reminder)">
+      <div v-for="reminder in sortedItems" :key="reminder.id" :class="['reminder-row', { 'reminder-row--overdue': isOverdue(reminder) }]" role="listitem" @click="openEditDrawer(reminder)">
         <div class="reminder-row__title-col">
           <span class="reminder-row__title">{{ reminder.title }}</span>
         </div>

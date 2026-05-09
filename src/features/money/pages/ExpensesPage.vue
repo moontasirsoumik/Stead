@@ -320,10 +320,9 @@ onMounted(async () => {
         <span class="expense-table__th expense-table__th--right">Amount</span>
       </div>
       <div
-        v-for="(expense, idx) in flatExpenses"
+        v-for="expense in flatExpenses"
         :key="expense.id"
-        class="expense-row row-enter"
-        :style="{ '--row-i': idx }"
+        class="expense-row"
         @click="openEdit(expense)"
       >
         <div class="expense-row__name">
@@ -347,7 +346,7 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div v-else class="empty-section page-enter empty-fade" :style="{ '--stagger': 4 }">
+    <div v-else class="empty-section page-enter" :style="{ '--stagger': 4 }">
       <EmptyState
         title="No expenses to show"
         :subtitle="search || categoryFilter ? 'Try adjusting your filters' : 'Start tracking your spending to see it here'"

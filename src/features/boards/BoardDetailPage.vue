@@ -197,7 +197,7 @@ onMounted(async () => {
       </div>
 
       <template v-else-if="!items.length">
-        <div class="empty-section page-enter empty-fade" :style="{ '--stagger': 1 }">
+        <div class="empty-section page-enter" :style="{ '--stagger': 1 }">
           <EmptyState title="This board is empty" subtitle="Add your first item to get started." icon="empty" action-label="Add Item" @action="openCreateDrawer" />
         </div>
       </template>
@@ -211,11 +211,10 @@ onMounted(async () => {
               <div v-else class="group-header">Ungrouped</div>
 
               <div
-                v-for="(item, idx) in groupItems"
+                v-for="item in groupItems"
                 :key="item.id"
-                class="item-row row-enter"
+                class="item-row"
                 :class="{ 'item-row--checked': item.is_checked }"
-                :style="{ '--row-i': idx }"
               >
                 <SCheckbox :model-value="item.is_checked" @update:model-value="toggleCheck(item.id)" />
                 <div class="item-row__content">
@@ -237,11 +236,10 @@ onMounted(async () => {
           <!-- Flat display -->
           <template v-else>
             <div
-              v-for="(item, idx) in items"
+              v-for="item in items"
               :key="item.id"
-              class="item-row row-enter"
+              class="item-row"
               :class="{ 'item-row--checked': item.is_checked }"
-              :style="{ '--row-i': idx }"
             >
               <SCheckbox :model-value="item.is_checked" @update:model-value="toggleCheck(item.id)" />
               <div class="item-row__content">

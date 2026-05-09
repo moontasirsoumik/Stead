@@ -241,11 +241,11 @@ onMounted(async () => {
     <div class="stats-bar page-enter" :style="{ '--stagger': 1 }">
       <div class="stats-bar__cell">
         <span class="stats-bar__label">Items wanted</span>
-        <span class="stats-bar__value stat-pop" :style="{ '--stat-i': 0 }">{{ activeItemCount }}</span>
+        <span class="stats-bar__value">{{ activeItemCount }}</span>
       </div>
       <div class="stats-bar__cell">
         <span class="stats-bar__label">Total value</span>
-        <span class="stats-bar__value stat-pop" :style="{ '--stat-i': 1 }">{{ formatCents(wishlistStore.totalWishlistValue) }}</span>
+        <span class="stats-bar__value">{{ formatCents(wishlistStore.totalWishlistValue) }}</span>
       </div>
     </div>
 
@@ -259,7 +259,7 @@ onMounted(async () => {
     </div>
 
     <template v-else-if="!filteredItems.length">
-      <div class="empty-section page-enter empty-fade" :style="{ '--stagger': 3 }">
+      <div class="empty-section page-enter" :style="{ '--stagger': 3 }">
         <EmptyState v-if="!wishlistStore.items.length" title="Your wishlist is empty" subtitle="Start dreaming! Add the things you'd love to have." icon="empty" action-label="Add first item" @action="openCreateDrawer" />
         <EmptyState v-else title="No matches" subtitle="Try adjusting your filters or search term." icon="search" />
       </div>
@@ -274,11 +274,10 @@ onMounted(async () => {
           <span class="wish-table__th wish-table__th--right">Price</span>
         </div>
         <div
-          v-for="(item, idx) in filteredItems"
+          v-for="item in filteredItems"
           :key="item.id"
-          class="wish-row row-enter"
+          class="wish-row"
           :class="{ 'wish-row--dimmed': isItemDimmed(item) }"
-          :style="{ '--row-i': idx }"
           @click="openEditDrawer(item)"
         >
           <div class="wish-row__name">

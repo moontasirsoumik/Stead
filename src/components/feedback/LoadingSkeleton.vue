@@ -48,18 +48,17 @@ withDefaults(
 
 .skeleton__bone {
   border-radius: var(--radius-s);
-  background: linear-gradient(
-    90deg,
-    var(--color-bg-tertiary) 0%,
-    var(--color-surface-container-high) 40%,
-    var(--color-bg-tertiary) 80%
-  );
-  background-size: 800px 100%;
-  animation: shimmer 1.6s var(--easing-standard) infinite;
+  background: var(--color-bg-tertiary);
+  animation: pulse 1.6s ease-in-out infinite;
 }
 
 .skeleton__bone--circle {
   border-radius: var(--radius-circle);
   flex-shrink: 0;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 </style>

@@ -99,17 +99,11 @@ html.high-contrast {
   --color-border-subtle: var(--color-border-default);
 }
 
-/* ============================================================
-   ANIMATION SYSTEM
-   Consistent, staggered, physics-informed motion.
-   All animations use custom curves from motion.css.
-   ============================================================ */
-
-/* ── Page Enter (section-level stagger) ── */
+/* ── Page Enter Animation ── */
 @keyframes page-enter {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -119,122 +113,7 @@ html.high-contrast {
 
 .page-enter {
   animation: page-enter var(--duration-page) var(--easing-out) both;
-  animation-delay: calc(var(--stagger, 0) * 40ms);
-}
-
-/* ── Row Enter (list/table row stagger) ── */
-@keyframes row-enter {
-  from {
-    opacity: 0;
-    transform: translateY(2px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.row-enter {
-  animation: row-enter 160ms var(--easing-out) both;
-  animation-delay: calc(var(--row-i, 0) * 20ms);
-}
-
-/* ── Section Enter (dashboard widgets stagger) ── */
-@keyframes section-enter {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.section-enter {
-  animation: section-enter 200ms var(--easing-out) both;
-  animation-delay: calc(var(--section-i, 0) * 40ms);
-}
-
-/* ── Fade Scale (badges, chips, toasts) ── */
-@keyframes fade-scale-in {
-  from {
-    opacity: 0;
-    transform: scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.fade-scale-in {
-  animation: fade-scale-in 160ms var(--easing-out) both;
-}
-
-/* ── Route Transitions (Vue <Transition>) ── */
-.route-enter-active {
-  transition: opacity 150ms var(--easing-out);
-}
-
-.route-leave-active {
-  transition: opacity 80ms var(--easing-out);
-}
-
-.route-enter-from,
-.route-leave-to {
-  opacity: 0;
-}
-
-/* ── Shimmer Skeleton ── */
-@keyframes shimmer {
-  0% {
-    background-position: -400px 0;
-  }
-  100% {
-    background-position: 400px 0;
-  }
-}
-
-/* ── Stat Value Fade ── */
-@keyframes stat-enter {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.stat-pop {
-  animation: stat-enter 200ms var(--easing-out) both;
-  animation-delay: calc(var(--stat-i, 0) * 30ms + 60ms);
-}
-
-/* ── Progress Ring Fill ── */
-@keyframes ring-fill {
-  from {
-    stroke-dashoffset: 100.53;
-  }
-}
-
-.ring-fill {
-  animation: ring-fill 600ms var(--easing-out) both;
-  animation-delay: calc(var(--ring-i, 0) * 60ms + 100ms);
-}
-
-/* ── Empty State Fade ── */
-@keyframes empty-fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.empty-fade {
-  animation: empty-fade 200ms var(--easing-out) both;
+  animation-delay: calc(var(--stagger, 0) * 50ms);
 }
 
 /* ── No Animations ── */

@@ -11,4 +11,5 @@ export interface GroceryItem extends HouseholdEntity {
   status: GroceryStatus
   preferred_store: string | null
   note: string | null
+  done_by: string | null
 }

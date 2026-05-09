@@ -220,7 +220,7 @@ onMounted(async () => {
     </div>
 
     <template v-else-if="!journalStore.items.length">
-      <div class="empty-section page-enter empty-fade" :style="{ '--stagger': 2 }">
+      <div class="empty-section page-enter" :style="{ '--stagger': 2 }">
         <EmptyState title="Your journal awaits" subtitle="Capture today's thoughts — even a few words can make a difference." icon="empty" action-label="Write first entry" @action="openCreateDrawer(true)" />
       </div>
     </template>
@@ -239,10 +239,9 @@ onMounted(async () => {
 
         <div class="journal-list">
           <div
-            v-for="(entry, idx) in group.entries"
+            v-for="entry in group.entries"
             :key="entry.id"
-            class="journal-row row-enter"
-            :style="{ '--row-i': idx }"
+            class="journal-row"
             @click="openEditDrawer(entry)"
           >
             <div class="journal-row__main">
