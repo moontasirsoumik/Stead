@@ -1,7 +1,7 @@
 # Stead — Implementation Progress Tracker
 
 > **Last updated:** 2026-05-09
-> **Current Phase:** P33 — Complete (Dashboard widget + DB migrations applied)
+> **Current Phase:** P34 — Complete (UI Redesign — Emil Kowalski design engineering)
 
 ---
 
@@ -47,6 +47,7 @@
 | P31 | Privacy & Sharing | ✅ Done | 2026-04-20 | 2026-05-09 | Frontend complete, DB migration 013 applied |
 | P32 | Feature Generalization | ✅ Done | 2026-05-09 | 2026-05-09 | Boards replaces Meals + Habits + Subscriptions — see details below |
 | P33 | Dashboard + Migrations | ✅ Done | 2026-05-09 | 2026-05-09 | Boards dashboard widget added. DB migrations 013+015 applied |
+| P34 | UI Redesign — Emil Kowalski | ✅ Done | 2026-05-09 | 2026-05-09 | Layered shadows, custom motion curves, press/hover interactions — see details below |
 
 ---
 
@@ -546,3 +547,32 @@ Get token from: https://supabase.com/dashboard/account/tokens
 | P32-18 | Update Settings — remove Meals section, update widget list | ✅ Done | `SettingsPage.vue` |
 | P32-19 | Create DB migration 015 (drop old tables, create boards) | ✅ Done | `supabase/migrations/015_boards_replace_meals_habits_subs.sql` |
 | P32-20 | Verify type-check + build passes | ✅ Done | `vue-tsc --noEmit` + `vite build` |
+
+---
+
+## Phase 34 — UI Redesign (Emil Kowalski Design Engineering)
+
+Complete visual redesign applying Emil Kowalski's design engineering philosophy: layered depth, custom motion curves, asymmetric transitions, tactile press/hover interactions. 34 files changed.
+
+### Tokens
+- `shadows.css` — Real layered shadows replacing `none` values. Added card, card-hover, dialog, drawer, brand, inset shadow tokens. Dark mode + personal scope variants all updated.
+- `motion.css` — Custom cubic-bezier curves (`--easing-out`, `--easing-drawer`, `--easing-in-out`, `--easing-spring`). Asymmetric durations (drawer enter vs exit, dialog enter vs exit). Added `--press-scale: 0.97` and `--hover-lift: -1px`.
+- `radius.css` — Added `--radius-pill: 999px`, bumped `--radius-2xl` to 24px.
+
+### Components (11 files)
+- SButton: shadow elevation + press scale + brand shadow on hover
+- SIconButton: press scale replaces opacity change
+- SCheckbox: press scale on active
+- SToggle: press scale + thumb shadow + spring easing
+- SInput/STextarea/SSelect: inset shadow + focus ring (3px branded ring)
+- NavItem: press scale on active
+- NavRail: specific property transitions (eliminated `transition: all`)
+- FormDrawer: asymmetric enter/exit timing + drawer shadow
+- ConfirmDialog: scale entrance + asymmetric exit + dialog shadow
+
+### Pages (16 feature pages + global.css)
+- Stats bars: `box-shadow: var(--shadow-2)` elevation
+- Table/list containers: `box-shadow: var(--shadow-card)` depth
+- Note cards: hover elevation (`--shadow-card-hover` + `translateY(--hover-lift)`) + press scale
+- Page enter animation: updated easing + stagger timing
+- SettingsPage: replaced `transition: all` with specific properties
