@@ -1,7 +1,7 @@
 # Stead — Implementation Progress Tracker
 
 > **Last updated:** 2026-05-09
-> **Current Phase:** P34 — Complete (UI Redesign — Emil Kowalski design engineering)
+> **Current Phase:** P35 — Complete (Animation System)
 
 ---
 
@@ -48,6 +48,7 @@
 | P32 | Feature Generalization | ✅ Done | 2026-05-09 | 2026-05-09 | Boards replaces Meals + Habits + Subscriptions — see details below |
 | P33 | Dashboard + Migrations | ✅ Done | 2026-05-09 | 2026-05-09 | Boards dashboard widget added. DB migrations 013+015 applied |
 | P34 | UI Redesign — Emil Kowalski | ✅ Done | 2026-05-09 | 2026-05-09 | Layered shadows, custom motion curves, press/hover interactions — see details below |
+| P35 | Animation System | ✅ Done | 2026-05-09 | 2026-05-09 | Consistent staggered animations across all pages — see details below |
 
 ---
 
@@ -576,3 +577,34 @@ Complete visual redesign applying Emil Kowalski's design engineering philosophy:
 - Note cards: hover elevation (`--shadow-card-hover` + `translateY(--hover-lift)`) + press scale
 - Page enter animation: updated easing + stagger timing
 - SettingsPage: replaced `transition: all` with specific properties
+
+---
+
+## Phase 35 — Animation System
+
+Consistent, staggered animation system across the entire app. 24 files changed, 334 insertions.
+
+### Animation Infrastructure (global.css)
+- `page-enter`: section-level stagger (50ms intervals) — headers, stats, filters, content
+- `row-enter`: list/table row stagger (30ms intervals) — every v-for row across all pages
+- `section-enter`: dashboard widget stagger (60ms intervals) — dashboard sections
+- `stat-pop`: spring pop-in for stat values (40ms intervals + 100ms base delay)
+- `ring-fill`: SVG progress ring fill animation (800ms ease-out)
+- `empty-fade`: empty state entrance (300ms with 100ms delay)
+- `shimmer`: directional skeleton shimmer (replaces static pulse)
+- `route-enter/leave`: Vue route transitions (200ms enter, 120ms exit, out-in mode)
+- `menu-pop`: dropdown menu spring entrance with scale + translate
+
+### Component Micro-interactions
+- AppShell: route transitions (fade+slide out-in), menu-pop for account dropdown
+- LoadingSkeleton: directional shimmer gradient replaces opacity pulse
+- SCheckbox: SVG check mark draw animation (stroke-dashoffset → 0)
+- SToggle: thumb width stretch on press (iOS-style squish feedback)
+- NavItem: cleaned up duplicate :active rule
+
+### Coverage
+- DashboardPage: full animation suite (page-enter, section-enter, row-enter, stat-pop, ring-fill, empty-fade)
+- CalendarPage: page-enter on header + view tabs
+- All 16 feature pages: row-enter stagger on list rows, empty-fade on empty states
+- 7 stats-bar pages: stat-pop on stat values
+- All prefers-reduced-motion and no-animations class respected
