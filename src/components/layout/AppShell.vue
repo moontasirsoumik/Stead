@@ -374,24 +374,24 @@ async function handleSignOut() {
 
 .menu-pop-enter-active {
   transition:
-    opacity var(--duration-normal) var(--easing-out),
-    transform var(--duration-normal) var(--easing-spring);
-}
-
-.menu-pop-leave-active {
-  transition:
     opacity var(--duration-fast) var(--easing-out),
     transform var(--duration-fast) var(--easing-out);
 }
 
+.menu-pop-leave-active {
+  transition:
+    opacity 80ms var(--easing-out),
+    transform 80ms var(--easing-out);
+}
+
 .menu-pop-enter-from {
   opacity: 0;
-  transform: scale(0.95) translateY(-4px);
+  transform: scale(0.98) translateY(-2px);
 }
 
 .menu-pop-leave-to {
   opacity: 0;
-  transform: scale(0.97) translateY(-2px);
+  transform: scale(0.99) translateY(-1px);
 }
 
 .account-menu__header {

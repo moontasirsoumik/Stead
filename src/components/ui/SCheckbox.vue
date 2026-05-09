@@ -100,7 +100,7 @@ withDefaults(
 .scheckbox__check path {
   stroke-dasharray: 12;
   stroke-dashoffset: 12;
-  animation: check-draw 250ms var(--easing-out) forwards;
+  animation: check-draw 150ms var(--easing-out) forwards;
 }
 
 @keyframes check-draw {

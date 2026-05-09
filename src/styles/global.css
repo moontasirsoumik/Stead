@@ -109,7 +109,7 @@ html.high-contrast {
 @keyframes page-enter {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -119,14 +119,14 @@ html.high-contrast {
 
 .page-enter {
   animation: page-enter var(--duration-page) var(--easing-out) both;
-  animation-delay: calc(var(--stagger, 0) * 50ms);
+  animation-delay: calc(var(--stagger, 0) * 40ms);
 }
 
 /* ── Row Enter (list/table row stagger) ── */
 @keyframes row-enter {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(2px);
   }
   to {
     opacity: 1;
@@ -135,15 +135,15 @@ html.high-contrast {
 }
 
 .row-enter {
-  animation: row-enter 200ms var(--easing-out) both;
-  animation-delay: calc(var(--row-i, 0) * 30ms);
+  animation: row-enter 160ms var(--easing-out) both;
+  animation-delay: calc(var(--row-i, 0) * 20ms);
 }
 
 /* ── Section Enter (dashboard widgets stagger) ── */
 @keyframes section-enter {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -152,15 +152,15 @@ html.high-contrast {
 }
 
 .section-enter {
-  animation: section-enter 280ms var(--easing-out) both;
-  animation-delay: calc(var(--section-i, 0) * 60ms);
+  animation: section-enter 200ms var(--easing-out) both;
+  animation-delay: calc(var(--section-i, 0) * 40ms);
 }
 
 /* ── Fade Scale (badges, chips, toasts) ── */
 @keyframes fade-scale-in {
   from {
     opacity: 0;
-    transform: scale(0.92);
+    transform: scale(0.96);
   }
   to {
     opacity: 1;
@@ -169,27 +169,21 @@ html.high-contrast {
 }
 
 .fade-scale-in {
-  animation: fade-scale-in 200ms var(--easing-spring) both;
+  animation: fade-scale-in 160ms var(--easing-out) both;
 }
 
 /* ── Route Transitions (Vue <Transition>) ── */
 .route-enter-active {
-  animation: page-enter 200ms var(--easing-out) both;
+  transition: opacity 150ms var(--easing-out);
 }
 
 .route-leave-active {
-  animation: route-leave 120ms var(--easing-out) both;
+  transition: opacity 80ms var(--easing-out);
 }
 
-@keyframes route-leave {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
+.route-enter-from,
+.route-leave-to {
+  opacity: 0;
 }
 
 /* ── Shimmer Skeleton ── */
@@ -202,25 +196,19 @@ html.high-contrast {
   }
 }
 
-/* ── Stat Value Pop (counter feel) ── */
-@keyframes stat-pop {
-  0% {
+/* ── Stat Value Fade ── */
+@keyframes stat-enter {
+  from {
     opacity: 0;
-    transform: scale(0.85) translateY(4px);
   }
-  60% {
+  to {
     opacity: 1;
-    transform: scale(1.02) translateY(-1px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
   }
 }
 
 .stat-pop {
-  animation: stat-pop 320ms var(--easing-spring) both;
-  animation-delay: calc(var(--stat-i, 0) * 40ms + 100ms);
+  animation: stat-enter 200ms var(--easing-out) both;
+  animation-delay: calc(var(--stat-i, 0) * 30ms + 60ms);
 }
 
 /* ── Progress Ring Fill ── */
@@ -231,25 +219,22 @@ html.high-contrast {
 }
 
 .ring-fill {
-  animation: ring-fill 800ms var(--easing-out) both;
-  animation-delay: calc(var(--ring-i, 0) * 80ms + 200ms);
+  animation: ring-fill 600ms var(--easing-out) both;
+  animation-delay: calc(var(--ring-i, 0) * 60ms + 100ms);
 }
 
 /* ── Empty State Fade ── */
 @keyframes empty-fade {
   from {
     opacity: 0;
-    transform: translateY(6px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
 .empty-fade {
-  animation: empty-fade 300ms var(--easing-out) both;
-  animation-delay: 100ms;
+  animation: empty-fade 200ms var(--easing-out) both;
 }
 
 /* ── No Animations ── */
