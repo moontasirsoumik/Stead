@@ -175,11 +175,11 @@ onMounted(async () => {
     <div class="stats-bar page-enter" :style="{ '--stagger': 1 }">
       <div class="stats-bar__cell">
         <span class="stats-bar__label">Boards</span>
-        <span class="stats-bar__value">{{ boardsStore.boardCount }}</span>
+        <span class="stats-bar__value stat-pop" :style="{ '--stat-i': 0 }">{{ boardsStore.boardCount }}</span>
       </div>
       <div class="stats-bar__cell">
         <span class="stats-bar__label">Total items</span>
-        <span class="stats-bar__value">{{ totalItemCount }}</span>
+        <span class="stats-bar__value stat-pop" :style="{ '--stat-i': 1 }">{{ totalItemCount }}</span>
       </div>
     </div>
 
@@ -190,7 +190,7 @@ onMounted(async () => {
     </div>
 
     <template v-else-if="!filteredBoards.length">
-      <div class="empty-section page-enter" :style="{ '--stagger': 3 }">
+      <div class="empty-section page-enter empty-fade" :style="{ '--stagger': 3 }">
         <EmptyState v-if="!boardsStore.boards.length" title="No boards yet" subtitle="Create your first board to start organizing." icon="empty" action-label="New Board" @action="openCreateDrawer" />
         <EmptyState v-else title="No matches" subtitle="Try adjusting your search term." icon="search" />
       </div>
@@ -199,9 +199,10 @@ onMounted(async () => {
     <template v-else>
       <div class="board-grid page-enter" :style="{ '--stagger': 3 }">
         <div
-          v-for="board in filteredBoards"
+          v-for="(board, idx) in filteredBoards"
           :key="board.id"
-          class="board-card"
+          class="board-card row-enter"
+          :style="{ '--row-i': idx }"
           @click="navigateToBoard(board.id)"
         >
           <div class="board-card__color" :style="{ background: boardColorValue(board.color) }" />

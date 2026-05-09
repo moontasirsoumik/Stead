@@ -200,7 +200,7 @@ onMounted(async () => {
     </div>
 
     <template v-else-if="!filteredItems.length">
-      <div class="empty-section page-enter" :style="{ '--stagger': 2 }">
+      <div class="empty-section page-enter empty-fade" :style="{ '--stagger': 2 }">
         <EmptyState v-if="!notesStore.items.length" title="No notes yet" subtitle="Jot down ideas, recipes, or anything the household needs to remember." icon="empty" action-label="New note" @action="openCreateDrawer" />
         <EmptyState v-else title="No matches" subtitle="Try adjusting your filters or search term." icon="search" />
       </div>
@@ -212,9 +212,10 @@ onMounted(async () => {
         <SectionHeader title="Pinned" :count="pinnedItems.length" />
         <div :class="viewMode === 'grid' ? 'notes-grid' : 'notes-list'">
           <div
-            v-for="note in pinnedItems"
+            v-for="(note, idx) in pinnedItems"
             :key="note.id"
-            class="note-card note-card--pinned"
+            class="note-card note-card--pinned row-enter"
+            :style="{ '--row-i': idx }"
             @click="openEditDrawer(note)"
           >
             <div class="note-card__header">
@@ -243,9 +244,10 @@ onMounted(async () => {
         <SectionHeader v-if="pinnedItems.length" title="All Notes" :count="unpinnedItems.length" />
         <div :class="viewMode === 'grid' ? 'notes-grid' : 'notes-list'">
           <div
-            v-for="note in unpinnedItems"
+            v-for="(note, idx) in unpinnedItems"
             :key="note.id"
-            class="note-card"
+            class="note-card row-enter"
+            :style="{ '--row-i': idx }"
             @click="openEditDrawer(note)"
           >
             <div class="note-card__header">

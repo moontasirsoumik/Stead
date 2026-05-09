@@ -254,15 +254,15 @@ onMounted(async () => {
     <div class="stats-bar page-enter" :style="{ '--stagger': 1 }">
       <div class="stats-bar__cell">
         <span class="stats-bar__label">Total Items</span>
-        <span class="stats-bar__value">{{ inventoryStore.items.length }}</span>
+        <span class="stats-bar__value stat-pop" :style="{ '--stat-i': 0 }">{{ inventoryStore.items.length }}</span>
       </div>
       <div class="stats-bar__cell">
         <span class="stats-bar__label">Low Stock</span>
-        <span class="stats-bar__value">{{ inventoryStore.lowStockItems.length }}</span>
+        <span class="stats-bar__value stat-pop" :style="{ '--stat-i': 1 }">{{ inventoryStore.lowStockItems.length }}</span>
       </div>
       <div class="stats-bar__cell">
         <span class="stats-bar__label">Restock Needed</span>
-        <span class="stats-bar__value">{{ inventoryStore.restockNeeded.length }}</span>
+        <span class="stats-bar__value stat-pop" :style="{ '--stat-i': 2 }">{{ inventoryStore.restockNeeded.length }}</span>
       </div>
     </div>
 
@@ -278,7 +278,7 @@ onMounted(async () => {
       <LoadingSkeleton :lines="5" />
     </div>
 
-    <div v-else-if="!filteredItems.length" class="empty-section page-enter" :style="{ '--stagger': 3 }">
+    <div v-else-if="!filteredItems.length" class="empty-section page-enter empty-fade" :style="{ '--stagger': 3 }">
       <EmptyState v-if="!inventoryStore.items.length" title="No items tracked" subtitle="Add items to keep track of household stock levels." icon="empty" action-label="Add item" @action="openCreateDrawer" />
       <EmptyState v-else title="No matches" subtitle="Try adjusting your filters or search term." icon="search" />
     </div>
@@ -293,9 +293,10 @@ onMounted(async () => {
         <span class="inv-table__th inv-table__th--right">Last checked</span>
       </div>
       <div
-        v-for="item in filteredItems"
+        v-for="(item, idx) in filteredItems"
         :key="item.id"
-        class="inv-row"
+        class="inv-row row-enter"
+        :style="{ '--row-i': idx }"
         @click="openEditDrawer(item)"
       >
         <div class="inv-row__name">{{ item.name }}</div>

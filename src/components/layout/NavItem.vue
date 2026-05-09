@@ -105,10 +105,6 @@ const materialIcon = computed(() => {
   background: var(--color-primary-container);
 }
 
-.navitem:active {
-  opacity: 0.8;
-}
-
 .navitem__icon {
   display: flex;
   align-items: center;

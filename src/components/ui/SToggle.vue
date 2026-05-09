@@ -78,11 +78,21 @@ withDefaults(
   background: var(--color-fg-on-brand);
   border-radius: var(--radius-circle);
   box-shadow: var(--shadow-2);
-  transition: transform var(--duration-fast) var(--easing-spring);
+  transition:
+    transform var(--duration-fast) var(--easing-spring),
+    width var(--duration-fast) var(--easing-out);
+}
+
+.stoggle:active .stoggle__thumb {
+  width: 20px;
 }
 
 .stoggle__track--on .stoggle__thumb {
   transform: translateX(18px);
+}
+
+.stoggle:active .stoggle__track--on .stoggle__thumb {
+  transform: translateX(14px);
 }
 
 .stoggle__input:focus-visible + .stoggle__track {

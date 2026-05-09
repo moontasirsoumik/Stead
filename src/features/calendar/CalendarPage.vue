@@ -648,7 +648,7 @@ watch(() => appStore.isPersonal, loadData)
 <template>
   <PageContainer>
     <!-- Header -->
-    <PageHeader title="Calendar" subtitle="Your schedule at a glance">
+    <PageHeader title="Calendar" subtitle="Your schedule at a glance" class="page-enter" :style="{ '--stagger': 0 }">
       <template #actions>
         <div class="cal-nav cal-nav--desktop">
           <button class="cal-nav__btn" aria-label="Previous" @click="navigatePrev">
@@ -668,7 +668,7 @@ watch(() => appStore.isPersonal, loadData)
     </PageHeader>
 
     <!-- View switcher tabs -->
-    <nav ref="tabNavRef" class="cal-view-tabs" aria-label="Calendar views">
+    <nav ref="tabNavRef" class="cal-view-tabs page-enter" :style="{ '--stagger': 1 }" aria-label="Calendar views">
       <div class="cal-view-tabs__pill" :style="pillStyle" />
       <button
         v-for="(view, i) in viewOptions"
@@ -682,7 +682,7 @@ watch(() => appStore.isPersonal, loadData)
     </nav>
 
     <!-- Mobile nav -->
-    <div class="cal-nav cal-nav--mobile">
+    <div class="cal-nav cal-nav--mobile page-enter" :style="{ '--stagger': 1 }">
       <span class="cal-nav__label">{{ navLabel }}</span>
       <div class="cal-nav__controls">
         <button class="cal-nav__btn" aria-label="Previous" @click="navigatePrev">

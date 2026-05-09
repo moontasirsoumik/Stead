@@ -99,7 +99,13 @@ html.high-contrast {
   --color-border-subtle: var(--color-border-default);
 }
 
-/* ── Page Enter Animation ── */
+/* ============================================================
+   ANIMATION SYSTEM
+   Consistent, staggered, physics-informed motion.
+   All animations use custom curves from motion.css.
+   ============================================================ */
+
+/* ── Page Enter (section-level stagger) ── */
 @keyframes page-enter {
   from {
     opacity: 0;
@@ -114,6 +120,136 @@ html.high-contrast {
 .page-enter {
   animation: page-enter var(--duration-page) var(--easing-out) both;
   animation-delay: calc(var(--stagger, 0) * 50ms);
+}
+
+/* ── Row Enter (list/table row stagger) ── */
+@keyframes row-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.row-enter {
+  animation: row-enter 200ms var(--easing-out) both;
+  animation-delay: calc(var(--row-i, 0) * 30ms);
+}
+
+/* ── Section Enter (dashboard widgets stagger) ── */
+@keyframes section-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.section-enter {
+  animation: section-enter 280ms var(--easing-out) both;
+  animation-delay: calc(var(--section-i, 0) * 60ms);
+}
+
+/* ── Fade Scale (badges, chips, toasts) ── */
+@keyframes fade-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.fade-scale-in {
+  animation: fade-scale-in 200ms var(--easing-spring) both;
+}
+
+/* ── Route Transitions (Vue <Transition>) ── */
+.route-enter-active {
+  animation: page-enter 200ms var(--easing-out) both;
+}
+
+.route-leave-active {
+  animation: route-leave 120ms var(--easing-out) both;
+}
+
+@keyframes route-leave {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+/* ── Shimmer Skeleton ── */
+@keyframes shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+
+/* ── Stat Value Pop (counter feel) ── */
+@keyframes stat-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.85) translateY(4px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.02) translateY(-1px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.stat-pop {
+  animation: stat-pop 320ms var(--easing-spring) both;
+  animation-delay: calc(var(--stat-i, 0) * 40ms + 100ms);
+}
+
+/* ── Progress Ring Fill ── */
+@keyframes ring-fill {
+  from {
+    stroke-dashoffset: 100.53;
+  }
+}
+
+.ring-fill {
+  animation: ring-fill 800ms var(--easing-out) both;
+  animation-delay: calc(var(--ring-i, 0) * 80ms + 200ms);
+}
+
+/* ── Empty State Fade ── */
+@keyframes empty-fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.empty-fade {
+  animation: empty-fade 300ms var(--easing-out) both;
+  animation-delay: 100ms;
 }
 
 /* ── No Animations ── */

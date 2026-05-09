@@ -188,91 +188,91 @@ onMounted(() => {
 
 <template>
   <PageContainer :class="{ 'dash--compact': app.dashboardDensity === 'compact', 'dash--spacious': app.dashboardDensity === 'spacious' }">
-    <PageHeader v-if="app.showDashboardGreeting" :title="greeting" :subtitle="householdName" />
+    <PageHeader v-if="app.showDashboardGreeting" :title="greeting" :subtitle="householdName" class="page-enter" :style="{ '--stagger': 0 }" />
 
     <!-- Stats row — compact bar with vertical dividers -->
-    <div class="stats-row">
+    <div class="stats-row page-enter" :style="{ '--stagger': 1 }">
       <div class="stat-cell">
         <span class="stat-cell__label">Monthly spending</span>
-        <span class="stat-cell__value">{{ formatCents(expenses.currentMonthTotal) }}</span>
+        <span class="stat-cell__value stat-pop" :style="{ '--stat-i': 0 }">{{ formatCents(expenses.currentMonthTotal) }}</span>
       </div>
       <div class="stat-cell">
         <span class="stat-cell__label">Monthly income</span>
-        <span class="stat-cell__value">{{ formatCents(income.currentMonthTotal) }}</span>
+        <span class="stat-cell__value stat-pop" :style="{ '--stat-i': 1 }">{{ formatCents(income.currentMonthTotal) }}</span>
       </div>
       <div class="stat-cell">
         <span class="stat-cell__label">Upcoming bills</span>
-        <span class="stat-cell__value">{{ bills.upcomingBills.length }}</span>
+        <span class="stat-cell__value stat-pop" :style="{ '--stat-i': 2 }">{{ bills.upcomingBills.length }}</span>
       </div>
       <div class="stat-cell">
         <span class="stat-cell__label">Tasks due</span>
-        <span class="stat-cell__value">{{ tasks.overdueTasks.length + tasks.dueToday.length }}</span>
+        <span class="stat-cell__value stat-pop" :style="{ '--stat-i': 3 }">{{ tasks.overdueTasks.length + tasks.dueToday.length }}</span>
       </div>
     </div>
 
     <!-- Tasks Due -->
-    <section v-if="app.dashboardWidgets.tasks" class="dash-section">
+    <section v-if="app.dashboardWidgets.tasks" class="dash-section section-enter" :style="{ '--section-i': 0 }">
       <div class="dash-section__header">
         <h3 class="dash-section__title">Tasks Due ({{ tasksDue.length }})</h3>
         <RouterLink to="/tasks" class="dash-section__link">View all</RouterLink>
       </div>
       <LoadingSkeleton v-if="tasks.loading" :lines="3" />
       <div v-else-if="tasksDue.length" class="dash-table">
-        <div v-for="task in tasksDue" :key="task.id" class="dash-row">
+        <div v-for="(task, idx) in tasksDue" :key="task.id" class="dash-row row-enter" :style="{ '--row-i': idx }">
           <span class="dash-row__name">{{ task.title }}</span>
           <span class="dash-row__badge"><SBadge :variant="priorityVariant(task.priority)" size="sm">{{ task.priority }}</SBadge></span>
           <span class="dash-row__trailing">{{ task.due_date ? formatRelativeDate(task.due_date) : '' }}</span>
           <span class="dash-row__amount"></span>
         </div>
       </div>
-      <p v-else class="dash-empty">All caught up — no tasks due</p>
+      <p v-else class="dash-empty empty-fade">All caught up — no tasks due</p>
     </section>
 
     <!-- Upcoming Bills (household only) -->
-    <section v-if="!app.isPersonal && app.dashboardWidgets.money" class="dash-section">
+    <section v-if="!app.isPersonal && app.dashboardWidgets.money" class="dash-section section-enter" :style="{ '--section-i': 1 }">
       <div class="dash-section__header">
         <h3 class="dash-section__title">Upcoming Bills ({{ nextBills.length }})</h3>
         <RouterLink to="/money/bills" class="dash-section__link">View all</RouterLink>
       </div>
       <LoadingSkeleton v-if="bills.loading" :lines="3" />
       <div v-else-if="nextBills.length" class="dash-table">
-        <div v-for="bill in nextBills" :key="bill.id" class="dash-row">
+        <div v-for="(bill, idx) in nextBills" :key="bill.id" class="dash-row row-enter" :style="{ '--row-i': idx }">
           <span class="dash-row__name">{{ bill.name }}</span>
           <span class="dash-row__badge"><SBadge :variant="bill.status === 'overdue' ? 'error' : 'info'" size="sm">{{ bill.status }}</SBadge></span>
           <span class="dash-row__trailing">Due day {{ bill.due_day }}</span>
           <span class="dash-row__amount">{{ formatCents(bill.amount) }}</span>
         </div>
       </div>
-      <p v-else class="dash-empty">No upcoming bills</p>
+      <p v-else class="dash-empty empty-fade">No upcoming bills</p>
     </section>
 
     <!-- Recent Expenses -->
-    <section v-if="app.dashboardWidgets.money" class="dash-section">
+    <section v-if="app.dashboardWidgets.money" class="dash-section section-enter" :style="{ '--section-i': 2 }">
       <div class="dash-section__header">
         <h3 class="dash-section__title">Recent Expenses ({{ recentExpenses.length }})</h3>
         <RouterLink to="/money/expenses" class="dash-section__link">View all</RouterLink>
       </div>
       <LoadingSkeleton v-if="expenses.loading" :lines="3" />
       <div v-else-if="recentExpenses.length" class="dash-table">
-        <div v-for="exp in recentExpenses" :key="exp.id" class="dash-row">
+        <div v-for="(exp, idx) in recentExpenses" :key="exp.id" class="dash-row row-enter" :style="{ '--row-i': idx }">
           <span class="dash-row__name">{{ truncate(exp.description, 30) }}</span>
           <span class="dash-row__badge"><SBadge variant="default" size="sm">{{ exp.category }}</SBadge></span>
           <span class="dash-row__trailing">{{ formatRelativeDate(exp.date) }}</span>
           <span class="dash-row__amount">{{ formatCents(exp.amount) }}</span>
         </div>
       </div>
-      <p v-else class="dash-empty">No expenses yet</p>
+      <p v-else class="dash-empty empty-fade">No expenses yet</p>
     </section>
 
     <!-- Reminders (household only) -->
-    <section v-if="!app.isPersonal && app.dashboardWidgets.reminders" class="dash-section">
+    <section v-if="!app.isPersonal && app.dashboardWidgets.reminders" class="dash-section section-enter" :style="{ '--section-i': 3 }">
       <div class="dash-section__header">
         <h3 class="dash-section__title">Reminders ({{ upcomingReminders.length }})</h3>
         <RouterLink to="/reminders" class="dash-section__link">View all</RouterLink>
       </div>
       <LoadingSkeleton v-if="reminders.loading" :lines="3" />
       <div v-else-if="upcomingReminders.length" class="dash-table">
-        <div v-for="rem in upcomingReminders" :key="rem.id" class="dash-row">
+        <div v-for="(rem, idx) in upcomingReminders" :key="rem.id" class="dash-row row-enter" :style="{ '--row-i': idx }">
           <span class="dash-row__name">{{ rem.title }}</span>
           <span class="dash-row__badge">
             <SBadge
@@ -286,18 +286,18 @@ onMounted(() => {
           <span class="dash-row__amount"></span>
         </div>
       </div>
-      <p v-else class="dash-empty">No reminders</p>
+      <p v-else class="dash-empty empty-fade">No reminders</p>
     </section>
 
     <!-- Maintenance (household only) -->
-    <section v-if="!app.isPersonal && app.dashboardWidgets.tasks" class="dash-section">
+    <section v-if="!app.isPersonal && app.dashboardWidgets.tasks" class="dash-section section-enter" :style="{ '--section-i': 4 }">
       <div class="dash-section__header">
         <h3 class="dash-section__title">Maintenance ({{ maintenanceAlerts.length }})</h3>
         <RouterLink to="/tasks" class="dash-section__link">View all</RouterLink>
       </div>
       <LoadingSkeleton v-if="tasks.loading" :lines="3" />
       <div v-else-if="maintenanceAlerts.length" class="dash-table">
-        <div v-for="item in maintenanceAlerts" :key="item.id" class="dash-row">
+        <div v-for="(item, idx) in maintenanceAlerts" :key="item.id" class="dash-row row-enter" :style="{ '--row-i': idx }">
           <span class="dash-row__name">{{ item.title }}</span>
           <span class="dash-row__badge">
             <SBadge :variant="item.status === 'overdue' || (item.due_date && new Date(item.due_date) < new Date(new Date().toDateString())) ? 'error' : 'default'" size="sm">
@@ -308,27 +308,27 @@ onMounted(() => {
           <span class="dash-row__amount"></span>
         </div>
       </div>
-      <p v-else class="dash-empty">No maintenance due</p>
+      <p v-else class="dash-empty empty-fade">No maintenance due</p>
     </section>
 
     <!-- Pinned Notes -->
     <!-- Two-column bottom area -->
-    <div class="dash-grid">
+    <div class="dash-grid page-enter" :style="{ '--stagger': 2 }">
       <!-- Savings Progress -->
-      <section class="dash-section">
+      <section class="dash-section section-enter" :style="{ '--section-i': 5 }">
         <div class="dash-section__header">
           <h3 class="dash-section__title">Savings Progress</h3>
           <RouterLink to="/money/savings" class="dash-section__link">View all</RouterLink>
         </div>
         <LoadingSkeleton v-if="savings.loading" :lines="3" />
         <div v-else-if="activeGoals.length" class="dash-table">
-          <div v-for="goal in activeGoals" :key="goal.id" class="goal-row">
+          <div v-for="(goal, idx) in activeGoals" :key="goal.id" class="goal-row">
             <div class="goal-row__ring">
               <svg viewBox="0 0 40 40" class="goal-row__svg">
                 <circle cx="20" cy="20" r="16" fill="none" stroke="var(--color-bg-tertiary)" stroke-width="3" />
                 <circle cx="20" cy="20" r="16" fill="none" stroke="var(--color-brand-primary)" stroke-width="3"
                   stroke-linecap="round" stroke-dasharray="100.53" :stroke-dashoffset="100.53 - (100.53 * goalPercent(goal.current_amount, goal.target_amount) / 100)"
-                  transform="rotate(-90 20 20)" />
+                  transform="rotate(-90 20 20)" class="ring-fill" :style="{ '--ring-i': idx }" />
               </svg>
               <span class="goal-row__pct">{{ goalPercent(goal.current_amount, goal.target_amount) }}</span>
             </div>
@@ -338,93 +338,93 @@ onMounted(() => {
             </div>
           </div>
         </div>
-        <p v-else class="dash-empty">No savings goals</p>
+        <p v-else class="dash-empty empty-fade">No savings goals</p>
       </section>
 
       <!-- Pinned Notes -->
-      <section class="dash-section">
+      <section class="dash-section section-enter" :style="{ '--section-i': 6 }">
         <div class="dash-section__header">
           <h3 class="dash-section__title">Pinned Notes ({{ pinned.length }})</h3>
           <RouterLink to="/notes" class="dash-section__link">View all</RouterLink>
         </div>
         <LoadingSkeleton v-if="notes.loading" :lines="3" />
         <div v-else-if="pinned.length" class="dash-table">
-          <div v-for="note in pinned" :key="note.id" class="dash-row dash-row--compact note-row">
+          <div v-for="(note, idx) in pinned" :key="note.id" class="dash-row dash-row--compact note-row row-enter" :style="{ '--row-i': idx }">
             <span class="dash-row__name dash-row__name--bold">{{ note.title }}</span>
             <span class="note-row__preview">{{ truncate(note.content, 40) }}</span>
           </div>
         </div>
-        <p v-else class="dash-empty">Pin a note to see it here</p>
+        <p v-else class="dash-empty empty-fade">Pin a note to see it here</p>
       </section>
     </div>
 
     <!-- Low Stock + Shopping row -->
-    <div v-if="!app.isPersonal && app.dashboardWidgets.pantry" class="dash-grid">
-      <section class="dash-section">
+    <div v-if="!app.isPersonal && app.dashboardWidgets.pantry" class="dash-grid page-enter" :style="{ '--stagger': 3 }">
+      <section class="dash-section section-enter" :style="{ '--section-i': 7 }">
         <div class="dash-section__header">
           <h3 class="dash-section__title">Low Stock</h3>
           <RouterLink to="/pantry/inventory" class="dash-section__link">View all</RouterLink>
         </div>
         <LoadingSkeleton v-if="inventory.loading" :lines="2" />
         <div v-else-if="lowStock.length" class="dash-table">
-          <div v-for="item in lowStock" :key="item.id" class="dash-row dash-row--compact">
+          <div v-for="(item, idx) in lowStock" :key="item.id" class="dash-row dash-row--compact row-enter" :style="{ '--row-i': idx }">
             <span class="dash-row__name">{{ item.name }}</span>
             <span class="dash-row__badge"><SBadge :variant="stockVariant(item.stock_status)" size="sm">{{ stockLabel(item.stock_status) }}</SBadge></span>
           </div>
         </div>
-        <p v-else class="dash-empty">Everything stocked</p>
+        <p v-else class="dash-empty empty-fade">Everything stocked</p>
       </section>
 
-      <section class="dash-section">
+      <section class="dash-section section-enter" :style="{ '--section-i': 8 }">
         <div class="dash-section__header">
           <h3 class="dash-section__title">Shopping List ({{ shopping.neededCount }})</h3>
           <RouterLink to="/pantry/shopping" class="dash-section__link">View all</RouterLink>
         </div>
         <LoadingSkeleton v-if="shopping.loading" :lines="2" />
         <div v-else-if="neededItems.length" class="dash-table">
-          <div v-for="item in neededItems" :key="item.id" class="dash-row dash-row--compact">
+          <div v-for="(item, idx) in neededItems" :key="item.id" class="dash-row dash-row--compact row-enter" :style="{ '--row-i': idx }">
             <span class="dash-row__name">{{ item.name }}</span>
             <span v-if="item.quantity > 1" class="dash-row__trailing">×{{ item.quantity }}</span>
           </div>
         </div>
-        <p v-else class="dash-empty">Shopping list is empty</p>
+        <p v-else class="dash-empty empty-fade">Shopping list is empty</p>
       </section>
     </div>
 
     <!-- Personal scope widgets -->
     <template v-if="app.isPersonal">
-      <section v-if="app.dashboardWidgets.wishlist" class="dash-section">
+      <section v-if="app.dashboardWidgets.wishlist" class="dash-section section-enter" :style="{ '--section-i': 9 }">
         <div class="dash-section__header">
           <h3 class="dash-section__title">Wishlist ({{ wishlistItems.length }})</h3>
           <RouterLink to="/wishlist" class="dash-section__link">View all</RouterLink>
         </div>
         <div v-if="wishlistItems.length" class="dash-table">
-          <div v-for="item in wishlistItems" :key="item.id" class="dash-row">
+          <div v-for="(item, idx) in wishlistItems" :key="item.id" class="dash-row row-enter" :style="{ '--row-i': idx }">
             <span class="dash-row__name">{{ item.name }}</span>
             <span class="dash-row__badge"><SBadge :variant="item.priority === 'high' ? 'error' : item.priority === 'medium' ? 'warning' : 'default'" size="sm">{{ item.priority }}</SBadge></span>
             <span class="dash-row__trailing"></span>
             <span class="dash-row__amount">{{ formatCents(item.price ?? 0) }}</span>
           </div>
         </div>
-        <p v-else class="dash-empty">Your wishlist is empty — start dreaming!</p>
+        <p v-else class="dash-empty empty-fade">Your wishlist is empty — start dreaming!</p>
       </section>
     </template>
 
     <!-- Boards widget (both scopes) -->
-    <section v-if="app.dashboardWidgets.boards" class="dash-section">
+    <section v-if="app.dashboardWidgets.boards" class="dash-section section-enter" :style="{ '--section-i': 10 }">
       <div class="dash-section__header">
         <h3 class="dash-section__title">Boards ({{ recentBoards.length }})</h3>
         <RouterLink to="/boards" class="dash-section__link">View all</RouterLink>
       </div>
       <div v-if="recentBoards.length" class="dash-table">
-        <div v-for="board in recentBoards" :key="board.id" class="dash-row">
+        <div v-for="(board, idx) in recentBoards" :key="board.id" class="dash-row row-enter" :style="{ '--row-i': idx }">
           <span class="dash-row__name">{{ board.name }}</span>
           <span class="dash-row__badge"><SBadge variant="default" size="sm">{{ board.total }} items</SBadge></span>
           <span class="dash-row__trailing"></span>
           <span v-if="board.total" class="dash-row__amount">{{ board.checked }}/{{ board.total }}</span>
         </div>
       </div>
-      <p v-else class="dash-empty">No boards yet — create one to organize anything!</p>
+      <p v-else class="dash-empty empty-fade">No boards yet — create one to organize anything!</p>
     </section>
   </PageContainer>
 </template>

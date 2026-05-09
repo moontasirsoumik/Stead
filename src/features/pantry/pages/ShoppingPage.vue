@@ -257,11 +257,11 @@ onMounted(async () => {
     <div class="stats-bar page-enter" :style="{ '--stagger': 1 }">
       <div class="stats-bar__cell">
         <span class="stats-bar__label">Needed</span>
-        <span class="stats-bar__value">{{ shoppingStore.neededCount }}</span>
+        <span class="stats-bar__value stat-pop" :style="{ '--stat-i': 0 }">{{ shoppingStore.neededCount }}</span>
       </div>
       <div class="stats-bar__cell">
         <span class="stats-bar__label">In Cart</span>
-        <span class="stats-bar__value">{{ shoppingStore.inCartCount }}</span>
+        <span class="stats-bar__value stat-pop" :style="{ '--stat-i': 1 }">{{ shoppingStore.inCartCount }}</span>
       </div>
     </div>
 
@@ -283,7 +283,7 @@ onMounted(async () => {
       <LoadingSkeleton :lines="5" />
     </div>
 
-    <div v-else-if="!filteredItems.length" class="empty-section page-enter" :style="{ '--stagger': 3 }">
+    <div v-else-if="!filteredItems.length" class="empty-section page-enter empty-fade" :style="{ '--stagger': 3 }">
       <EmptyState v-if="!shoppingStore.items.length" title="Shopping list is empty" subtitle="Add items you need to pick up." icon="empty" action-label="Add item" @action="openCreateDrawer" />
       <EmptyState v-else title="No matches" subtitle="Try adjusting your filters or search term." icon="search" />
     </div>
@@ -298,9 +298,10 @@ onMounted(async () => {
         <span class="shop-table__th shop-table__th--center">Assignee</span>
       </div>
       <div
-        v-for="item in filteredItems"
+        v-for="(item, idx) in filteredItems"
         :key="item.id"
-        class="shop-row"
+        class="shop-row row-enter"
+        :style="{ '--row-i': idx }"
         @click="openEditDrawer(item)"
       >
         <div class="shop-row__name">{{ item.name }}</div>
