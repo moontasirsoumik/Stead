@@ -2020,12 +2020,14 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
 }
 
 .legal-expand-enter-active {
-  transition: all var(--duration-normal) var(--easing-decelerate);
+  transition: opacity var(--duration-normal) var(--easing-decelerate),
+              max-height var(--duration-normal) var(--easing-decelerate);
   overflow: hidden;
 }
 
 .legal-expand-leave-active {
-  transition: all var(--duration-fast) var(--easing-accelerate);
+  transition: opacity var(--duration-fast) var(--easing-accelerate),
+              max-height var(--duration-fast) var(--easing-accelerate);
   overflow: hidden;
 }
 

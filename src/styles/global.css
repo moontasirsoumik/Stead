@@ -103,7 +103,7 @@ html.high-contrast {
 @keyframes page-enter {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -112,8 +112,8 @@ html.high-contrast {
 }
 
 .page-enter {
-  animation: page-enter var(--duration-page) var(--easing-decelerate) both;
-  animation-delay: calc(var(--stagger, 0) * 40ms);
+  animation: page-enter var(--duration-page) var(--easing-out) both;
+  animation-delay: calc(var(--stagger, 0) * 50ms);
 }
 
 /* ── No Animations ── */

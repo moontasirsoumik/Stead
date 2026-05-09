@@ -246,6 +246,7 @@ onMounted(async () => {
   border-radius: var(--radius-m);
   margin-bottom: var(--space-l);
   overflow: hidden;
+  box-shadow: var(--shadow-2);
 }
 .stats-bar__cell {
   flex: 1;
@@ -278,9 +279,21 @@ onMounted(async () => {
   border-radius: var(--radius-l);
   overflow: hidden;
   cursor: pointer;
-  transition: background var(--duration-fast) var(--easing-standard);
+  box-shadow: var(--shadow-card);
+  transition:
+    background var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard),
+    transform 160ms var(--easing-out);
 }
-.board-card:hover { background: var(--color-bg-tertiary); }
+.board-card:hover {
+  background: var(--color-bg-tertiary);
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(var(--hover-lift));
+}
+.board-card:active {
+  transform: scale(var(--press-scale));
+  box-shadow: var(--shadow-2);
+}
 
 .board-card__color {
   width: 4px;

@@ -336,6 +336,7 @@ onMounted(async () => {
   border-radius: var(--radius-m);
   margin-bottom: var(--space-l);
   overflow: hidden;
+  box-shadow: var(--shadow-2);
 }
 .stats-bar__cell {
   flex: 1;
@@ -361,6 +362,7 @@ onMounted(async () => {
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-l);
   overflow: hidden;
+  box-shadow: var(--shadow-card);
 }
 
 .wish-table__header {

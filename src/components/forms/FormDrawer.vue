@@ -92,7 +92,7 @@ function handleOverlayMouseUp(e: MouseEvent) {
   height: 100%;
   background: var(--color-surface-nav);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-xl);
+  box-shadow: var(--shadow-drawer);
   overflow: hidden;
 }
 
@@ -135,19 +135,19 @@ function handleOverlayMouseUp(e: MouseEvent) {
 }
 
 .drawer-enter-active {
-  transition: opacity var(--duration-normal) var(--easing-decelerate);
+  transition: opacity var(--duration-drawer) var(--easing-out);
 }
 
 .drawer-enter-active .drawer {
-  transition: transform var(--duration-normal) var(--easing-decelerate);
+  transition: transform var(--duration-drawer) var(--easing-drawer);
 }
 
 .drawer-leave-active {
-  transition: opacity var(--duration-fast) var(--easing-accelerate);
+  transition: opacity var(--duration-drawer-exit) var(--easing-out);
 }
 
 .drawer-leave-active .drawer {
-  transition: transform var(--duration-fast) var(--easing-accelerate);
+  transition: transform var(--duration-drawer-exit) var(--easing-out);
 }
 
 .drawer-enter-from {

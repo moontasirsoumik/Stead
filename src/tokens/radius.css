@@ -1,6 +1,6 @@
 /* ============================================================
-   Stead — Border Radius Tokens  ·  "Refined Utility"
-   Small, crisp radii for flat design — subtle rounding only.
+   Stead — Border Radius Tokens  ·  "Quiet Confidence"
+   Generous rounding for elevated elements, crisp for inline.
    ============================================================ */
 
 :root {
@@ -8,6 +8,7 @@
   --radius-m: 10px;
   --radius-l: 14px;
   --radius-xl: 18px;
-  --radius-2xl: 22px;
+  --radius-2xl: 24px;
+  --radius-pill: 999px;
   --radius-circle: 999px;
 }

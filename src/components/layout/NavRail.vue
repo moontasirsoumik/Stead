@@ -210,7 +210,10 @@ const extraItems = computed(() =>
   padding: 0;
   white-space: nowrap;
   overflow: hidden;
-  transition: all var(--duration-fast) var(--easing-standard);
+  transition:
+    opacity var(--duration-normal) var(--easing-out),
+    height var(--duration-normal) var(--easing-out),
+    padding var(--duration-normal) var(--easing-out);
 }
 
 .rail--expanded .rail__group-label {

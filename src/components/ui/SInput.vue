@@ -96,9 +96,11 @@ defineEmits<{
   border: 1px solid var(--color-border-input);
   border-radius: var(--radius-m);
   overflow: hidden;
+  box-shadow: var(--shadow-inset);
   transition:
     border-color var(--duration-fast) var(--easing-standard),
-    background-color var(--duration-fast) var(--easing-standard);
+    background-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard);
 }
 
 .sinput__wrapper:hover:not(.sinput--disabled .sinput__wrapper) {
@@ -107,6 +109,7 @@ defineEmits<{
 
 .sinput__wrapper:focus-within {
   border-color: var(--color-brand-primary);
+  box-shadow: 0 0 0 3px rgba(74, 85, 120, 0.12);
 }
 
 .sinput__field {

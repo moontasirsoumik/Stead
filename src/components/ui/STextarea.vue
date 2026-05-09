@@ -80,7 +80,10 @@ withDefaults(
   color: var(--color-fg-primary);
   resize: vertical;
   min-height: 56px;
-  transition: border-color var(--duration-fast) var(--easing-standard);
+  box-shadow: var(--shadow-inset);
+  transition:
+    border-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard);
 }
 
 .stextarea__field::placeholder {
@@ -94,6 +97,7 @@ withDefaults(
 .stextarea__field:focus {
   outline: none;
   border-color: var(--color-brand-primary);
+  box-shadow: 0 0 0 3px rgba(74, 85, 120, 0.12);
 }
 
 .stextarea--error .stextarea__field {

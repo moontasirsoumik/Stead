@@ -71,7 +71,12 @@ withDefaults(
   background: transparent;
   transition:
     background-color var(--duration-fast) var(--easing-standard),
-    border-color var(--duration-fast) var(--easing-standard);
+    border-color var(--duration-fast) var(--easing-standard),
+    transform 160ms var(--easing-out);
+}
+
+.scheckbox:active .scheckbox__box {
+  transform: scale(0.88);
 }
 
 .scheckbox:hover .scheckbox__box {

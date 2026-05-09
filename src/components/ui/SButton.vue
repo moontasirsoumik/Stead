@@ -63,7 +63,13 @@ defineEmits<{
     background-color var(--duration-fast) var(--easing-standard),
     border-color var(--duration-fast) var(--easing-standard),
     color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard),
+    transform 160ms var(--easing-out),
     opacity var(--duration-fast) var(--easing-standard);
+}
+
+.sbutton:active:not(:disabled) {
+  transform: scale(var(--press-scale));
 }
 
 .sbutton--sm {
@@ -89,14 +95,17 @@ defineEmits<{
 .sbutton--primary {
   background-color: var(--color-brand-primary);
   color: var(--color-fg-on-brand);
+  box-shadow: var(--shadow-2);
 }
 
 .sbutton--primary:hover:not(:disabled) {
   background-color: var(--color-brand-hover);
+  box-shadow: var(--shadow-brand);
 }
 
 .sbutton--primary:active:not(:disabled) {
   background-color: var(--color-brand-pressed);
+  box-shadow: var(--shadow-2);
 }
 
 .sbutton--secondary {

@@ -316,6 +316,7 @@ onMounted(async () => {
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-l);
   overflow: hidden;
+  box-shadow: var(--shadow-card);
 }
 
 .bills-table__header {

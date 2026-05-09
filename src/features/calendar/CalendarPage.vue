@@ -1204,6 +1204,7 @@ watch(() => appStore.isPersonal, loadData)
   border-radius: var(--radius-l);
   background: var(--color-bg-primary);
   overflow: hidden;
+  box-shadow: var(--shadow-card);
 }
 
 .month__grid {
@@ -1326,6 +1327,7 @@ watch(() => appStore.isPersonal, loadData)
   border-radius: var(--radius-l);
   background: var(--color-bg-primary);
   overflow: hidden;
+  box-shadow: var(--shadow-card);
 }
 
 .day-panel__header {
@@ -1463,6 +1465,7 @@ watch(() => appStore.isPersonal, loadData)
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  box-shadow: var(--shadow-card);
 }
 
 /* ── Header row ── */
@@ -1729,6 +1732,7 @@ watch(() => appStore.isPersonal, loadData)
   border-radius: var(--radius-l);
   background: var(--color-bg-primary);
   overflow: hidden;
+  box-shadow: var(--shadow-card);
 }
 
 .agenda__empty { padding: var(--space-2xl) var(--space-xl); }

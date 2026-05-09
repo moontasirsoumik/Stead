@@ -286,6 +286,7 @@ onMounted(async () => {
   padding: var(--space-m) var(--space-l);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-m);
+  box-shadow: var(--shadow-card);
 }
 
 .today-cta__inner {
@@ -338,6 +339,7 @@ onMounted(async () => {
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-l);
   overflow: hidden;
+  box-shadow: var(--shadow-card);
 }
 
 .journal-row {

@@ -439,6 +439,7 @@ onMounted(() => {
   border-radius: var(--radius-m);
   margin-bottom: var(--space-xl);
   overflow: hidden;
+  box-shadow: var(--shadow-2);
 }
 
 .stat-cell {
@@ -513,6 +514,7 @@ onMounted(() => {
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-m);
   overflow: hidden;
+  box-shadow: var(--shadow-card);
 }
 
 .dash-row {

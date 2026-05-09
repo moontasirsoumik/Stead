@@ -89,11 +89,12 @@ async function handleConfirm() {
 
 .dialog {
   background: var(--color-bg-elevated);
-  border-radius: var(--radius-l);
+  border-radius: var(--radius-xl);
   border: 1px solid var(--color-border-default);
-  padding: var(--space-xl);
+  padding: var(--space-2xl);
   max-width: 380px;
   width: 100%;
+  box-shadow: var(--shadow-dialog);
 }
 
 .dialog__title {
@@ -115,16 +116,21 @@ async function handleConfirm() {
 }
 
 .dialog-enter-active {
-  transition: opacity var(--duration-normal) var(--easing-decelerate);
+  transition: opacity var(--duration-dialog) var(--easing-out);
 }
 
 .dialog-enter-active .dialog {
-  transition: transform var(--duration-normal) var(--easing-decelerate),
-    opacity var(--duration-normal) var(--easing-decelerate);
+  transition: transform var(--duration-dialog) var(--easing-out),
+    opacity var(--duration-dialog) var(--easing-out);
 }
 
 .dialog-leave-active {
-  transition: opacity var(--duration-fast) var(--easing-accelerate);
+  transition: opacity var(--duration-dialog-exit) var(--easing-out);
+}
+
+.dialog-leave-active .dialog {
+  transition: transform var(--duration-dialog-exit) var(--easing-out),
+    opacity var(--duration-dialog-exit) var(--easing-out);
 }
 
 .dialog-enter-from {
@@ -133,10 +139,15 @@ async function handleConfirm() {
 
 .dialog-enter-from .dialog {
   opacity: 0;
-  transform: scale(0.98);
+  transform: scale(0.96);
 }
 
 .dialog-leave-to {
   opacity: 0;
+}
+
+.dialog-leave-to .dialog {
+  opacity: 0;
+  transform: scale(0.98);
 }
 </style>

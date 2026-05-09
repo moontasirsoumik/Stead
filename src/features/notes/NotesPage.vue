@@ -334,14 +334,23 @@ onMounted(async () => {
   border-radius: var(--radius-l);
   border: 1px solid var(--color-border-default);
   cursor: pointer;
+  box-shadow: var(--shadow-card);
   transition:
     background-color var(--duration-fast) var(--easing-standard),
-    border-color var(--duration-fast) var(--easing-standard);
+    border-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard),
+    transform var(--duration-fast) var(--easing-standard);
 }
 
 .note-card:hover {
   background: var(--color-surface-card-hover);
   border-color: var(--color-outline-variant);
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(var(--hover-lift));
+}
+
+.note-card:active {
+  transform: scale(var(--press-scale));
 }
 
 .note-card--pinned {

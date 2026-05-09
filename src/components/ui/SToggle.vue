@@ -55,8 +55,13 @@ withDefaults(
   border-radius: var(--radius-circle);
   transition:
     background-color var(--duration-fast) var(--easing-standard),
-    border-color var(--duration-fast) var(--easing-standard);
+    border-color var(--duration-fast) var(--easing-standard),
+    transform 160ms var(--easing-out);
   flex-shrink: 0;
+}
+
+.stoggle:active .stoggle__track {
+  transform: scale(0.95);
 }
 
 .stoggle__track--on {
@@ -72,7 +77,8 @@ withDefaults(
   height: 16px;
   background: var(--color-fg-on-brand);
   border-radius: var(--radius-circle);
-  transition: transform var(--duration-fast) var(--easing-decelerate);
+  box-shadow: var(--shadow-2);
+  transition: transform var(--duration-fast) var(--easing-spring);
 }
 
 .stoggle__track--on .stoggle__thumb {
