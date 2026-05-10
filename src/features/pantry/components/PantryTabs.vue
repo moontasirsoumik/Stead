@@ -39,7 +39,7 @@ function updatePill(animate: boolean) {
     width: w,
     transform: tx,
     transition: animate
-      ? 'transform 300ms cubic-bezier(0.4, 0, 0, 1), width 300ms cubic-bezier(0.4, 0, 0, 1)'
+      ? 'transform var(--duration-slow) var(--easing-smooth), width var(--duration-slow) var(--easing-smooth)'
       : 'none',
   }
   sharedPillPosition = { width: w, transform: tx }

@@ -64,12 +64,7 @@ defineEmits<{
     border-color var(--duration-fast) var(--easing-standard),
     color var(--duration-fast) var(--easing-standard),
     box-shadow var(--duration-fast) var(--easing-standard),
-    transform 160ms var(--easing-out),
     opacity var(--duration-fast) var(--easing-standard);
-}
-
-.sbutton:active:not(:disabled) {
-  transform: scale(var(--press-scale));
 }
 
 .sbutton--sm {

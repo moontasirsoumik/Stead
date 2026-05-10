@@ -7,7 +7,6 @@ import SButton from '@/components/ui/SButton.vue'
 import SBadge from '@/components/ui/SBadge.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import LoadingSkeleton from '@/components/feedback/LoadingSkeleton.vue'
-import MoneyTabs from '@/features/money/components/MoneyTabs.vue'
 import { useExpenseSplitsStore } from '@/stores/expense-splits.store'
 import { useExpensesStore } from '@/stores/expenses.store'
 import { useHouseholdStore } from '@/stores/household.store'
@@ -69,8 +68,6 @@ onMounted(async () => {
       class="page-enter"
       :style="{ '--stagger': 0 }"
     />
-
-    <MoneyTabs />
 
     <div v-if="splitsStore.loading" class="page-enter" :style="{ '--stagger': 2 }">
       <LoadingSkeleton :lines="4" />
@@ -170,11 +167,11 @@ onMounted(async () => {
   display: flex;
   align-items: stretch;
   background: var(--color-surface-container-low);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-m);
   margin-bottom: var(--space-l);
   overflow: hidden;
-  box-shadow: var(--shadow-2);
+  box-shadow: var(--shadow-card);
 }
 .stats-bar__cell {
   flex: 1;
@@ -182,7 +179,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: var(--space-2xs);
-  border-right: 1px solid var(--color-border-default);
+  border-right: 1px solid var(--color-border-subtle);
 }
 .stats-bar__cell:last-child { border-right: none; }
 .stats-bar__label {
@@ -211,7 +208,7 @@ onMounted(async () => {
 .balance-list {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-l);
   background: var(--color-surface-card);
   box-shadow: var(--shadow-card);
@@ -223,7 +220,7 @@ onMounted(async () => {
   gap: var(--space-m);
   padding: var(--space-m) var(--space-l);
   border-bottom: 1px solid var(--color-border-subtle);
-  transition: background var(--duration-fast) var(--easing-standard);
+  transition: background-color var(--duration-fast) var(--easing-standard);
 }
 
 .balance-row:last-child {

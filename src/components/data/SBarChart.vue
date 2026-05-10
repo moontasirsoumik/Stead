@@ -198,7 +198,7 @@ function pct(value: number): number {
   height: 100%;
   border-radius: var(--radius-s);
   min-width: 2px;
-  transition: width 500ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 500ms var(--easing-chart);
 }
 
 .bar__row--active .bar__fill {
@@ -256,7 +256,7 @@ function pct(value: number): number {
   width: 100%;
   border-radius: var(--radius-s) var(--radius-s) 0 0;
   min-height: 1px;
-  transition: height 500ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: height 500ms var(--easing-chart);
 }
 
 .bar__group--active .bar__col-fill {
@@ -277,7 +277,7 @@ function pct(value: number): number {
   left: 50%;
   transform: translateX(-50%);
   background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-m);
   padding: 4px 8px;
   display: flex;

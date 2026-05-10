@@ -278,7 +278,7 @@ onMounted(() => {
   /* IMPORTANT: function list must match --flying for flicker-free interpolation */
   transform: translate(0px, var(--center-y, 0px)) scale(1);
   will-change: transform;
-  transition: transform 1.1s cubic-bezier(0.22, 0.68, 0.35, 1.05);
+  transition: transform 1.1s var(--easing-spring);
 }
 
 .hero-anim--shrunk {
@@ -326,8 +326,8 @@ onMounted(() => {
   white-space: nowrap;
   line-height: 1;
   transition:
-    transform 1s cubic-bezier(0.22, 0.68, 0.35, 1.05),
-    opacity 0.6s ease;
+    transform 1s var(--easing-spring),
+    opacity 0.6s var(--easing-out);
 }
 
 .hero-brand--visible {
@@ -384,7 +384,7 @@ onMounted(() => {
   border: 0.5px dashed rgba(0,0,0,0.12);
   pointer-events: none;
   z-index: 10;
-  transition: opacity 0.5s;
+  transition: opacity 0.5s var(--easing-out);
 }
 
 .hero-house.phase-3d .floor::after { opacity: 0; }

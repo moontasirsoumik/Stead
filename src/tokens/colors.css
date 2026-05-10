@@ -12,18 +12,18 @@
 
   --color-primary-container: #DDE0ED;
   --color-on-primary-container: #262C40;
-  --color-surface-container-low: #F6F6F4;
-  --color-surface-container: #F0F0EE;
-  --color-surface-container-high: #E8E8E6;
+  --color-surface-container-low: #F4F5F7;
+  --color-surface-container: #ECEDF0;
+  --color-surface-container-high: #E2E4E8;
   --color-outline: #737888;
   --color-outline-variant: #C8CAD0;
 
-  --color-bg-primary: #FAFAF8;
-  --color-bg-secondary: #F4F4F2;
-  --color-bg-tertiary: #EDEDEB;
+  --color-bg-primary: #FAFBFC;
+  --color-bg-secondary: #F4F5F7;
+  --color-bg-tertiary: #ECEDF0;
   --color-bg-elevated: #FFFFFF;
   --color-bg-overlay: rgba(0, 0, 0, 0.40);
-  --color-bg-wash: #F7F7F5;
+  --color-bg-wash: #F7F8FA;
 
   --color-fg-primary: #1A1D26;
   --color-fg-secondary: #555968;
@@ -44,27 +44,35 @@
   --color-info: #3A6C9E;
   --color-info-bg: #EDF4FB;
 
-  --color-border-default: #E2E3E6;
-  --color-border-strong: #CDCED4;
-  --color-border-subtle: #EDEDEB;
+  --color-border-default: #E5E7EB;
+  --color-border-strong: #D1D5DB;
+  --color-border-subtle: #F0F1F3;
   --color-border-brand: #4A5578;
-  --color-border-input: #D2D3D9;
-  --color-border-input-hover: #B5B7C0;
+  --color-border-input: #D5D7DE;
+  --color-border-input-hover: #B8BBC4;
 
-  --color-surface-card: #F4F4F2;
-  --color-surface-card-hover: #EDEDEB;
+  --color-surface-card: #FFFFFF;
+  --color-surface-card-hover: #F8F9FB;
   --color-surface-dialog: #FFFFFF;
-  --color-surface-nav: #F2F2F0;
+  --color-surface-nav: #F5F6F8;
   --color-surface-nav-hover: rgba(74, 85, 120, 0.06);
   --color-surface-nav-active: #DDE0ED;
-  --color-surface-input: #F2F2F0;
-  --color-surface-input-hover: #EAEAE8;
+  --color-surface-input: #FFFFFF;
+  --color-surface-input-hover: #F8F9FB;
 
   --color-nav-fg: #6B7080;
   --color-nav-fg-active: #1A1D26;
   --color-nav-fg-hover: #3A3F50;
-  --color-nav-border: #E2E3E6;
+  --color-nav-border: #E5E7EB;
   --color-nav-brand-indicator: #4A5578;
+
+  /* Scope indicator colors */
+  --color-scope-household: #4A5578;
+  --color-scope-household-bg: #ECEEF5;
+  --color-scope-household-fg: #3D4868;
+  --color-scope-personal: #2D7A6F;
+  --color-scope-personal-bg: #E8F5F2;
+  --color-scope-personal-fg: #24665D;
 
   --color-bg-smoke: rgba(0, 0, 0, 0.32);
 }
@@ -215,20 +223,28 @@
   --color-border-input: #34363E;
   --color-border-input-hover: #505260;
 
-  --color-surface-card: #131316;
-  --color-surface-card-hover: #1A1A1E;
+  --color-surface-card: #18181C;
+  --color-surface-card-hover: #1E1E23;
   --color-surface-dialog: #1E1E21;
   --color-surface-nav: #1E1E21;
   --color-surface-nav-hover: rgba(163, 177, 212, 0.07);
   --color-surface-nav-active: #181B26;
-  --color-surface-input: #151517;
-  --color-surface-input-hover: #1C1C1F;
+  --color-surface-input: #18181C;
+  --color-surface-input-hover: #1F1F24;
 
   --color-nav-fg: #888A98;
   --color-nav-fg-active: #ECEDEE;
   --color-nav-fg-hover: #C0C1CC;
   --color-nav-border: #222228;
   --color-nav-brand-indicator: #A3B1D4;
+
+  /* Scope indicator colors — dark */
+  --color-scope-household: #A3B1D4;
+  --color-scope-household-bg: #1C1F2E;
+  --color-scope-household-fg: #C0CBE6;
+  --color-scope-personal: #7CC8B8;
+  --color-scope-personal-bg: #121F1C;
+  --color-scope-personal-fg: #A0DCCE;
 
   --color-bg-smoke: rgba(0, 0, 0, 0.56);
 }
@@ -398,6 +414,14 @@
     --color-nav-fg-hover: #C0C1CC;
     --color-nav-border: #222228;
     --color-nav-brand-indicator: #A3B1D4;
+
+    /* Scope indicator colors — prefers-dark */
+    --color-scope-household: #A3B1D4;
+    --color-scope-household-bg: #1C1F2E;
+    --color-scope-household-fg: #C0CBE6;
+    --color-scope-personal: #7CC8B8;
+    --color-scope-personal-bg: #121F1C;
+    --color-scope-personal-fg: #A0DCCE;
 
     --color-bg-smoke: rgba(0, 0, 0, 0.56);
   }

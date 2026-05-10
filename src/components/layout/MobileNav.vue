@@ -59,10 +59,12 @@ function isActive(to: string): boolean {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   align-items: center;
-  height: calc(56px + env(safe-area-inset-bottom));
-  padding: 4px 4px calc(4px + env(safe-area-inset-bottom));
-  background: var(--color-bg-primary);
-  border-top: 1px solid var(--color-border-default);
+  height: calc(60px + env(safe-area-inset-bottom));
+  padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+  background: color-mix(in srgb, var(--color-bg-primary) 80%, transparent);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-top: 1px solid var(--color-border-subtle);
   z-index: 100;
 }
 

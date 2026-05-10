@@ -30,7 +30,7 @@ defineProps<{
 .month-summary {
   display: flex;
   align-items: stretch;
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-l);
   background: var(--color-surface-card);
   margin-bottom: var(--space-l);

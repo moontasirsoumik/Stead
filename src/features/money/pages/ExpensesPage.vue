@@ -17,7 +17,6 @@ import FormDrawer from '@/components/forms/FormDrawer.vue'
 import FormField from '@/components/forms/FormField.vue'
 import FormSection from '@/components/forms/FormSection.vue'
 import MonthSummary from '@/features/money/components/MonthSummary.vue'
-import MoneyTabs from '@/features/money/components/MoneyTabs.vue'
 import { useExpensesStore } from '@/stores/expenses.store'
 import { useExpenseSplitsStore } from '@/stores/expense-splits.store'
 import { useAuthStore } from '@/stores/auth.store'
@@ -274,8 +273,6 @@ onMounted(async () => {
       </template>
     </PageHeader>
 
-    <MoneyTabs />
-
     <div class="money-mobile-actions">
       <SButton @click="openAdd">Add Expense</SButton>
     </div>
@@ -469,7 +466,7 @@ onMounted(async () => {
 .expense-table {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-l);
   overflow: hidden;
   box-shadow: var(--shadow-card);
@@ -481,7 +478,7 @@ onMounted(async () => {
   align-items: center;
   padding: var(--space-s) var(--space-l);
   background: var(--color-surface-container-low);
-  border-bottom: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-subtle);
   gap: var(--space-m);
 }
 
@@ -504,7 +501,7 @@ onMounted(async () => {
   gap: var(--space-m);
   border-bottom: 1px solid var(--color-border-subtle);
   cursor: pointer;
-  transition: background var(--duration-fast) var(--easing-standard);
+  transition: background-color var(--duration-fast) var(--easing-standard);
 }
 
 .expense-row:last-child { border-bottom: none; }
@@ -590,10 +587,11 @@ onMounted(async () => {
 .split-breakdown {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-l);
   background: var(--color-surface-card);
   overflow: hidden;
+  box-shadow: var(--shadow-card);
 }
 
 .split-row {
@@ -659,7 +657,7 @@ onMounted(async () => {
   -moz-appearance: textfield;
   transition:
     border-color var(--duration-fast) var(--easing-standard),
-    background var(--duration-fast) var(--easing-standard);
+    background-color var(--duration-fast) var(--easing-standard);
 }
 
 .split-row__editor::placeholder {

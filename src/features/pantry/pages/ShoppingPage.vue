@@ -436,11 +436,11 @@ onMounted(async () => {
   display: flex;
   align-items: stretch;
   background: var(--color-surface-container-low);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-m);
   margin-bottom: var(--space-l);
   overflow: hidden;
-  box-shadow: var(--shadow-2);
+  box-shadow: var(--shadow-card);
 }
 .stats-bar__cell {
   flex: 1;
@@ -448,7 +448,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: var(--space-2xs);
-  border-right: 1px solid var(--color-border-default);
+  border-right: 1px solid var(--color-border-subtle);
 }
 .stats-bar__cell:last-child { border-right: none; }
 .stats-bar__label {
@@ -464,7 +464,7 @@ onMounted(async () => {
 .shop-table {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-l);
   overflow: hidden;
   box-shadow: var(--shadow-card);
@@ -477,7 +477,7 @@ onMounted(async () => {
   align-items: center;
   padding: var(--space-s) var(--space-l);
   background: var(--color-surface-container-low);
-  border-bottom: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-subtle);
   gap: var(--space-m);
 }
 
@@ -513,7 +513,7 @@ onMounted(async () => {
   gap: var(--space-m);
   border-bottom: 1px solid var(--color-border-subtle);
   cursor: pointer;
-  transition: background var(--duration-fast) var(--easing-standard);
+  transition: background-color var(--duration-fast) var(--easing-standard);
 }
 
 /* Archive row has an extra column (bought-by avatar) */
@@ -598,13 +598,10 @@ onMounted(async () => {
   cursor: pointer;
   color: var(--color-fg-tertiary);
   transition:
-    background var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard),
     color var(--duration-fast) var(--easing-standard),
-    border-color var(--duration-fast) var(--easing-standard),
-    transform var(--duration-fast) var(--easing-standard);
+    border-color var(--duration-fast) var(--easing-standard);
 }
-
-.shop-row__action-btn:active { transform: scale(0.88); }
 
 .shop-row__action-btn--done:hover {
   background: color-mix(in srgb, var(--color-success) 12%, transparent);
@@ -636,15 +633,13 @@ onMounted(async () => {
   border-radius: var(--radius-m);
   font: var(--text-body-1);
   color: var(--color-fg-tertiary);
-  box-shadow: var(--shadow-inset);
   cursor: pointer;
   white-space: nowrap;
   transition:
     border-color var(--duration-fast) var(--easing-standard),
-    background var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard),
     color var(--duration-fast) var(--easing-standard),
-    box-shadow var(--duration-fast) var(--easing-standard),
-    transform 160ms var(--easing-out);
+    box-shadow var(--duration-fast) var(--easing-standard);
 }
 
 .archive-select-btn:hover {
@@ -663,10 +658,6 @@ onMounted(async () => {
   background: var(--color-brand-selected);
   border-color: var(--color-brand-hover);
   color: var(--color-brand-primary);
-}
-
-.archive-select-btn:active {
-  transform: scale(var(--press-scale));
 }
 
 /* ── Archive date groups ── */

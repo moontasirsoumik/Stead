@@ -284,7 +284,7 @@ onMounted(async () => {
 .item-list {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-l);
   overflow: hidden;
   box-shadow: var(--shadow-card);
@@ -309,7 +309,7 @@ onMounted(async () => {
   padding: var(--space-s) var(--space-l);
   border-bottom: 1px solid var(--color-border-subtle);
   min-height: var(--height-row-min);
-  transition: background var(--duration-fast) var(--easing-standard);
+  transition: background-color var(--duration-fast) var(--easing-standard);
 }
 .item-row:hover { background: var(--color-bg-tertiary); }
 

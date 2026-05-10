@@ -787,17 +787,17 @@ onMounted(() => {
   display: flex;
   align-items: stretch;
   background: var(--color-surface-container-low);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-m);
   margin-bottom: var(--space-xl);
   overflow: hidden;
-  box-shadow: var(--shadow-2);
+  box-shadow: var(--shadow-card);
 }
 
 .stat-cell {
   flex: 1;
   padding: var(--space-m) var(--space-l);
-  border-right: 1px solid var(--color-border-default);
+  border-right: 1px solid var(--color-border-subtle);
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -828,7 +828,7 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   padding-bottom: var(--space-s);
-  border-bottom: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-subtle);
   margin-bottom: var(--space-s);
 }
 
@@ -863,7 +863,7 @@ onMounted(() => {
 .dash-table {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-m);
   overflow: hidden;
   box-shadow: var(--shadow-card);
@@ -1022,11 +1022,11 @@ onMounted(() => {
   display: flex;
   align-items: stretch;
   background: var(--color-surface-container-low);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-m);
   margin-bottom: var(--space-xl);
   overflow: hidden;
-  box-shadow: var(--shadow-2);
+  box-shadow: var(--shadow-card);
 }
 
 .pulse-panel__summary {
@@ -1036,7 +1036,7 @@ onMounted(() => {
   flex-direction: column;
   justify-content: center;
   gap: var(--space-s);
-  border-right: 1px solid var(--color-border-default);
+  border-right: 1px solid var(--color-border-subtle);
 }
 
 .pulse-panel__eyebrow {
@@ -1113,10 +1113,10 @@ onMounted(() => {
 
 .insight-card {
   background: var(--color-surface-container-low);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-m);
   padding: var(--space-l);
-  box-shadow: var(--shadow-2);
+  box-shadow: var(--shadow-card);
 }
 
 .insight-card:only-child {
@@ -1197,7 +1197,7 @@ onMounted(() => {
   background: var(--color-brand-primary);
   border-radius: 3px;
   opacity: 0.65;
-  transition: width 0.4s var(--easing-standard);
+  transition: width var(--duration-slow) var(--easing-standard);
 }
 
 /* ── Task pulse visualization ── */
@@ -1218,7 +1218,7 @@ onMounted(() => {
 .task-bar__seg {
   border-radius: 5px;
   min-width: 6px;
-  transition: flex 0.3s var(--easing-standard);
+  transition: flex var(--duration-slow) var(--easing-standard);
 }
 
 .task-bar__seg--done { background: var(--color-success); opacity: 0.65; }
@@ -1273,10 +1273,10 @@ onMounted(() => {
 /* Sparkline card */
 .spark-card {
   background: var(--color-surface-container-low);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-m);
   padding: var(--space-l);
-  box-shadow: var(--shadow-2);
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
 }
@@ -1338,10 +1338,10 @@ onMounted(() => {
 /* Horizon card */
 .horizon-card {
   background: var(--color-surface-container-low);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-m);
   padding: var(--space-l);
-  box-shadow: var(--shadow-2);
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
 }
@@ -1446,10 +1446,10 @@ onMounted(() => {
 /* Countdown card */
 .countdown-card {
   background: var(--color-surface-container-low);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-m);
   padding: var(--space-l);
-  box-shadow: var(--shadow-2);
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
 }
@@ -1522,12 +1522,12 @@ onMounted(() => {
   }
 
   .stat-cell:nth-child(odd) {
-    border-right: 1px solid var(--color-border-default);
+    border-right: 1px solid var(--color-border-subtle);
   }
 
   .stat-cell:nth-child(1),
   .stat-cell:nth-child(2) {
-    border-bottom: 1px solid var(--color-border-default);
+    border-bottom: 1px solid var(--color-border-subtle);
   }
 
   .dash-grid {
@@ -1598,7 +1598,7 @@ onMounted(() => {
   .pulse-panel__summary {
     flex: none;
     border-right: none;
-    border-bottom: 1px solid var(--color-border-default);
+    border-bottom: 1px solid var(--color-border-subtle);
     padding: var(--space-m) var(--space-l);
   }
 
@@ -1638,7 +1638,7 @@ onMounted(() => {
   }
 
   .stat-cell:not(:last-child) {
-    border-bottom: 1px solid var(--color-border-default);
+    border-bottom: 1px solid var(--color-border-subtle);
   }
 }
 

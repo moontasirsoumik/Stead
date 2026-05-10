@@ -90,7 +90,7 @@ async function handleConfirm() {
 .dialog {
   background: var(--color-bg-elevated);
   border-radius: var(--radius-xl);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   padding: var(--space-2xl);
   max-width: 380px;
   width: 100%;

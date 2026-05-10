@@ -43,8 +43,7 @@ defineEmits<{
   background: transparent;
   transition:
     background-color var(--duration-fast) var(--easing-standard),
-    color var(--duration-fast) var(--easing-standard),
-    transform 160ms var(--easing-out);
+    color var(--duration-fast) var(--easing-standard);
 }
 
 .siconbutton--sm { width: var(--height-control-sm); height: var(--height-control-sm); }
@@ -69,10 +68,6 @@ defineEmits<{
   background: var(--color-surface-container-low);
   border-color: var(--color-outline-variant);
   color: var(--color-fg-primary);
-}
-
-.siconbutton:active:not(:disabled) {
-  transform: scale(var(--press-scale));
 }
 
 .siconbutton:disabled {

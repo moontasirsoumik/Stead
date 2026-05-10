@@ -332,11 +332,11 @@ onMounted(async () => {
   display: flex;
   align-items: stretch;
   background: var(--color-surface-container-low);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-m);
   margin-bottom: var(--space-l);
   overflow: hidden;
-  box-shadow: var(--shadow-2);
+  box-shadow: var(--shadow-card);
 }
 .stats-bar__cell {
   flex: 1;
@@ -344,7 +344,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: var(--space-2xs);
-  border-right: 1px solid var(--color-border-default);
+  border-right: 1px solid var(--color-border-subtle);
 }
 .stats-bar__cell:last-child { border-right: none; }
 .stats-bar__label {
@@ -359,7 +359,7 @@ onMounted(async () => {
 .wish-table {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-l);
   overflow: hidden;
   box-shadow: var(--shadow-card);
@@ -371,7 +371,7 @@ onMounted(async () => {
   align-items: center;
   padding: var(--space-s) var(--space-l);
   background: var(--color-surface-container-low);
-  border-bottom: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-subtle);
   gap: var(--space-m);
 }
 
@@ -394,7 +394,7 @@ onMounted(async () => {
   gap: var(--space-m);
   border-bottom: 1px solid var(--color-border-subtle);
   cursor: pointer;
-  transition: background var(--duration-fast) var(--easing-standard);
+  transition: background-color var(--duration-fast) var(--easing-standard);
 }
 
 .wish-row:last-child { border-bottom: none; }

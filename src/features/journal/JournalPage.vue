@@ -284,7 +284,7 @@ onMounted(async () => {
 .today-cta {
   margin-bottom: var(--space-l);
   padding: var(--space-m) var(--space-l);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-m);
   box-shadow: var(--shadow-card);
 }
@@ -336,7 +336,7 @@ onMounted(async () => {
 .journal-list {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-l);
   overflow: hidden;
   box-shadow: var(--shadow-card);
@@ -349,7 +349,7 @@ onMounted(async () => {
   padding: var(--space-m) var(--space-l);
   border-bottom: 1px solid var(--color-border-subtle);
   cursor: pointer;
-  transition: background var(--duration-fast) var(--easing-standard);
+  transition: background-color var(--duration-fast) var(--easing-standard);
 }
 
 .journal-row:last-child { border-bottom: none; }

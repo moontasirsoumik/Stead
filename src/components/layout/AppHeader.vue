@@ -46,7 +46,7 @@ defineEmits<{
   height: var(--height-header);
   padding: 0 var(--space-l);
   background: var(--color-bg-primary);
-  border-bottom: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .header__left {

@@ -214,7 +214,18 @@ async function quickStockUpdate(id: string, status: StockStatus) {
   await inventoryStore.update(id, { stock_status: status })
 }
 
+const recentlyAdded = ref(new Set<string>())
+
+function isInShoppingList(itemName: string): boolean {
+  if (recentlyAdded.value.has(itemName.toLowerCase())) return true
+  return shoppingStore.items.some(
+    (g) => g.name.toLowerCase() === itemName.toLowerCase() && g.status !== 'bought',
+  )
+}
+
 async function addToShoppingList(item: InventoryItem) {
+  if (isInShoppingList(item.name)) return
+  recentlyAdded.value.add(item.name.toLowerCase())
   await shoppingStore.create({
     name: item.name,
     quantity: 1,
@@ -233,7 +244,10 @@ async function addToShoppingList(item: InventoryItem) {
 
 onMounted(async () => {
   if (authStore.householdId) {
-    await inventoryStore.fetchItems(authStore.householdId)
+    await Promise.all([
+      inventoryStore.fetchItems(authStore.householdId),
+      shoppingStore.fetchItems(authStore.householdId),
+    ])
   }
 })
 </script>
@@ -288,6 +302,7 @@ onMounted(async () => {
       <div class="inv-table__header">
         <span class="inv-table__th">Item</span>
         <span class="inv-table__th inv-table__th--center">Stock</span>
+        <span class="inv-table__th inv-table__th--cart"></span>
         <span class="inv-table__th inv-table__th--center">Category</span>
         <span class="inv-table__th inv-table__th--center">Location</span>
         <span class="inv-table__th inv-table__th--center">Target</span>
@@ -302,6 +317,16 @@ onMounted(async () => {
         <div class="inv-row__name">{{ item.name }}</div>
         <div class="inv-row__stock">
           <SBadge v-if="appStore.showStockIndicators" :variant="stockVariant(item.stock_status)" size="sm">{{ stockLabel(item.stock_status) }}</SBadge>
+        </div>
+        <div class="inv-row__cart">
+          <button
+            :class="['inv-row__cart-btn', { 'inv-row__cart-btn--added': isInShoppingList(item.name) }]"
+            :title="isInShoppingList(item.name) ? 'Already in shopping list' : 'Add to shopping list'"
+            :disabled="isInShoppingList(item.name)"
+            @click.stop="addToShoppingList(item)"
+          >
+            <span class="material-symbols-rounded">{{ isInShoppingList(item.name) ? 'check' : 'add_shopping_cart' }}</span>
+          </button>
         </div>
         <div class="inv-row__chips">
           <div class="inv-row__category">
@@ -343,11 +368,11 @@ onMounted(async () => {
   display: flex;
   align-items: stretch;
   background: var(--color-surface-container-low);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-m);
   margin-bottom: var(--space-l);
   overflow: hidden;
-  box-shadow: var(--shadow-2);
+  box-shadow: var(--shadow-card);
 }
 .stats-bar__cell {
   flex: 1;
@@ -355,7 +380,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: var(--space-2xs);
-  border-right: 1px solid var(--color-border-default);
+  border-right: 1px solid var(--color-border-subtle);
 }
 .stats-bar__cell:last-child { border-right: none; }
 .stats-bar__label {
@@ -371,7 +396,7 @@ onMounted(async () => {
 .inv-table {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-l);
   overflow: hidden;
   box-shadow: var(--shadow-card);
@@ -379,12 +404,16 @@ onMounted(async () => {
 
 .inv-table__header {
   display: grid;
-  grid-template-columns: 1fr 120px 100px 100px 80px 100px;
+  grid-template-columns: 1fr 120px 36px 100px 100px 80px 100px;
   align-items: center;
   padding: var(--space-s) var(--space-l);
   background: var(--color-surface-container-low);
-  border-bottom: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-subtle);
   gap: var(--space-m);
+}
+
+.inv-table__th--cart {
+  /* Empty header for cart column — keeps alignment clean */
 }
 
 .inv-table__th {
@@ -399,14 +428,14 @@ onMounted(async () => {
 
 .inv-row {
   display: grid;
-  grid-template-columns: 1fr 120px 100px 100px 80px 100px;
+  grid-template-columns: 1fr 120px 36px 100px 100px 80px 100px;
   align-items: center;
   min-height: var(--height-row-min);
   padding: 0 var(--space-l);
   gap: var(--space-m);
   border-bottom: 1px solid var(--color-border-subtle);
   cursor: pointer;
-  transition: background var(--duration-fast) var(--easing-standard);
+  transition: background-color var(--duration-fast) var(--easing-standard);
 }
 
 .inv-row:last-child { border-bottom: none; }
@@ -426,6 +455,50 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.inv-row__cart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inv-row__cart-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-m);
+  border: none;
+  background: transparent;
+  color: var(--color-fg-tertiary);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard);
+}
+
+.inv-row__cart-btn .material-symbols-rounded {
+  font-size: 18px;
+}
+
+.inv-row__cart-btn:hover:not(:disabled) {
+  background: var(--color-brand-selected);
+  color: var(--color-brand-primary);
+}
+
+.inv-row__cart-btn:active:not(:disabled) {
+  background: var(--color-brand-subtle);
+}
+
+.inv-row__cart-btn--added {
+  color: var(--color-status-success);
+  cursor: default;
+}
+
+.inv-row__cart-btn--added .material-symbols-rounded {
+  font-size: 16px;
 }
 
 .inv-row__location {
@@ -455,14 +528,15 @@ onMounted(async () => {
   .pantry-mobile-actions { display: flex; margin-bottom: var(--space-m); }
   .inv-table__header { display: none; }
   .inv-row {
-    grid-template-columns: 1fr 5rem;
+    grid-template-columns: 1fr auto 5rem;
     grid-template-rows: auto auto;
     padding: var(--space-s) var(--space-l);
     row-gap: var(--space-2xs);
-    column-gap: var(--space-m);
+    column-gap: var(--space-xs);
   }
   .inv-row__name { grid-column: 1; grid-row: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-  .inv-row__stock { grid-column: 2; grid-row: 1 / -1; align-self: center; justify-self: end; }
+  .inv-row__stock { grid-column: 3; grid-row: 1 / -1; align-self: center; justify-self: end; }
+  .inv-row__cart { grid-column: 2; grid-row: 1 / -1; align-self: center; }
   .inv-row__chips {
     display: flex;
     flex-wrap: wrap;

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import { useAppStore } from '@/stores/app.store'
 import { useHouseholdStore } from '@/stores/household.store'
 import { useAuthStore } from '@/stores/auth.store'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import NavRail from './NavRail.vue'
 import SAvatar from '@/components/ui/SAvatar.vue'
 import SteadLogo from '@/components/ui/SteadLogo.vue'
@@ -12,8 +12,43 @@ const appStore = useAppStore()
 const householdStore = useHouseholdStore()
 const authStore = useAuthStore()
 const router = useRouter()
+const route = useRoute()
 
 const mobileOpen = computed(() => appStore.mobileSidebarOpen)
+
+/* ── Scope transition ── */
+const scopeTransitioning = ref(false)
+
+// Routes exclusive to one scope
+const householdOnly = ['/pantry', '/reminders', '/contacts', '/documents']
+const personalOnly = ['/wishlist', '/journal']
+
+function isRouteInScope(path: string, scope: 'household' | 'personal'): boolean {
+  if (scope === 'personal') return !householdOnly.some(r => path.startsWith(r))
+  return !personalOnly.some(r => path.startsWith(r))
+}
+
+function handleScopeToggle() {
+  const nextScope = appStore.scope === 'household' ? 'personal' : 'household'
+  const currentPath = route.path
+  const routeAvailable = isRouteInScope(currentPath, nextScope)
+
+  // Start transition
+  scopeTransitioning.value = true
+
+  // After the fade-out (half-point), switch scope + maybe redirect
+  setTimeout(() => {
+    appStore.toggleScope()
+    if (!routeAvailable) {
+      router.replace('/')
+    }
+  }, 180)
+
+  // After the full transition, remove the overlay
+  setTimeout(() => {
+    scopeTransitioning.value = false
+  }, 420)
+}
 
 const isMobile = ref(false)
 const isTablet = ref(false)
@@ -42,12 +77,6 @@ function closeMobile() {
 }
 
 const userName = computed(() => householdStore.currentMember?.name ?? 'User')
-const scopeLabel = computed(() =>
-  appStore.scope === 'personal' ? 'Personal' : 'Household',
-)
-const scopeIcon = computed(() =>
-  appStore.scope === 'personal' ? 'person' : 'home',
-)
 const themeToggleLabel = computed(() =>
   appStore.resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode',
 )
@@ -80,10 +109,26 @@ async function handleSignOut() {
           <span class="shell__brand-label">Stead</span>
         </RouterLink>
         <span class="shell__topbar-divider" />
-        <button class="shell__scope-chip" @click="appStore.toggleScope()">
-          <span class="material-symbols-rounded shell__scope-chip-icon">{{ scopeIcon }}</span>
-          <span class="shell__scope-chip-label">{{ scopeLabel }}</span>
-        </button>
+        <div class="shell__scope-pill">
+          <button
+            :class="['shell__scope-btn', 'shell__scope-btn--household', { 'shell__scope-btn--active': appStore.scope === 'household' }]"
+            @click="appStore.scope !== 'household' && handleScopeToggle()"
+          >
+            <span class="material-symbols-rounded shell__scope-btn-icon">home</span>
+            <span class="shell__scope-btn-label-wrap">
+              <span class="shell__scope-btn-label">Household</span>
+            </span>
+          </button>
+          <button
+            :class="['shell__scope-btn', 'shell__scope-btn--personal', { 'shell__scope-btn--active': appStore.scope === 'personal' }]"
+            @click="appStore.scope !== 'personal' && handleScopeToggle()"
+          >
+            <span class="material-symbols-rounded shell__scope-btn-icon">person</span>
+            <span class="shell__scope-btn-label-wrap">
+              <span class="shell__scope-btn-label">Personal</span>
+            </span>
+          </button>
+        </div>
       </div>
       <div class="shell__topbar-right">
         <button
@@ -130,6 +175,10 @@ async function handleSignOut() {
 
       <!-- Content -->
       <main class="shell__content">
+        <!-- Scope transition overlay -->
+        <Transition name="scope-fade">
+          <div v-if="scopeTransitioning" class="shell__scope-overlay" />
+        </Transition>
         <RouterView v-slot="{ Component, route }">
           <component :is="Component" :key="route.matched[1]?.path ?? route.path" />
         </RouterView>
@@ -176,11 +225,13 @@ async function handleSignOut() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 48px;
-  padding: 0 16px;
+  height: 52px;
+  padding: 0 20px;
   flex-shrink: 0;
-  background: var(--color-bg-primary);
-  border-bottom: 1px solid var(--color-border-default);
+  background: color-mix(in srgb, var(--color-bg-primary) 85%, transparent);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-bottom: 1px solid var(--color-border-subtle);
   z-index: 20;
 }
 
@@ -214,12 +265,46 @@ async function handleSignOut() {
 
 /* ── Content ── */
 .shell__content {
+  position: relative;
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-gutter: stable;
-  padding: 16px;
+  padding: 24px;
   min-width: 0;
+}
+
+/* ── Scope transition overlay ── */
+.shell__scope-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: var(--color-bg-primary);
+  pointer-events: none;
+}
+
+.scope-fade-enter-active {
+  transition: opacity 180ms var(--easing-out);
+}
+
+.scope-fade-leave-active {
+  transition: opacity 240ms var(--easing-standard);
+}
+
+.scope-fade-enter-from {
+  opacity: 1;
+}
+
+.scope-fade-enter-to {
+  opacity: 1;
+}
+
+.scope-fade-leave-from {
+  opacity: 1;
+}
+
+.scope-fade-leave-to {
+  opacity: 0;
 }
 
 /* ── Menu button (mobile) ── */
@@ -273,37 +358,90 @@ async function handleSignOut() {
   flex-shrink: 0;
 }
 
-.shell__scope-chip {
+/* ── Scope pill toggle ── */
+.shell__scope-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  height: 30px;
-  padding: 0 10px;
+  height: 32px;
   border-radius: var(--radius-circle);
+  background: var(--color-surface-container);
   border: 1px solid var(--color-border-subtle);
+  padding: 2px;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.shell__scope-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  height: 26px;
+  padding: 0 6px;
+  border-radius: var(--radius-circle);
+  border: 1px solid transparent;
   background: transparent;
-  color: var(--color-fg-secondary);
+  color: var(--color-fg-tertiary);
   cursor: pointer;
   font: var(--text-label-sm);
   font-weight: var(--font-weight-medium);
+  white-space: nowrap;
   transition:
-    background-color var(--duration-fast) var(--easing-standard),
-    border-color var(--duration-fast) var(--easing-standard),
-    color var(--duration-fast) var(--easing-standard);
+    background-color var(--duration-slow) var(--easing-expressive),
+    border-color var(--duration-slow) var(--easing-expressive),
+    color var(--duration-slow) var(--easing-expressive),
+    padding var(--duration-slow) var(--easing-expressive),
+    gap var(--duration-slow) var(--easing-expressive);
 }
 
-.shell__scope-chip:hover {
-  background: var(--color-surface-container);
-  border-color: var(--color-border-default);
-  color: var(--color-fg-primary);
+.shell__scope-btn--active {
+  padding: 0 10px 0 7px;
+  gap: 5px;
 }
 
-.shell__scope-chip-icon {
+.shell__scope-btn--household.shell__scope-btn--active {
+  background: var(--color-scope-household-bg);
+  border-color: var(--color-scope-household);
+  color: var(--color-scope-household-fg);
+}
+
+.shell__scope-btn--personal.shell__scope-btn--active {
+  background: var(--color-scope-personal-bg);
+  border-color: var(--color-scope-personal);
+  color: var(--color-scope-personal-fg);
+}
+
+.shell__scope-btn:not(.shell__scope-btn--active):hover {
+  background: var(--color-surface-card-hover);
+  color: var(--color-fg-secondary);
+}
+
+.shell__scope-btn-icon {
   font-size: 16px;
+  flex-shrink: 0;
 }
 
-.shell__scope-chip-label {
+/* Grid-column trick for smooth width animation */
+.shell__scope-btn-label-wrap {
+  display: grid;
+  grid-template-columns: 0fr;
+  overflow: hidden;
+  transition: grid-template-columns var(--duration-slow) var(--easing-expressive);
+}
+
+.shell__scope-btn--active .shell__scope-btn-label-wrap {
+  grid-template-columns: 1fr;
+}
+
+.shell__scope-btn-label {
+  min-width: 0;
   line-height: 1;
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--easing-standard);
+}
+
+.shell__scope-btn--active .shell__scope-btn-label {
+  opacity: 1;
+  transition: opacity var(--duration-slow) var(--easing-expressive) 80ms;
 }
 
 /* ── Top bar icon button ── */
@@ -360,17 +498,17 @@ async function handleSignOut() {
   top: 44px;
   right: 0;
   width: 260px;
-  background: var(--color-surface-container);
-  border: 1px solid var(--color-border-default);
+  background: var(--color-surface-dialog);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-l);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-16);
   z-index: 100;
   padding: var(--space-s);
-  animation: menu-enter var(--duration-fast) var(--easing-standard);
+  animation: menu-enter var(--duration-normal) var(--easing-out);
 }
 
 @keyframes menu-enter {
-  from { opacity: 0; transform: translateY(-4px); }
+  from { opacity: 0; transform: translateY(-6px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -459,8 +597,13 @@ async function handleSignOut() {
 
 /* ── Mobile ── */
 @media (max-width: 768px) {
+  .shell__topbar {
+    height: 56px;
+    padding: 0 16px;
+  }
+
   .shell__content {
-    padding: 12px;
+    padding: 16px;
   }
 }
 </style>

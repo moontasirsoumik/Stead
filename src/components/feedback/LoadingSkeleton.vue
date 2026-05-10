@@ -49,7 +49,7 @@ withDefaults(
 .skeleton__bone {
   border-radius: var(--radius-s);
   background: var(--color-bg-tertiary);
-  animation: pulse 1.6s ease-in-out infinite;
+  animation: pulse 1.6s var(--easing-in-out) infinite;
 }
 
 .skeleton__bone--circle {

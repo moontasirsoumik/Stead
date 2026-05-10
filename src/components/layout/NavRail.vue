@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch, nextTick } from 'vue'
 import { useAppStore } from '@/stores/app.store'
 import NavItem from './NavItem.vue'
 
@@ -19,6 +19,19 @@ const expanded = ref(false)
 function toggleExpand() {
   expanded.value = !expanded.value
 }
+
+/* ── Scope transition state ── */
+const scopeTransitioning = ref(false)
+
+watch(() => appStore.scope, () => {
+  scopeTransitioning.value = true
+  // After items swap + a tick, remove the class so stagger-in plays
+  nextTick(() => {
+    requestAnimationFrame(() => {
+      scopeTransitioning.value = false
+    })
+  })
+})
 
 
 
@@ -85,18 +98,20 @@ const extraItems = computed(() =>
 </script>
 
 <template>
-  <div :class="['rail', { 'rail--personal': appStore.isPersonal, 'rail--expanded': expanded || props.isMobile }]">
+  <div :class="['rail', { 'rail--personal': appStore.isPersonal, 'rail--expanded': expanded || props.isMobile, 'rail--scope-entering': !scopeTransitioning }]">
     <!-- Main nav -->
     <nav class="rail__nav" aria-label="Main navigation">
       <div class="rail__group">
         <span class="rail__group-label">Overview</span>
         <div class="rail__section">
           <NavItem
-            v-for="item in overviewItems"
+            v-for="(item, i) in overviewItems"
             :key="item.to"
             :to="item.to"
             :icon="item.icon"
             :label="item.label"
+            :style="{ '--nav-i': i }"
+            class="rail__nav-item"
             @click="$emit('navigate')"
           />
         </div>
@@ -106,11 +121,13 @@ const extraItems = computed(() =>
         <span class="rail__group-label">Manage</span>
         <div class="rail__section">
           <NavItem
-            v-for="item in manageItems"
+            v-for="(item, i) in manageItems"
             :key="item.to"
             :to="item.to"
             :icon="item.icon"
             :label="item.label"
+            :style="{ '--nav-i': i + 3 }"
+            class="rail__nav-item"
             @click="$emit('navigate')"
           />
         </div>
@@ -120,11 +137,13 @@ const extraItems = computed(() =>
         <span class="rail__group-label">{{ appStore.isPersonal ? 'Reflect' : 'Notes' }}</span>
         <div class="rail__section">
           <NavItem
-            v-for="item in thinkItems"
+            v-for="(item, i) in thinkItems"
             :key="item.to"
             :to="item.to"
             :icon="item.icon"
             :label="item.label"
+            :style="{ '--nav-i': i + 6 }"
+            class="rail__nav-item"
             @click="$emit('navigate')"
           />
         </div>
@@ -134,11 +153,13 @@ const extraItems = computed(() =>
         <span class="rail__group-label">{{ appStore.isPersonal ? 'Stuff' : 'Reference' }}</span>
         <div class="rail__section">
           <NavItem
-            v-for="item in extraItems"
+            v-for="(item, i) in extraItems"
             :key="item.to"
             :to="item.to"
             :icon="item.icon"
             :label="item.label"
+            :style="{ '--nav-i': i + 8 }"
+            class="rail__nav-item"
             @click="$emit('navigate')"
           />
         </div>
@@ -167,7 +188,9 @@ const extraItems = computed(() =>
   border-radius: var(--radius-xl);
   padding: 10px 0;
   overflow: hidden;
-  transition: width var(--duration-normal) var(--easing-standard);
+  transition:
+    width var(--duration-normal) var(--easing-standard),
+    background-color var(--duration-slow) var(--easing-smooth);
 }
 
 /* ── Expanded state ── */
@@ -298,5 +321,22 @@ const extraItems = computed(() =>
   margin-top: auto;
   padding: 4px 6px 0;
   align-self: stretch;
+}
+
+/* ── Scope switch stagger animation ── */
+@keyframes nav-item-in {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.rail--scope-entering .rail__nav-item {
+  animation: nav-item-in var(--duration-slow) var(--easing-expressive) both;
+  animation-delay: calc(var(--nav-i, 0) * 30ms);
 }
 </style>

@@ -3,7 +3,6 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
-import MoneyTabs from '@/features/money/components/MoneyTabs.vue'
 import LoadingSkeleton from '@/components/feedback/LoadingSkeleton.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import SBadge from '@/components/ui/SBadge.vue'
@@ -431,7 +430,6 @@ onMounted(async () => {
 <template>
   <PageContainer>
     <PageHeader title="Finances" subtitle="Household overview" class="page-enter" :style="{ '--stagger': 0 }" />
-    <MoneyTabs />
 
     <LoadingSkeleton v-if="loading" :lines="10" class="page-enter" :style="{ '--stagger': 2 }" />
 
@@ -847,24 +845,25 @@ onMounted(async () => {
   gap: 6px;
   min-width: 0;
   padding: var(--space-m);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-m);
   background: var(--color-bg-elevated);
+  box-shadow: var(--shadow-card);
 }
 
 .overview-stat--positive {
   background: color-mix(in srgb, var(--color-success-bg) 48%, var(--color-bg-elevated));
-  border-color: color-mix(in srgb, var(--color-success) 18%, var(--color-border-default));
+  border-color: color-mix(in srgb, var(--color-success) 18%, var(--color-border-subtle));
 }
 
 .overview-stat--negative {
   background: color-mix(in srgb, var(--color-error-bg) 50%, var(--color-bg-elevated));
-  border-color: color-mix(in srgb, var(--color-error) 18%, var(--color-border-default));
+  border-color: color-mix(in srgb, var(--color-error) 18%, var(--color-border-subtle));
 }
 
 .overview-stat--warning {
   background: color-mix(in srgb, var(--color-warning-bg) 54%, var(--color-bg-elevated));
-  border-color: color-mix(in srgb, var(--color-warning) 18%, var(--color-border-default));
+  border-color: color-mix(in srgb, var(--color-warning) 18%, var(--color-border-subtle));
 }
 
 .overview-stat__label {
@@ -920,9 +919,10 @@ onMounted(async () => {
   gap: var(--space-s);
   min-width: 0;
   padding: var(--space-m);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-m);
   background: var(--color-bg-elevated);
+  box-shadow: var(--shadow-card);
 }
 
 .panel__header {
@@ -1404,7 +1404,7 @@ onMounted(async () => {
 
 .bills-row:hover,
 .ledger-row:hover {
-  border-color: var(--color-border-default);
+  border-color: var(--color-border-subtle);
   background: var(--color-surface-container);
 }
 

@@ -125,11 +125,11 @@ provide('openLegal', openLegal)
   color-scheme: light;
 
   /* Backgrounds */
-  --color-bg-primary: #FAFAF8;
-  --color-bg-secondary: #F4F4F2;
-  --color-bg-tertiary: #EDEDEB;
+  --color-bg-primary: #FAFBFC;
+  --color-bg-secondary: #F4F5F7;
+  --color-bg-tertiary: #ECEDF0;
   --color-bg-elevated: #FFFFFF;
-  --color-bg-wash: #F7F7F5;
+  --color-bg-wash: #F7F8FA;
   --color-bg-overlay: rgba(0, 0, 0, 0.40);
 
   /* Foreground */
@@ -141,18 +141,18 @@ provide('openLegal', openLegal)
   --color-fg-muted: #9498A4;
 
   /* Borders */
-  --color-border-default: #E2E3E6;
-  --color-border-strong: #CDCED4;
-  --color-border-subtle: #EDEDEB;
-  --color-border-input: #D2D3D9;
-  --color-border-input-hover: #B5B7C0;
+  --color-border-default: #E5E7EB;
+  --color-border-strong: #D1D5DB;
+  --color-border-subtle: #F0F1F3;
+  --color-border-input: #D5D7DE;
+  --color-border-input-hover: #B8BBC4;
 
   /* Surfaces */
-  --color-surface-card: #F4F4F2;
-  --color-surface-card-hover: #EDEDEB;
+  --color-surface-card: #FFFFFF;
+  --color-surface-card-hover: #F8F9FB;
   --color-surface-dialog: #FFFFFF;
-  --color-surface-input: #F2F2F0;
-  --color-surface-input-hover: #EAEAE8;
+  --color-surface-input: #FFFFFF;
+  --color-surface-input-hover: #F8F9FB;
 
   /* Outline */
   --color-outline: #737888;
@@ -241,7 +241,7 @@ provide('openLegal', openLegal)
   background-color: #49662E;
   padding: var(--space-2xl);
   z-index: 2;
-  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.7s var(--easing-expressive), background-color 0.7s var(--easing-expressive);
   will-change: transform;
   overflow: hidden;
 }
@@ -296,8 +296,8 @@ provide('openLegal', openLegal)
   overflow: hidden;
   opacity: 0;
   transform: translateY(16px);
-  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.7s var(--easing-expressive),
+              transform 0.7s var(--easing-expressive);
   pointer-events: none;
 }
 
@@ -330,8 +330,8 @@ provide('openLegal', openLegal)
   overflow: hidden;
   opacity: 0;
   transform: translateY(12px);
-  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s,
-              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+  transition: opacity 0.6s var(--easing-expressive) 0.2s,
+              transform 0.6s var(--easing-expressive) 0.2s;
   pointer-events: none;
 }
 
@@ -369,8 +369,8 @@ provide('openLegal', openLegal)
 .slide-right-enter-active,
 .slide-right-leave-active {
   transition:
-    opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity 0.55s var(--easing-expressive),
+    transform 0.55s var(--easing-expressive);
 }
 
 .slide-left-leave-active,
@@ -419,7 +419,7 @@ provide('openLegal', openLegal)
     top: 0;
     left: 0;
     transform: translateY(0);
-    transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 0.7s var(--easing-expressive);
   }
 
   .auth-shell--signup .auth-door {
@@ -534,7 +534,7 @@ provide('openLegal', openLegal)
     max-width: 100%;
     width: 100%;
     height: 100%;
-    transition: all 0.6s ease;
+    transition: flex-direction 0.6s var(--easing-out), height 0.6s var(--easing-out), gap 0.6s var(--easing-out);
   }
 
   .auth-door--settled .door-inner {
@@ -555,7 +555,7 @@ provide('openLegal', openLegal)
     gap: var(--space-s);
     opacity: 0;
     transform: translateY(4px);
-    transition: opacity 0.5s ease, transform 0.5s ease;
+    transition: opacity 0.5s var(--easing-out), transform 0.5s var(--easing-out);
     pointer-events: none;
   }
 
@@ -600,7 +600,7 @@ provide('openLegal', openLegal)
     justify-content: center;
     background: linear-gradient(135deg, #49662E 0%, #3a5422 100%);
     z-index: 2;
-    transition: height 0.8s cubic-bezier(0.22, 0.68, 0.18, 1);
+    transition: height 0.8s var(--easing-expressive);
     will-change: height;
     overflow: hidden;
   }
@@ -619,7 +619,7 @@ provide('openLegal', openLegal)
 
   .brand-hero {
     display: flex !important;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s var(--easing-out);
     /* Allow animation to overflow within the full-screen door */
     overflow: visible;
   }

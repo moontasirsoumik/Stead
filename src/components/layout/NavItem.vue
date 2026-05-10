@@ -68,12 +68,7 @@ const materialIcon = computed(() => {
   overflow: hidden;
   transition:
     color var(--duration-fast) var(--easing-standard),
-    background-color var(--duration-fast) var(--easing-standard),
-    transform 160ms var(--easing-out);
-}
-
-.navitem:active {
-  transform: scale(var(--press-scale));
+    background-color var(--duration-fast) var(--easing-standard);
 }
 
 .navitem__pill {

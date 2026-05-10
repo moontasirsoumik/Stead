@@ -67,7 +67,7 @@ function select(value: string) {
   gap: var(--space-xs);
   height: var(--height-sm);
   padding: 0 var(--space-s);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-m);
   background: var(--color-bg-primary);
   font: var(--text-body-2);
@@ -87,7 +87,7 @@ function select(value: string) {
   right: 0;
   min-width: 180px;
   background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-m);
   padding: var(--space-2xs);
   z-index: 50;

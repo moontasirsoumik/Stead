@@ -387,7 +387,7 @@ function updatePill(animate: boolean) {
     width: `${el.offsetWidth}px`,
     transform: `translateX(${el.offsetLeft}px)`,
     transition: animate
-      ? 'transform 300ms cubic-bezier(0.4, 0, 0, 1), width 300ms cubic-bezier(0.4, 0, 0, 1)'
+      ? 'transform var(--duration-slow) var(--easing-smooth), width var(--duration-slow) var(--easing-smooth)'
       : 'none',
   }
 }
@@ -1102,7 +1102,7 @@ watch(() => appStore.isPersonal, loadData)
   justify-content: center;
   width: 34px;
   height: 34px;
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-m);
   background: var(--color-bg-primary);
   color: var(--color-fg-secondary);
@@ -1124,7 +1124,7 @@ watch(() => appStore.isPersonal, loadData)
   gap: var(--space-2xs);
   height: 34px;
   padding: 0 var(--space-m);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-m);
   background: var(--color-bg-primary);
   font: var(--text-label-sm);
@@ -1200,7 +1200,7 @@ watch(() => appStore.isPersonal, loadData)
 
 /* ═══ MONTH VIEW ═══ */
 .month {
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-l);
   background: var(--color-bg-primary);
   overflow: hidden;
@@ -1323,7 +1323,7 @@ watch(() => appStore.isPersonal, loadData)
 /* ═══ DAY DETAIL PANEL ═══ */
 .day-panel {
   margin-top: var(--space-l);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-l);
   background: var(--color-bg-primary);
   overflow: hidden;
@@ -1459,7 +1459,7 @@ watch(() => appStore.isPersonal, loadData)
 
 /* ═══ TIME GRID (Week / 3-Day / Day) ═══ */
 .tg {
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-l);
   background: var(--color-bg-primary);
   overflow: hidden;
@@ -1471,7 +1471,7 @@ watch(() => appStore.isPersonal, loadData)
 /* ── Header row ── */
 .tg__header {
   display: flex;
-  border-bottom: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-subtle);
   background: var(--color-surface-container-low);
   flex-shrink: 0;
 }
@@ -1547,7 +1547,7 @@ watch(() => appStore.isPersonal, loadData)
 /* ── All-day row ── */
 .tg__allday {
   display: flex;
-  border-bottom: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-subtle);
   background: var(--color-bg-primary);
   min-height: 32px;
   max-height: 80px;
@@ -1728,7 +1728,7 @@ watch(() => appStore.isPersonal, loadData)
 
 /* ═══ AGENDA VIEW ═══ */
 .agenda {
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-l);
   background: var(--color-bg-primary);
   overflow: hidden;

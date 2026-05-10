@@ -20,10 +20,12 @@ withDefaults(
 <style scoped>
 .contentcard {
   background: var(--color-surface-card);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-l);
+  box-shadow: var(--shadow-card);
   transition:
     border-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard),
     background-color var(--duration-fast) var(--easing-standard);
 }
 
@@ -34,6 +36,7 @@ withDefaults(
 
 .contentcard--hoverable:hover {
   background: var(--color-surface-card-hover);
-  border-color: var(--color-outline-variant);
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--color-border-default);
 }
 </style>

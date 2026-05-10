@@ -236,7 +236,7 @@ function hoverTranslate(arc: ComputedArc): string {
 
 .donut__arc {
   transition:
-    stroke-dasharray 600ms cubic-bezier(0.4, 0, 0.2, 1),
+    stroke-dasharray 600ms var(--easing-chart),
     stroke-width 200ms var(--easing-standard),
     transform 200ms var(--easing-standard),
     opacity 150ms var(--easing-standard);
@@ -257,7 +257,7 @@ function hoverTranslate(arc: ComputedArc): string {
   font-family: var(--font-mono);
   fill: var(--color-fg-primary);
   letter-spacing: var(--tracking-tight);
-  transition: fill 150ms;
+  transition: fill var(--duration-fast) var(--easing-standard);
 }
 
 .donut__center-label {
@@ -291,7 +291,7 @@ function hoverTranslate(arc: ComputedArc): string {
   padding: 4px var(--space-s);
   border-radius: var(--radius-s);
   cursor: default;
-  transition: background 120ms var(--easing-standard), transform 120ms var(--easing-standard);
+  transition: background var(--duration-fast) var(--easing-standard), transform var(--duration-fast) var(--easing-standard);
 }
 
 .donut__legend-item:hover,

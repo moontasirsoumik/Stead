@@ -70,7 +70,7 @@ function getCheckedCount(boardId: string): number {
 }
 
 function boardColorValue(color: string | null): string {
-  if (!color) return 'var(--color-border-default)'
+  if (!color) return 'var(--color-border-subtle)'
   const map: Record<string, string> = {
     red: 'var(--color-red)',
     orange: 'var(--color-orange)',
@@ -82,7 +82,7 @@ function boardColorValue(color: string | null): string {
     rose: 'var(--color-rose)',
     slate: 'var(--color-slate)',
   }
-  return map[color] ?? 'var(--color-border-default)'
+  return map[color] ?? 'var(--color-border-subtle)'
 }
 
 function openCreateDrawer() {
@@ -242,11 +242,11 @@ onMounted(async () => {
   display: flex;
   align-items: stretch;
   background: var(--color-surface-container-low);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-m);
   margin-bottom: var(--space-l);
   overflow: hidden;
-  box-shadow: var(--shadow-2);
+  box-shadow: var(--shadow-card);
 }
 .stats-bar__cell {
   flex: 1;
@@ -254,7 +254,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: var(--space-2xs);
-  border-right: 1px solid var(--color-border-default);
+  border-right: 1px solid var(--color-border-subtle);
 }
 .stats-bar__cell:last-child { border-right: none; }
 .stats-bar__label {
@@ -275,24 +275,18 @@ onMounted(async () => {
 .board-card {
   display: flex;
   background: var(--color-surface-container-low);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-l);
   overflow: hidden;
   cursor: pointer;
   box-shadow: var(--shadow-card);
   transition:
-    background var(--duration-fast) var(--easing-standard),
-    box-shadow var(--duration-fast) var(--easing-standard),
-    transform 160ms var(--easing-out);
+    background-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard);
 }
 .board-card:hover {
   background: var(--color-bg-tertiary);
   box-shadow: var(--shadow-card-hover);
-  transform: translateY(var(--hover-lift));
-}
-.board-card:active {
-  transform: scale(var(--press-scale));
-  box-shadow: var(--shadow-2);
 }
 
 .board-card__color {

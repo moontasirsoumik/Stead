@@ -194,13 +194,13 @@ const hoveredPoint = computed(() => {
 }
 
 .sparkline__line {
-  transition: stroke-dashoffset 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: stroke-dashoffset 600ms var(--easing-chart);
   vector-effect: non-scaling-stroke;
 }
 
 .sparkline__area {
   opacity: 0;
-  transition: opacity 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 600ms var(--easing-chart);
 }
 
 .sparkline__area--visible {
@@ -215,7 +215,7 @@ const hoveredPoint = computed(() => {
   font-family: var(--font-mono);
   color: var(--color-fg-primary);
   background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-m);
   padding: 2px 8px;
   white-space: nowrap;

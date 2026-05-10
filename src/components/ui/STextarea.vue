@@ -80,7 +80,6 @@ withDefaults(
   color: var(--color-fg-primary);
   resize: vertical;
   min-height: 56px;
-  box-shadow: var(--shadow-inset);
   transition:
     border-color var(--duration-fast) var(--easing-standard),
     box-shadow var(--duration-fast) var(--easing-standard);

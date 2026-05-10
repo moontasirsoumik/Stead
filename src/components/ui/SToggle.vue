@@ -55,13 +55,8 @@ withDefaults(
   border-radius: var(--radius-circle);
   transition:
     background-color var(--duration-fast) var(--easing-standard),
-    border-color var(--duration-fast) var(--easing-standard),
-    transform 160ms var(--easing-out);
+    border-color var(--duration-fast) var(--easing-standard);
   flex-shrink: 0;
-}
-
-.stoggle:active .stoggle__track {
-  transform: scale(0.95);
 }
 
 .stoggle__track--on {

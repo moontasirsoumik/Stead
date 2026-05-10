@@ -74,7 +74,7 @@ const modelValue = defineModel<DataScope>({ default: 'household' })
   background: var(--color-brand-primary);
   border-radius: var(--radius-s);
   z-index: 0;
-  transition: transform var(--duration-normal) cubic-bezier(0.4, 0, 0, 1);
+  transition: transform var(--duration-normal) var(--easing-smooth);
 }
 
 .scope-toggle__pill--right {

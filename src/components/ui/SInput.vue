@@ -96,7 +96,6 @@ defineEmits<{
   border: 1px solid var(--color-border-input);
   border-radius: var(--radius-m);
   overflow: hidden;
-  box-shadow: var(--shadow-inset);
   transition:
     border-color var(--duration-fast) var(--easing-standard),
     background-color var(--duration-fast) var(--easing-standard),

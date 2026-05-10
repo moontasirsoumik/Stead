@@ -256,7 +256,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: var(--space-m) var(--space-l);
-  border-bottom: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-subtle);
   flex-shrink: 0;
 }
 
@@ -298,7 +298,7 @@ onUnmounted(() => {
   border-radius: var(--radius-s);
   color: var(--color-fg-secondary);
   cursor: pointer;
-  transition: background var(--duration-fast) var(--easing-standard),
+  transition: background-color var(--duration-fast) var(--easing-standard),
     color var(--duration-fast) var(--easing-standard);
 }
 
@@ -405,21 +405,21 @@ onUnmounted(() => {
 
 /* ── Overlay enter/leave transitions ── */
 .overlay-enter-active {
-  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.3s var(--easing-expressive);
 }
 
 .overlay-leave-active {
-  transition: opacity 0.22s ease-in;
+  transition: opacity 0.22s var(--easing-accelerate);
 }
 
 .overlay-enter-active .legal-panel {
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.4s var(--easing-expressive),
+    opacity 0.35s var(--easing-expressive);
 }
 
 .overlay-leave-active .legal-panel {
-  transition: transform 0.22s ease-in,
-    opacity 0.18s ease-in;
+  transition: transform 0.22s var(--easing-accelerate),
+    opacity 0.18s var(--easing-accelerate);
 }
 
 .overlay-enter-from {
@@ -468,8 +468,8 @@ onUnmounted(() => {
   }
 
   .overlay-enter-active .legal-panel {
-    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-      opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 0.4s var(--easing-expressive),
+      opacity 0.2s var(--easing-expressive);
   }
 
   .overlay-leave-to .legal-panel {
@@ -478,8 +478,8 @@ onUnmounted(() => {
   }
 
   .overlay-leave-active .legal-panel {
-    transition: transform 0.3s ease-in,
-      opacity 0.3s ease-in;
+    transition: transform 0.3s var(--easing-accelerate),
+      opacity 0.3s var(--easing-accelerate);
   }
 }
 </style>

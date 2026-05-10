@@ -90,7 +90,7 @@ function handleOverlayMouseUp(e: MouseEvent) {
   width: 420px;
   max-width: calc(100vw - 16px);
   height: 100%;
-  background: var(--color-surface-nav);
+  background: var(--color-surface-dialog);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-drawer);
   overflow: hidden;
@@ -105,7 +105,7 @@ function handleOverlayMouseUp(e: MouseEvent) {
   align-items: center;
   justify-content: space-between;
   padding: var(--space-l) var(--space-xl);
-  border-bottom: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-subtle);
   flex-shrink: 0;
 }
 
@@ -130,7 +130,7 @@ function handleOverlayMouseUp(e: MouseEvent) {
   justify-content: flex-end;
   gap: var(--space-s);
   padding: var(--space-l) var(--space-xl);
-  border-top: 1px solid var(--color-border-default);
+  border-top: 1px solid var(--color-border-subtle);
   flex-shrink: 0;
 }
 

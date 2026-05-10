@@ -112,7 +112,7 @@ defineProps<{
 
 /* ── Animated hover ── */
 .stead-logo--animated {
-  transition: transform 0.3s cubic-bezier(0.22, 0.68, 0.35, 1.1);
+  transition: transform var(--duration-slow) var(--easing-spring);
 }
 
 .stead-logo--animated:hover {

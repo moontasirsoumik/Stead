@@ -23,7 +23,7 @@ defineProps<{
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-l);
-  margin-bottom: 12px;
+  margin-bottom: 20px;
 }
 
 .pageheader__text {
@@ -40,7 +40,7 @@ defineProps<{
 
 .pageheader__subtitle {
   font: var(--text-body-2);
-  color: var(--color-fg-secondary);
+  color: var(--color-fg-tertiary);
 }
 
 .pageheader__actions {

@@ -15,7 +15,6 @@ import FormDrawer from '@/components/forms/FormDrawer.vue'
 import FormField from '@/components/forms/FormField.vue'
 import FormSection from '@/components/forms/FormSection.vue'
 import MonthSummary from '@/features/money/components/MonthSummary.vue'
-import MoneyTabs from '@/features/money/components/MoneyTabs.vue'
 import { useBillsStore } from '@/stores/bills.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { useHouseholdStore } from '@/stores/household.store'
@@ -181,8 +180,6 @@ onMounted(async () => {
       </template>
     </PageHeader>
 
-    <MoneyTabs />
-
     <div class="money-mobile-actions">
       <SButton @click="openAdd">Add Bill</SButton>
     </div>
@@ -313,7 +310,7 @@ onMounted(async () => {
 .bills-table {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-l);
   overflow: hidden;
   box-shadow: var(--shadow-card);
@@ -325,7 +322,7 @@ onMounted(async () => {
   align-items: center;
   padding: var(--space-s) var(--space-l);
   background: var(--color-surface-container-low);
-  border-bottom: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-subtle);
   gap: var(--space-m);
 }
 
@@ -348,7 +345,7 @@ onMounted(async () => {
   gap: var(--space-m);
   border-bottom: 1px solid var(--color-border-subtle);
   cursor: pointer;
-  transition: background var(--duration-fast) var(--easing-standard);
+  transition: background-color var(--duration-fast) var(--easing-standard);
 }
 
 .bill-row:last-child { border-bottom: none; }

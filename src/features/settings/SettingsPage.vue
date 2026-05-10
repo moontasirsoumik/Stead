@@ -1442,8 +1442,9 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
 /* -- Settings section -- */
 .settings-section {
   margin-bottom: var(--space-l);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-m);
+  box-shadow: var(--shadow-card);
 }
 
 .card-header {
@@ -1569,12 +1570,10 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
   align-items: center;
   justify-content: center;
   transition:
-    border-color var(--duration-fast) var(--easing-standard),
-    transform var(--duration-fast) var(--easing-standard);
+    border-color var(--duration-fast) var(--easing-standard);
 }
 
 .accent-dot:hover {
-  transform: scale(1.12);
   border-color: var(--color-border-strong);
 }
 
@@ -1582,7 +1581,6 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
   border-color: var(--color-fg-primary);
   outline: 2px solid var(--color-bg-primary);
   outline-offset: 0;
-  transform: scale(1.08);
 }
 
 /* -- Widget chips -- */
@@ -1613,8 +1611,7 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
     border-color var(--duration-fast) var(--easing-standard),
     background-color var(--duration-fast) var(--easing-standard),
     color var(--duration-fast) var(--easing-standard),
-    box-shadow var(--duration-fast) var(--easing-standard),
-    transform var(--duration-fast) var(--easing-standard);
+    box-shadow var(--duration-fast) var(--easing-standard);
   user-select: none;
 }
 
@@ -1622,10 +1619,6 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
   border-color: var(--color-border-strong);
   background: var(--color-bg-tertiary);
   box-shadow: var(--shadow-xs);
-}
-
-.widget-chip:active {
-  transform: scale(0.96);
 }
 
 .widget-chip--active {
@@ -1940,7 +1933,7 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
   cursor: pointer;
   text-align: left;
   color: inherit;
-  transition: background var(--duration-fast) var(--easing-standard);
+  transition: background-color var(--duration-fast) var(--easing-standard);
 }
 
 .legal-toggle + .legal-toggle {

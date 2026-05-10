@@ -278,11 +278,11 @@ onMounted(async () => {
   display: flex;
   align-items: stretch;
   background: var(--color-surface-container-low);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-m);
   margin-bottom: var(--space-l);
   overflow: hidden;
-  box-shadow: var(--shadow-2);
+  box-shadow: var(--shadow-card);
 }
 .stats-bar__cell {
   flex: 1;
@@ -290,7 +290,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: var(--space-2xs);
-  border-right: 1px solid var(--color-border-default);
+  border-right: 1px solid var(--color-border-subtle);
 }
 .stats-bar__cell:last-child { border-right: none; }
 .stats-bar__label {
@@ -306,7 +306,7 @@ onMounted(async () => {
 .reminder-table {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-l);
   overflow: hidden;
   box-shadow: var(--shadow-card);
@@ -318,7 +318,7 @@ onMounted(async () => {
   align-items: center;
   padding: var(--space-s) var(--space-l);
   background: var(--color-surface-container-low);
-  border-bottom: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-subtle);
   gap: var(--space-m);
 }
 
@@ -393,7 +393,7 @@ onMounted(async () => {
 
 @media (max-width: 640px) {
   .stats-bar { flex-direction: column; }
-  .stats-bar__cell { border-right: none; border-bottom: 1px solid var(--color-border-default); }
+  .stats-bar__cell { border-right: none; border-bottom: 1px solid var(--color-border-subtle); }
   .stats-bar__cell:last-child { border-bottom: none; }
   .reminder-table__header { display: none; }
   .reminder-row {

@@ -482,17 +482,17 @@ onMounted(async () => {
   display: flex;
   align-items: stretch;
   background: var(--color-surface-container-low);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-m);
   margin-bottom: var(--space-l);
   overflow: hidden;
-  box-shadow: var(--shadow-2);
+  box-shadow: var(--shadow-card);
 }
 
 .stat-cell {
   flex: 1;
   padding: var(--space-s) var(--space-l);
-  border-right: 1px solid var(--color-border-default);
+  border-right: 1px solid var(--color-border-subtle);
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -526,7 +526,7 @@ onMounted(async () => {
 .task-table {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-l);
   overflow: hidden;
   box-shadow: var(--shadow-card);
@@ -538,7 +538,7 @@ onMounted(async () => {
   align-items: center;
   padding: var(--space-s) var(--space-l);
   background: var(--color-surface-container-low);
-  border-bottom: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-subtle);
   gap: var(--space-m);
 }
 
@@ -686,7 +686,7 @@ onMounted(async () => {
 
 @media (max-width: 640px) {
   .stats-row { flex-direction: column; }
-  .stat-cell { border-right: none; border-bottom: 1px solid var(--color-border-default); }
+  .stat-cell { border-right: none; border-bottom: 1px solid var(--color-border-subtle); }
   .stat-cell:last-child { border-bottom: none; }
   .task-row {
     grid-template-columns: 1fr auto;

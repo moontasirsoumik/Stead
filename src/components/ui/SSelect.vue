@@ -101,7 +101,6 @@ withDefaults(
   color: var(--color-fg-primary);
   appearance: none;
   cursor: pointer;
-  box-shadow: var(--shadow-inset);
   transition:
     border-color var(--duration-fast) var(--easing-standard),
     box-shadow var(--duration-fast) var(--easing-standard);

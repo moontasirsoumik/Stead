@@ -23,14 +23,15 @@
   --easing-decelerate: cubic-bezier(0.0, 0.0, 0.2, 1);
   --easing-spring: cubic-bezier(0.22, 0.68, 0.35, 1.05);
   --easing-smooth: cubic-bezier(0.4, 0, 0, 1);
+  --easing-expressive: cubic-bezier(0.16, 1, 0.3, 1);
+  --easing-chart: cubic-bezier(0.4, 0, 0.2, 1);
   --easing-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 
   /* Deprecated — kept for compat but never use ease-in for UI */
   --easing-accelerate: cubic-bezier(0.4, 0, 1, 1);
 
   /* ── Interactive feedback ── */
-  --press-scale: 0.97;
-  --hover-lift: -1px;
+  /* Scale/lift removed — app uses bg/color transitions only */
 }
 
 /* ── Reduced Motion ── */
