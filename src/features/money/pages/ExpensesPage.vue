@@ -24,6 +24,7 @@ import { useAppStore } from '@/stores/app.store'
 import { useHouseholdStore } from '@/stores/household.store'
 import { formatCents, formatDate } from '@/utils/format'
 import { EXPENSE_CATEGORIES } from '@/constants/categories'
+import { useMobileExpand } from '@/composables/useMobileExpand'
 import type { Expense } from '@/models/expense.model'
 
 const expensesStore = useExpensesStore()
@@ -31,6 +32,7 @@ const splitsStore = useExpenseSplitsStore()
 const authStore = useAuthStore()
 const appStore = useAppStore()
 const householdStore = useHouseholdStore()
+const { mobileExpandedId, handleRowClick } = useMobileExpand()
 const search = ref('')
 const categoryFilter = ref('')
 const drawerOpen = ref(false)
@@ -319,26 +321,49 @@ onMounted(async () => {
       <div
         v-for="expense in flatExpenses"
         :key="expense.id"
-        class="expense-row"
-        @click="openEdit(expense)"
+        class="expense-entry"
       >
-        <div class="expense-row__name">
-          <span class="expense-row__desc">{{ expense.description }}</span>
-          <span v-if="expense.subcategory" class="expense-row__sub">{{ expense.subcategory }}</span>
-        </div>
-        <div class="expense-row__chips">
-          <div class="expense-row__date">
-            <SBadge variant="default" size="sm">{{ formatDate(expense.date) }}</SBadge>
+        <div
+          class="expense-row"
+          :class="{ 'expense-row--m-expanded': mobileExpandedId === expense.id }"
+          @click="handleRowClick(expense.id, () => openEdit(expense))"
+        >
+          <div class="expense-row__name">
+            <span class="expense-row__desc">{{ expense.description }}</span>
+            <span v-if="expense.subcategory" class="expense-row__sub">{{ expense.subcategory }}</span>
           </div>
-          <div class="expense-row__category">
-            <SBadge variant="brand" size="sm">{{ expense.category }}</SBadge>
+          <div class="expense-row__chips">
+            <div class="expense-row__date">
+              <SBadge variant="default" size="sm">{{ formatDate(expense.date) }}</SBadge>
+            </div>
+            <div class="expense-row__category">
+              <SBadge variant="brand" size="sm">{{ expense.category }}</SBadge>
+            </div>
           </div>
+          <div class="expense-row__payer">
+            <SAvatar :name="getMemberName(expense.paid_by)" :color="getMemberColor(expense.paid_by)" size="sm" />
+          </div>
+          <div class="expense-row__amount">
+            {{ formatCents(expense.amount) }}
+          </div>
+          <span class="expense-row__chevron material-symbols-rounded">expand_more</span>
         </div>
-        <div class="expense-row__payer">
-          <SAvatar :name="getMemberName(expense.paid_by)" :color="getMemberColor(expense.paid_by)" size="sm" />
-        </div>
-        <div class="expense-row__amount">
-          {{ formatCents(expense.amount) }}
+        <div class="m-detail" :class="{ 'm-detail--open': mobileExpandedId === expense.id }">
+          <div class="m-detail__inner">
+            <div class="m-detail__body">
+              <SBadge variant="brand" size="sm">{{ expense.category }}</SBadge>
+              <span class="m-detail__chip">{{ formatDate(expense.date) }}</span>
+              <span v-if="expense.subcategory" class="m-detail__chip">{{ expense.subcategory }}</span>
+              <span v-if="getMemberName(expense.paid_by)" class="m-detail__who">
+                <SAvatar :name="getMemberName(expense.paid_by)" :color="getMemberColor(expense.paid_by)" size="sm" />
+                <span>{{ getMemberName(expense.paid_by) }}</span>
+              </span>
+              <button class="m-detail__edit" @click.stop="openEdit(expense)">
+                <span class="material-symbols-rounded">edit</span>
+              </button>
+              <span v-if="expense.note" class="m-detail__note">{{ expense.note }}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -492,6 +517,11 @@ onMounted(async () => {
 .expense-table__th--center { text-align: center; }
 .expense-table__th--right { text-align: right; }
 
+.expense-entry {
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.expense-entry:last-child { border-bottom: none; }
+
 .expense-row {
   display: grid;
   grid-template-columns: 1fr 120px 120px 60px 110px;
@@ -499,13 +529,14 @@ onMounted(async () => {
   min-height: var(--height-row-min);
   padding: 0 var(--space-l);
   gap: var(--space-m);
-  border-bottom: 1px solid var(--color-border-subtle);
   cursor: pointer;
   transition: background-color var(--duration-fast) var(--easing-standard);
 }
 
-.expense-row:last-child { border-bottom: none; }
+.expense-row__chevron { display: none; }
+.m-detail { display: none; }
 .expense-row:hover { background: var(--color-bg-tertiary); }
+.expense-row:active { transform: scale(0.98); transition: transform var(--duration-fast) var(--easing-standard); }
 
 .expense-row__name {
   display: flex;
@@ -563,24 +594,88 @@ onMounted(async () => {
   :deep(.pageheader__actions) { display: none; }
   .money-mobile-actions { display: flex; margin-bottom: var(--space-m); }
   .expense-table__header { display: none; }
+
   .expense-row {
-    grid-template-columns: 1fr 28px 5.5rem;
-    grid-template-rows: auto auto;
-    padding: var(--space-s) var(--space-l);
-    row-gap: var(--space-2xs);
-    column-gap: var(--space-m);
+    grid-template-columns: 1fr 5.5rem 20px;
+    grid-template-rows: auto;
+    padding: var(--space-s) var(--space-m);
+    column-gap: var(--space-s);
   }
   .expense-row__name { grid-column: 1; grid-row: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-  .expense-row__payer { grid-column: 2; grid-row: 1 / -1; align-self: center; justify-self: center; }
-  .expense-row__amount { grid-column: 3; grid-row: 1 / -1; align-self: center; text-align: right; }
-  .expense-row__chips {
+  .expense-row__amount { grid-column: 2; grid-row: 1; align-self: center; text-align: right; }
+  .expense-row__chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-column: 3;
+    grid-row: 1;
+    color: var(--color-fg-disabled);
+    font-size: 18px;
+    transition: transform var(--duration-fast) var(--easing-out);
+  }
+  .expense-row--m-expanded .expense-row__chevron {
+    transform: rotate(180deg);
+  }
+  .expense-row__chips { display: none; }
+  .expense-row__payer { display: none; }
+
+  /* ── Expandable detail ── */
+  .m-detail {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--duration-normal) var(--easing-out);
+  }
+  .m-detail--open { grid-template-rows: 1fr; }
+  .m-detail__inner { overflow: hidden; }
+  .m-detail__body {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2xs);
-    grid-column: 1;
-    grid-row: 2;
     align-items: center;
+    gap: var(--space-2xs);
+    padding: var(--space-xs) var(--space-m);
+    border-top: 1px solid var(--color-border-subtle);
+    background: var(--color-bg-secondary);
   }
+  .m-detail__chip {
+    font: var(--text-label-sm);
+    color: var(--color-fg-secondary);
+    background: var(--color-bg-tertiary);
+    padding: 2px var(--space-s);
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+  }
+  .m-detail__who {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font: var(--text-label-sm);
+    color: var(--color-fg-secondary);
+  }
+  .m-detail__note {
+    font: var(--text-caption);
+    color: var(--color-fg-tertiary);
+    font-style: italic;
+    flex-basis: 100%;
+    line-height: 1.4;
+  }
+  .m-detail__edit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    margin-left: auto;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--color-border-default);
+    background: var(--color-bg-elevated);
+    color: var(--color-fg-tertiary);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color var(--duration-fast) var(--easing-standard),
+                color var(--duration-fast) var(--easing-standard);
+  }
+  .m-detail__edit:active { background: var(--color-bg-tertiary); color: var(--color-fg-primary); }
+  .m-detail__edit .material-symbols-rounded { font-size: 15px; }
 }
 
 /* ── Split breakdown ───────────────────────────────────── */

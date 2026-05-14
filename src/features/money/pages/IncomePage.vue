@@ -22,11 +22,13 @@ import { useAppStore } from '@/stores/app.store'
 import { useHouseholdStore } from '@/stores/household.store'
 import { formatCents, formatDate } from '@/utils/format'
 import type { Income } from '@/models/income.model'
+import { useMobileExpand } from '@/composables/useMobileExpand'
 
 const incomeStore = useIncomeStore()
 const authStore = useAuthStore()
 const appStore = useAppStore()
 const householdStore = useHouseholdStore()
+const { mobileExpandedId, handleRowClick } = useMobileExpand()
 const drawerOpen = ref(false)
 const editingId = ref<string | null>(null)
 const saving = ref(false)
@@ -192,27 +194,40 @@ onMounted(async () => {
         <span class="income-table__th income-table__th--center">Recurring</span>
         <span class="income-table__th income-table__th--right">Amount</span>
       </div>
-      <div
-        v-for="(item, idx) in scopedSorted"
-        :key="item.id"
-        class="income-row page-enter"
-        :style="{ '--stagger': 3 + idx }"
-        @click="openEdit(item)"
-      >
-        <div class="income-row__source">{{ item.source }}</div>
-        <div class="income-row__chips">
-          <div v-if="item.category" class="income-row__category">
-            <SBadge variant="success" size="sm">{{ item.category }}</SBadge>
+      <div v-for="(item, idx) in scopedSorted" :key="item.id" class="income-entry page-enter" :style="{ '--stagger': 3 + idx }">
+        <div class="income-row" :class="{ 'income-row--m-expanded': mobileExpandedId === item.id }" @click="handleRowClick(item.id, () => openEdit(item))">
+          <div class="income-row__source">{{ item.source }}</div>
+          <div class="income-row__chips">
+            <div v-if="item.category" class="income-row__category">
+              <SBadge variant="success" size="sm">{{ item.category }}</SBadge>
+            </div>
+            <div class="income-row__date">{{ formatDate(item.date) }}</div>
+            <div class="income-row__recurring">
+              <SBadge v-if="item.recurring" variant="info" size="sm">Recurring</SBadge>
+            </div>
           </div>
-          <div class="income-row__date">{{ formatDate(item.date) }}</div>
-          <div class="income-row__recurring">
-            <SBadge v-if="item.recurring" variant="info" size="sm">Recurring</SBadge>
+          <div class="income-row__payer">
+            <SAvatar :name="getMemberName(item.received_by)" :color="getMemberColor(item.received_by)" size="sm" />
+          </div>
+          <div class="income-row__amount">{{ formatCents(item.amount) }}</div>
+          <span class="income-row__chevron material-symbols-rounded">expand_more</span>
+        </div>
+        <div class="m-detail" :class="{ 'm-detail--open': mobileExpandedId === item.id }">
+          <div class="m-detail__inner">
+            <div class="m-detail__body">
+              <SBadge v-if="item.category" variant="success" size="sm">{{ item.category }}</SBadge>
+              <span class="m-detail__chip">{{ formatDate(item.date) }}</span>
+              <SBadge v-if="item.recurring" variant="info" size="sm">Recurring</SBadge>
+              <span v-if="getMemberName(item.received_by)" class="m-detail__who">
+                <SAvatar :name="getMemberName(item.received_by)" :color="getMemberColor(item.received_by)" size="sm" />
+                <span>{{ getMemberName(item.received_by) }}</span>
+              </span>
+              <button class="m-detail__edit" @click.stop="openEdit(item)">
+                <span class="material-symbols-rounded">edit</span>
+              </button>
+            </div>
           </div>
         </div>
-        <div class="income-row__payer">
-          <SAvatar :name="getMemberName(item.received_by)" :color="getMemberColor(item.received_by)" size="sm" />
-        </div>
-        <div class="income-row__amount">{{ formatCents(item.amount) }}</div>
       </div>
     </div>
 
@@ -317,13 +332,11 @@ onMounted(async () => {
   min-height: var(--height-row-min);
   padding: 0 var(--space-l);
   gap: var(--space-m);
-  border-bottom: 1px solid var(--color-border-subtle);
   cursor: pointer;
   transition: background-color var(--duration-fast) var(--easing-standard);
 }
-
-.income-row:last-child { border-bottom: none; }
 .income-row:hover { background: var(--color-bg-tertiary); }
+.income-row:active { transform: scale(0.98); transition: transform var(--duration-fast) var(--easing-standard); }
 
 .income-row__source {
   font: var(--text-body-2);
@@ -366,27 +379,91 @@ onMounted(async () => {
   display: none;
 }
 
+.income-entry {
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.income-entry:last-child { border-bottom: none; }
+
+.income-row__chevron { display: none; }
+.m-detail { display: none; }
+
 @media (max-width: 640px) {
   :deep(.pageheader__actions) { display: none; }
   .money-mobile-actions { display: flex; margin-bottom: var(--space-m); }
   .income-table__header { display: none; }
+
   .income-row {
-    grid-template-columns: 1fr 28px 5.5rem;
-    grid-template-rows: auto auto;
-    padding: var(--space-s) var(--space-l);
-    row-gap: var(--space-2xs);
-    column-gap: var(--space-m);
+    grid-template-columns: 1fr 5.5rem 20px;
+    grid-template-rows: auto;
+    padding: var(--space-s) var(--space-m);
+    column-gap: var(--space-s);
   }
   .income-row__source { grid-column: 1; grid-row: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-  .income-row__payer { grid-column: 2; grid-row: 1 / -1; align-self: center; justify-self: center; }
-  .income-row__amount { grid-column: 3; grid-row: 1 / -1; align-self: center; text-align: right; }
-  .income-row__chips {
+  .income-row__amount { grid-column: 2; grid-row: 1; align-self: center; text-align: right; }
+  .income-row__chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-column: 3;
+    grid-row: 1;
+    color: var(--color-fg-disabled);
+    font-size: 18px;
+    transition: transform var(--duration-fast) var(--easing-out);
+  }
+  .income-row--m-expanded .income-row__chevron {
+    transform: rotate(180deg);
+  }
+  .income-row__chips { display: none; }
+  .income-row__payer { display: none; }
+
+  .m-detail {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--duration-normal) var(--easing-out);
+  }
+  .m-detail--open { grid-template-rows: 1fr; }
+  .m-detail__inner { overflow: hidden; }
+  .m-detail__body {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2xs);
-    grid-column: 1;
-    grid-row: 2;
     align-items: center;
+    gap: var(--space-2xs);
+    padding: var(--space-xs) var(--space-m);
+    border-top: 1px solid var(--color-border-subtle);
+    background: var(--color-bg-secondary);
   }
+  .m-detail__chip {
+    font: var(--text-label-sm);
+    color: var(--color-fg-secondary);
+    background: var(--color-bg-tertiary);
+    padding: 2px var(--space-s);
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+  }
+  .m-detail__who {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font: var(--text-label-sm);
+    color: var(--color-fg-secondary);
+  }
+  .m-detail__edit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    margin-left: auto;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--color-border-default);
+    background: var(--color-bg-elevated);
+    color: var(--color-fg-tertiary);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color var(--duration-fast) var(--easing-standard),
+                color var(--duration-fast) var(--easing-standard);
+  }
+  .m-detail__edit:active { background: var(--color-bg-tertiary); color: var(--color-fg-primary); }
+  .m-detail__edit .material-symbols-rounded { font-size: 15px; }
 }
 </style>

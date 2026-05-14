@@ -1625,20 +1625,8 @@ onMounted(() => {
 }
 
 @media (max-width: 480px) {
-  .stats-row {
-    grid-template-columns: 1fr;
-  }
-
   .stat-cell {
-    border-right: none;
-  }
-
-  .stat-cell:nth-child(odd) {
-    border-right: none;
-  }
-
-  .stat-cell:not(:last-child) {
-    border-bottom: 1px solid var(--color-border-subtle);
+    padding: var(--space-s) var(--space-m);
   }
 }
 

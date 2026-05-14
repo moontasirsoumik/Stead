@@ -24,9 +24,21 @@ const activeTab = computed(() => route.name as string)
 const tabRefs = ref<HTMLElement[]>([])
 const navRef = ref<HTMLElement | null>(null)
 const pillStyle = ref<Record<string, string>>({})
+const scrollEdge = ref<'start' | 'middle' | 'end' | 'none'>('none')
+
+function updateScrollEdge() {
+  const el = navRef.value
+  if (!el) return
+  const maxScroll = el.scrollWidth - el.clientWidth
+  if (maxScroll <= 2) { scrollEdge.value = 'none'; return }
+  if (el.scrollLeft <= 2) scrollEdge.value = 'start'
+  else if (el.scrollLeft >= maxScroll - 2) scrollEdge.value = 'end'
+  else scrollEdge.value = 'middle'
+}
 
 function saveScrollPosition() {
   if (navRef.value) sharedScrollLeft = navRef.value.scrollLeft
+  updateScrollEdge()
 }
 
 function restoreScrollPosition() {
@@ -48,22 +60,34 @@ function updatePill(animate: boolean) {
   }
 }
 
+function scrollActiveIntoView() {
+  const idx = tabs.findIndex((t) => t.name === activeTab.value)
+  const el = tabRefs.value[idx]
+  if (!el || !navRef.value) return
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+}
+
 onMounted(() => {
   nextTick(() => {
     restoreScrollPosition()
-    // Always snap to the current tab instantly on mount — no cross-route animation.
-    // This avoids layout-shift glitches when the sidebar width is transitioning.
     updatePill(false)
+    requestAnimationFrame(() => {
+      scrollActiveIntoView()
+      updateScrollEdge()
+    })
   })
 })
 
 watch(activeTab, () => {
-  nextTick(() => updatePill(true))
+  nextTick(() => {
+    updatePill(true)
+    scrollActiveIntoView()
+  })
 })
 </script>
 
 <template>
-  <nav ref="navRef" class="money-tabs" aria-label="Finances sections" @scroll="saveScrollPosition">
+  <nav ref="navRef" :class="['money-tabs', `money-tabs--scroll-${scrollEdge}`]" aria-label="Finances sections" @scroll="saveScrollPosition">
     <div class="money-tabs__pill" :style="pillStyle" />
     <RouterLink
       v-for="(tab, i) in tabs"
@@ -131,5 +155,29 @@ watch(activeTab, () => {
 
 .money-tab--active:hover {
   color: var(--color-fg-on-brand);
+}
+
+@media (max-width: 640px) {
+  .money-tabs {
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--space-xs);
+  }
+  /* Fade masks based on scroll position */
+  .money-tabs--scroll-start {
+    -webkit-mask-image: linear-gradient(to right, black 0%, black calc(100% - 28px), transparent 100%);
+    mask-image: linear-gradient(to right, black 0%, black calc(100% - 28px), transparent 100%);
+  }
+  .money-tabs--scroll-middle {
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 28px, black calc(100% - 28px), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0%, black 28px, black calc(100% - 28px), transparent 100%);
+  }
+  /* scroll-end and scroll-none: no mask needed */
+  .money-tab {
+    padding: var(--space-2xs) var(--space-s);
+    font: var(--text-label-md);
+    scroll-snap-align: center;
+  }
 }
 </style>

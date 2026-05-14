@@ -1,7 +1,7 @@
 # Stead — Implementation Progress Tracker
 
-> **Last updated:** 2026-05-09
-> **Current Phase:** P34 — Complete (UI Redesign — Emil Kowalski design engineering)
+> **Last updated:** 2026-07-13
+> **Current Phase:** P35 — Complete (Mobile Expand + Chip-Flow Detail Panels)
 
 ---
 
@@ -48,6 +48,7 @@
 | P32 | Feature Generalization | ✅ Done | 2026-05-09 | 2026-05-09 | Boards replaces Meals + Habits + Subscriptions — see details below |
 | P33 | Dashboard + Migrations | ✅ Done | 2026-05-09 | 2026-05-09 | Boards dashboard widget added. DB migrations 013+015 applied |
 | P34 | UI Redesign — Emil Kowalski | ✅ Done | 2026-05-09 | 2026-05-09 | Layered shadows, custom motion curves, press/hover interactions — see details below |
+| P35 | Mobile Expand + Chip-Flow Detail | ✅ Done | 2026-07-13 | 2026-07-13 | useMobileExpand composable + compact chip-flow detail panels on 12 pages |
 
 ---
 
@@ -576,3 +577,33 @@ Complete visual redesign applying Emil Kowalski's design engineering philosophy:
 - Note cards: hover elevation (`--shadow-card-hover` + `translateY(--hover-lift)`) + press scale
 - Page enter animation: updated easing + stagger timing
 - SettingsPage: replaced `transition: all` with specific properties
+
+---
+
+## Phase 35 — Mobile Expand + Chip-Flow Detail Panels
+
+Added tap-to-expand/collapse on all mobile table rows with a compact chip-flow detail panel design.
+
+### Composable
+- `src/composables/useMobileExpand.ts` — provides `mobileExpandedId` ref + `handleRowClick(id, desktopCallback, breakpoint)`. On mobile: toggles expand. On desktop: fires callback directly.
+
+### Pattern
+- `.m-detail` wrapper with CSS `grid-template-rows: 0fr → 1fr` animation
+- `.m-detail__chips` — flex-wrap row of pill-shaped chip-text spans + SBadge components
+- `.m-detail__edit` — 28×28 icon button (edit action)
+- Context-specific extras: `.m-detail__link-chip` (Contacts phone/email, Wishlist URL), `.m-detail__chip-mono` (Documents reference number), `.m-detail__cart-btn` (Inventory add-to-list)
+- Desktop: `.m-detail { display: none }` — detail panels are mobile-only
+
+### Pages updated (12)
+1. ExpensesPage — date pill, category badge, paid-by avatar+name, note
+2. IncomePage — category badge, date pill, recurring badge, avatar+name
+3. BillsPage — status/frequency/autopay badges, due day chip, note
+4. BudgetsPage — progress bar + spent/budget/% chips
+5. SavingsPage — progress bar + priority/status/target/deadline chips + percentage
+6. RemindersPage — status/type badges + date pill, avatar+name + Done/Snooze
+7. TasksPage — due-chip pill + assignee-chip with avatar (kept existing expand pattern)
+8. InventoryPage — category badge, location, target level, last checked + add-to-list button
+9. ShoppingPage — active: priority/qty/assignee; archive: qty/assignee/bought-by (2 panels)
+10. ContactsPage — category badge + phone/email link chips
+11. DocumentsPage — type/status badges, issue/expiry dates, reference number mono chip
+12. WishlistPage — priority/status badges, category chip, "View item ↗" link

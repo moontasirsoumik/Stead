@@ -25,11 +25,14 @@ import { useAppStore } from '@/stores/app.store'
 import { formatDate } from '@/utils/format'
 import type { InventoryItem } from '@/models/inventory.model'
 import type { StockStatus, TargetLevel } from '@/models/enums'
+import { useMobileExpand } from '@/composables/useMobileExpand'
 
 const inventoryStore = useInventoryStore()
 const authStore = useAuthStore()
 const shoppingStore = useShoppingStore()
 const appStore = useAppStore()
+
+const { mobileExpandedId, handleRowClick } = useMobileExpand()
 
 const search = ref('')
 const stockStatusFilter = ref('')
@@ -84,7 +87,7 @@ const categoryOptions = computed(() => {
   }
   return [
     { value: '', label: 'All categories' },
-    ...Array.from(cats).sort().map((c) => ({ value: c, label: c })),
+    ...Array.from(cats).sort().map((c) => ({ value: c, label: formatLabel(c) })),
   ]
 })
 
@@ -95,7 +98,7 @@ const locationOptions = computed(() => {
   }
   return [
     { value: '', label: 'All locations' },
-    ...Array.from(locs).sort().map((l) => ({ value: l, label: l })),
+    ...Array.from(locs).sort().map((l) => ({ value: l, label: formatLabel(l) })),
   ]
 })
 
@@ -136,6 +139,10 @@ function targetLabel(t: TargetLevel) {
     keep_1: 'Keep 1', keep_2: 'Keep 2', keep_3_plus: 'Keep 3+', weekly_item: 'Weekly', monthly_item: 'Monthly',
   }
   return map[t]
+}
+
+function formatLabel(str: string): string {
+  return str.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
 }
 
 function openCreateDrawer() {
@@ -308,35 +315,50 @@ onMounted(async () => {
         <span class="inv-table__th inv-table__th--center">Target</span>
         <span class="inv-table__th inv-table__th--right">Last checked</span>
       </div>
-      <div
-        v-for="item in filteredItems"
-        :key="item.id"
-        class="inv-row"
-        @click="openEditDrawer(item)"
-      >
-        <div class="inv-row__name">{{ item.name }}</div>
-        <div class="inv-row__stock">
-          <SBadge v-if="appStore.showStockIndicators" :variant="stockVariant(item.stock_status)" size="sm">{{ stockLabel(item.stock_status) }}</SBadge>
-        </div>
-        <div class="inv-row__cart">
-          <button
-            :class="['inv-row__cart-btn', { 'inv-row__cart-btn--added': isInShoppingList(item.name) }]"
-            :title="isInShoppingList(item.name) ? 'Already in shopping list' : 'Add to shopping list'"
-            :disabled="isInShoppingList(item.name)"
-            @click.stop="addToShoppingList(item)"
-          >
-            <span class="material-symbols-rounded">{{ isInShoppingList(item.name) ? 'check' : 'add_shopping_cart' }}</span>
-          </button>
-        </div>
-        <div class="inv-row__chips">
-          <div class="inv-row__category">
-            <SBadge v-if="item.category" size="sm">{{ item.category }}</SBadge>
+      <div v-for="item in filteredItems" :key="item.id" class="inv-entry">
+        <div class="inv-row" :class="{ 'inv-row--m-expanded': mobileExpandedId === item.id }" @click="handleRowClick(item.id, () => openEditDrawer(item))">
+          <div class="inv-row__name">{{ item.name }}</div>
+          <div class="inv-row__stock">
+            <SBadge v-if="appStore.showStockIndicators" :variant="stockVariant(item.stock_status)" size="sm">{{ stockLabel(item.stock_status) }}</SBadge>
           </div>
-          <div class="inv-row__location">
-            <span v-if="item.location">{{ item.location }}</span>
+          <div class="inv-row__cart">
+            <button
+              :class="['inv-row__cart-btn', { 'inv-row__cart-btn--added': isInShoppingList(item.name) }]"
+              :title="isInShoppingList(item.name) ? 'Already in shopping list' : 'Add to shopping list'"
+              :disabled="isInShoppingList(item.name)"
+              @click.stop="addToShoppingList(item)"
+            >
+              <span class="material-symbols-rounded">{{ isInShoppingList(item.name) ? 'check' : 'add_shopping_cart' }}</span>
+            </button>
           </div>
-          <div class="inv-row__target">{{ targetLabel(item.target_level) }}</div>
-          <div class="inv-row__checked">{{ item.last_checked_date ? formatDate(item.last_checked_date) : '—' }}</div>
+          <div class="inv-row__chips">
+            <div class="inv-row__category">
+              <SBadge v-if="item.category" size="sm">{{ formatLabel(item.category) }}</SBadge>
+            </div>
+            <div v-if="item.location" class="inv-row__location">
+              {{ formatLabel(item.location) }}
+            </div>
+            <div class="inv-row__target">{{ targetLabel(item.target_level) }}</div>
+            <div v-if="item.last_checked_date" class="inv-row__checked">{{ formatDate(item.last_checked_date) }}</div>
+          </div>
+          <span class="inv-row__chevron material-symbols-rounded">expand_more</span>
+        </div>
+        <div class="m-detail" :class="{ 'm-detail--open': mobileExpandedId === item.id }">
+          <div class="m-detail__inner">
+            <div class="m-detail__body">
+              <SBadge v-if="item.category" size="sm">{{ formatLabel(item.category) }}</SBadge>
+              <span v-if="item.location" class="m-detail__chip">{{ formatLabel(item.location) }}</span>
+              <span class="m-detail__chip">Target: {{ targetLabel(item.target_level) }}</span>
+              <span v-if="item.last_checked_date" class="m-detail__chip">Checked {{ formatDate(item.last_checked_date) }}</span>
+              <button :class="['m-detail__cart-btn', { 'm-detail__cart-btn--done': isInShoppingList(item.name) }]" :disabled="isInShoppingList(item.name)" @click.stop="addToShoppingList(item)">
+                <span class="material-symbols-rounded">{{ isInShoppingList(item.name) ? 'check' : 'add_shopping_cart' }}</span>
+                {{ isInShoppingList(item.name) ? 'In list' : 'Add' }}
+              </button>
+              <button class="m-detail__edit" @click.stop="openEditDrawer(item)">
+                <span class="material-symbols-rounded">edit</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -426,6 +448,11 @@ onMounted(async () => {
 .inv-table__th--center { text-align: center; }
 .inv-table__th--right { text-align: right; }
 
+.inv-entry {
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.inv-entry:last-child { border-bottom: none; }
+
 .inv-row {
   display: grid;
   grid-template-columns: 1fr 120px 36px 100px 100px 80px 100px;
@@ -433,13 +460,13 @@ onMounted(async () => {
   min-height: var(--height-row-min);
   padding: 0 var(--space-l);
   gap: var(--space-m);
-  border-bottom: 1px solid var(--color-border-subtle);
   cursor: pointer;
   transition: background-color var(--duration-fast) var(--easing-standard);
 }
 
-.inv-row:last-child { border-bottom: none; }
-.inv-row:hover { background: var(--color-bg-tertiary); }
+.inv-row__chevron { display: none; }
+.m-detail { display: none; }
+.inv-row:hover { background: var(--color-bg-tertiary); }\n.inv-row:active { transform: scale(0.98); transition: transform var(--duration-fast) var(--easing-standard); }
 
 .inv-row__name {
   font: var(--text-body-2);
@@ -527,26 +554,90 @@ onMounted(async () => {
   :deep(.pageheader__actions) { display: none; }
   .pantry-mobile-actions { display: flex; margin-bottom: var(--space-m); }
   .inv-table__header { display: none; }
+
   .inv-row {
-    grid-template-columns: 1fr auto 5rem;
-    grid-template-rows: auto auto;
-    padding: var(--space-s) var(--space-l);
-    row-gap: var(--space-2xs);
-    column-gap: var(--space-xs);
+    grid-template-columns: 1fr 5.5rem 20px;
+    grid-template-rows: auto;
+    padding: var(--space-s) var(--space-m);
+    column-gap: var(--space-s);
   }
   .inv-row__name { grid-column: 1; grid-row: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-  .inv-row__stock { grid-column: 3; grid-row: 1 / -1; align-self: center; justify-self: end; }
-  .inv-row__cart { grid-column: 2; grid-row: 1 / -1; align-self: center; }
-  .inv-row__chips {
+  .inv-row__stock { grid-column: 2; grid-row: 1; align-self: center; justify-self: end; }
+  .inv-row__chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-column: 3;
+    grid-row: 1;
+    color: var(--color-fg-disabled);
+    font-size: 18px;
+    transition: transform var(--duration-fast) var(--easing-out);
+  }
+  .inv-row--m-expanded .inv-row__chevron { transform: rotate(180deg); }
+  .inv-row__chips { display: none; }
+  .inv-row__cart { display: none; }
+
+  .m-detail {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--duration-normal) var(--easing-out);
+  }
+  .m-detail--open { grid-template-rows: 1fr; }
+  .m-detail__inner { overflow: hidden; }
+  .m-detail__body {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2xs);
-    grid-column: 1;
-    grid-row: 2;
     align-items: center;
+    gap: var(--space-2xs);
+    padding: var(--space-xs) var(--space-m);
+    border-top: 1px solid var(--color-border-subtle);
+    background: var(--color-bg-secondary);
   }
-  .inv-row__location,
-  .inv-row__target,
-  .inv-row__checked { font: var(--text-caption); color: var(--color-fg-tertiary); }
+  .m-detail__chip {
+    font: var(--text-label-sm);
+    color: var(--color-fg-secondary);
+    background: var(--color-bg-tertiary);
+    padding: 2px var(--space-s);
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+  }
+  .m-detail__cart-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font: var(--text-label-sm);
+    color: var(--color-fg-secondary);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-s);
+    padding: 2px var(--space-s);
+    cursor: pointer;
+    margin-left: auto;
+    transition: background-color var(--duration-fast) var(--easing-standard);
+  }
+  .m-detail__cart-btn .material-symbols-rounded { font-size: 14px; }
+  .m-detail__cart-btn:active:not(:disabled) { background: var(--color-bg-tertiary); }
+  .m-detail__cart-btn--done {
+    color: var(--color-success);
+    border-color: color-mix(in srgb, var(--color-success) 28%, transparent);
+    cursor: default;
+  }
+  .m-detail__edit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--color-border-default);
+    background: var(--color-bg-elevated);
+    color: var(--color-fg-tertiary);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color var(--duration-fast) var(--easing-standard),
+                color var(--duration-fast) var(--easing-standard);
+  }
+  .m-detail__edit:active { background: var(--color-bg-tertiary); color: var(--color-fg-primary); }
+  .m-detail__edit .material-symbols-rounded { font-size: 15px; }
 }
 </style>

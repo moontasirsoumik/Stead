@@ -17,6 +17,7 @@ import ConfirmDialog from '@/components/feedback/ConfirmDialog.vue'
 import FormDrawer from '@/components/forms/FormDrawer.vue'
 import FormField from '@/components/forms/FormField.vue'
 import FormSection from '@/components/forms/FormSection.vue'
+import { useMobileExpand } from '@/composables/useMobileExpand'
 import { useContactsStore } from '@/stores/contacts.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { useAppStore } from '@/stores/app.store'
@@ -25,6 +26,7 @@ import type { Contact } from '@/models/contact.model'
 const contactsStore = useContactsStore()
 const authStore = useAuthStore()
 const appStore = useAppStore()
+const { mobileExpandedId, handleRowClick } = useMobileExpand()
 
 const search = ref('')
 const categoryFilter = ref('')
@@ -63,6 +65,10 @@ const categoryFormOptions = [
   { value: 'insurance', label: 'Insurance' },
   { value: 'other', label: 'Other' },
 ]
+
+function formatLabel(str: string): string {
+  return str.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+}
 
 function categoryVariant(cat: string): 'default' | 'brand' | 'success' | 'warning' | 'error' | 'info' {
   const map: Record<string, 'default' | 'brand' | 'success' | 'warning' | 'error' | 'info'> = {
@@ -210,36 +216,46 @@ onMounted(async () => {
         <span class="contact-table__th">Email</span>
         <span class="contact-table__th contact-table__th--right">Actions</span>
       </div>
-      <div
-        v-for="contact in filteredItems"
-        :key="contact.id"
-        class="contact-row"
-        @click="openEditDrawer(contact)"
-      >
-        <div class="contact-row__name-col">
-          <SAvatar :name="contact.name" size="sm" />
-          <div class="contact-row__info">
-            <span class="contact-row__name">{{ contact.name }}</span>
-            <span v-if="contact.role || contact.company" class="contact-row__role">
-              {{ contact.role }}<template v-if="contact.role && contact.company"> · </template>{{ contact.company }}
-            </span>
+      <div v-for="contact in filteredItems" :key="contact.id" class="contact-entry">
+        <div class="contact-row" :class="{ 'contact-row--m-expanded': mobileExpandedId === contact.id }" @click="handleRowClick(contact.id, () => openEditDrawer(contact))">
+          <div class="contact-row__name-col">
+            <SAvatar :name="contact.name" size="sm" />
+            <div class="contact-row__info">
+              <span class="contact-row__name">{{ contact.name }}</span>
+              <span v-if="contact.role || contact.company" class="contact-row__role">
+                {{ contact.role }}<template v-if="contact.role && contact.company"> · </template>{{ contact.company }}
+              </span>
+            </div>
           </div>
+          <div class="contact-row__chips">
+            <div class="contact-row__category">
+              <SBadge v-if="contact.category" :variant="categoryVariant(contact.category)" size="sm">{{ formatLabel(contact.category) }}</SBadge>
+            </div>
+            <div class="contact-row__phone">
+              <a v-if="contact.phone" :href="`tel:${contact.phone}`" class="contact-link" @click.stop>{{ contact.phone }}</a>
+            </div>
+            <div class="contact-row__email">
+              <a v-if="contact.email" :href="`mailto:${contact.email}`" class="contact-link" @click.stop>{{ contact.email }}</a>
+            </div>
+          </div>
+          <div class="contact-row__actions" @click.stop>
+            <SIconButton label="Delete" size="sm" @click="confirmDelete(contact.id)">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 3L9 9M9 3L3 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
+            </SIconButton>
+          </div>
+          <span class="contact-row__chevron material-symbols-rounded">expand_more</span>
         </div>
-        <div class="contact-row__chips">
-          <div class="contact-row__category">
-            <SBadge v-if="contact.category" :variant="categoryVariant(contact.category)" size="sm">{{ contact.category }}</SBadge>
+        <div class="m-detail" :class="{ 'm-detail--open': mobileExpandedId === contact.id }">
+          <div class="m-detail__inner">
+            <div class="m-detail__body">
+              <SBadge v-if="contact.category" size="sm">{{ contact.category }}</SBadge>
+              <a v-if="contact.phone" :href="'tel:' + contact.phone" class="m-detail__link" @click.stop>{{ contact.phone }}</a>
+              <a v-if="contact.email" :href="'mailto:' + contact.email" class="m-detail__link" @click.stop>{{ contact.email }}</a>
+              <button class="m-detail__edit" @click.stop="openEditDrawer(contact)">
+                <span class="material-symbols-rounded">edit</span>
+              </button>
+            </div>
           </div>
-          <div class="contact-row__phone">
-            <a v-if="contact.phone" :href="`tel:${contact.phone}`" class="contact-link" @click.stop>{{ contact.phone }}</a>
-          </div>
-          <div class="contact-row__email">
-            <a v-if="contact.email" :href="`mailto:${contact.email}`" class="contact-link" @click.stop>{{ contact.email }}</a>
-          </div>
-        </div>
-        <div class="contact-row__actions" @click.stop>
-          <SIconButton label="Delete" size="sm" @click="confirmDelete(contact.id)">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 3L9 9M9 3L3 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
-          </SIconButton>
         </div>
       </div>
     </div>
@@ -306,6 +322,11 @@ onMounted(async () => {
 .contact-table__th--center { text-align: center; }
 .contact-table__th--right { text-align: right; }
 
+.contact-entry {
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.contact-entry:last-child { border-bottom: none; }
+
 .contact-row {
   display: grid;
   grid-template-columns: 1fr 100px 140px 200px 48px;
@@ -313,13 +334,14 @@ onMounted(async () => {
   min-height: var(--height-row-min);
   padding: 0 var(--space-l);
   gap: var(--space-m);
-  border-bottom: 1px solid var(--color-border-subtle);
   cursor: pointer;
   transition: background-color var(--duration-fast) var(--easing-standard);
 }
 
-.contact-row:last-child { border-bottom: none; }
+.contact-row__chevron { display: none; }
+.m-detail { display: none; }
 .contact-row:hover { background: var(--color-bg-tertiary); }
+.contact-row:active { transform: scale(0.98); transition: transform var(--duration-fast) var(--easing-standard); }
 
 .contact-row__name-col {
   display: flex;
@@ -387,23 +409,79 @@ onMounted(async () => {
 @media (max-width: 640px) {
   .contact-table__header { display: none; }
   .contact-row {
-    grid-template-columns: 1fr 36px;
-    grid-template-rows: auto auto;
-    padding: var(--space-s) var(--space-l);
-    row-gap: var(--space-2xs);
-    column-gap: var(--space-m);
+    grid-template-columns: 1fr 20px;
+    grid-template-rows: auto;
+    padding: var(--space-s) var(--space-m);
+    column-gap: var(--space-s);
   }
   .contact-row__name-col { grid-column: 1; grid-row: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-  .contact-row__actions { grid-column: 2; grid-row: 1 / -1; align-self: center; justify-self: center; }
-  .contact-row__chips {
+  .contact-row__chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-column: 2;
+    grid-row: 1;
+    color: var(--color-fg-disabled);
+    font-size: 18px;
+    transition: transform var(--duration-fast) var(--easing-out);
+  }
+  .contact-row--m-expanded .contact-row__chevron { transform: rotate(180deg); }
+  .contact-row__chips { display: none; }
+  .contact-row__actions { display: none; }
+
+  .m-detail {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--duration-normal) var(--easing-out);
+  }
+  .m-detail--open { grid-template-rows: 1fr; }
+  .m-detail__inner { overflow: hidden; }
+  .m-detail__body {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2xs);
-    grid-column: 1;
-    grid-row: 2;
     align-items: center;
+    gap: var(--space-2xs);
+    padding: var(--space-xs) var(--space-m);
+    border-top: 1px solid var(--color-border-subtle);
+    background: var(--color-bg-secondary);
   }
-  .contact-row__phone { font: var(--text-caption); }
-  .contact-row__email { font: var(--text-caption); overflow: hidden; text-overflow: ellipsis; }
+  .m-detail__chip {
+    font: var(--text-label-sm);
+    color: var(--color-fg-secondary);
+    background: var(--color-bg-tertiary);
+    padding: 2px var(--space-s);
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+  }
+  .m-detail__edit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    margin-left: auto;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--color-border-default);
+    background: var(--color-bg-elevated);
+    color: var(--color-fg-tertiary);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color var(--duration-fast) var(--easing-standard),
+                color var(--duration-fast) var(--easing-standard);
+  }
+  .m-detail__edit:active { background: var(--color-bg-tertiary); color: var(--color-fg-primary); }
+  .m-detail__edit .material-symbols-rounded { font-size: 15px; }
+  .m-detail__link {
+    font: var(--text-label-sm);
+    color: var(--color-fg-brand);
+    background: var(--color-bg-tertiary);
+    padding: 2px var(--space-s);
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+  }
 }
 </style>

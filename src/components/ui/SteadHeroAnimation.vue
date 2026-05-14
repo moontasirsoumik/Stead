@@ -10,7 +10,7 @@
  *   5. Scale down logo + slide in "Stead" brand name
  *   6. Emit 'done' → parent reveals tagline
  */
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 
 const emit = defineEmits<{
   done: []
@@ -25,6 +25,18 @@ const animEl = ref<HTMLDivElement>()
 const shrunk = ref(false)
 const showBrand = ref(false)
 const centerY = ref(0)
+const showSkip = ref(false)
+
+/** Track all scheduled timeouts so skip can cancel them */
+const pendingTimeouts: ReturnType<typeof setTimeout>[] = []
+
+function schedule(fn: () => void, ms: number) {
+  pendingTimeouts.push(setTimeout(fn, ms))
+}
+
+onUnmounted(() => {
+  pendingTimeouts.forEach(t => clearTimeout(t))
+})
 
 const W = 100, D = 80, WH = 55, RL = 58, RA = 45
 const gH = Math.round(RL * Math.sin(RA * Math.PI / 180))
@@ -43,6 +55,81 @@ function setDelays(delays: Record<string, string>) {
     const el = house.querySelector('.' + cls) as HTMLElement | null
     if (el) el.style.transitionDelay = delays[cls] || '0s'
   }
+}
+
+/** Fly the diamond to the mobile header bar using WAAPI */
+function flyToHeader() {
+  const el = animEl.value
+  const door = el?.closest('.auth-door') as HTMLElement | null
+  if (!el || !door) return
+
+  const doorRect = door.getBoundingClientRect()
+  const animRect = el.getBoundingClientRect()
+
+  // Target: center of 32px logo area in future 56px header bar
+  const targetX = doorRect.left + 32
+  const targetY = doorRect.top + 28
+  const currentX = animRect.left + animRect.width / 2
+  const currentY = animRect.top + animRect.height / 2
+  const dx = targetX - currentX
+  const dy = targetY - currentY
+  const s = 0.28
+
+  // Disable CSS transition — WAAPI controls the animation
+  el.style.transition = 'none'
+
+  const fly = el.animate([
+    { transform: `translate(0px, ${centerY.value}px) scale(1)` },
+    { transform: `translate(${dx}px, ${dy + centerY.value}px) scale(${s})` },
+  ], {
+    duration: 1100,
+    easing: 'cubic-bezier(0.25, 0.1, 0.25, 1)',
+    fill: 'forwards',
+  })
+
+  fly.onfinish = () => emit('done')
+}
+
+/** Skip the folding animation — snap to completed diamond, then run end sequence */
+function skipAnimation() {
+  showSkip.value = false
+
+  // Cancel all pending animation timeouts
+  pendingTimeouts.forEach(t => clearTimeout(t))
+  pendingTimeouts.length = 0
+
+  const house = houseEl.value
+  if (!house) return
+
+  // Instantly snap all faces to the folded diamond + tilt-2d state
+  const faces = house.querySelectorAll<HTMLElement>('.face')
+  faces.forEach(f => {
+    f.style.transitionDuration = '0s'
+    f.style.transitionDelay = '0s'
+  })
+  house.style.transitionDuration = '0s'
+
+  house.classList.remove('phase-3d')
+  house.classList.remove('pre-fold-z')
+  house.classList.add('phase-2d')
+  house.classList.add('tilt-2d')
+
+  // Force layout to apply instant changes
+  house.offsetHeight
+
+  // Re-enable transitions, then trigger the end sequence
+  requestAnimationFrame(() => {
+    faces.forEach(f => {
+      f.style.transitionDuration = ''
+      f.style.transitionDelay = ''
+    })
+    house.style.transitionDuration = ''
+
+    // Run end sequence: shrink → brand → done (same as desktop/mobile fallback path)
+    schedule(() => { shrunk.value = true }, 150)
+    schedule(() => { showBrand.value = true }, 650)
+    schedule(() => { emit('done') }, 1650)
+  })
 }
 
 onMounted(() => {
@@ -73,8 +160,11 @@ onMounted(() => {
 
   // House starts with phase-3d in template — no animation into 3D
 
+  // Show skip button after a brief delay (template v-if gates on mobile prop reactively)
+  schedule(() => { showSkip.value = true }, 500)
+
   // 1→2: unfold 3D house → flat (simultaneous pairs)
-  setTimeout(() => {
+  schedule(() => {
     setDelays({
       'roof-back': '0s', 'roof-front': '0s',
       'tri-left': '0s', 'tri-right': '0s',
@@ -85,7 +175,7 @@ onMounted(() => {
   }, 1200)
 
   // 2→3: flat → folded diamond (simultaneous — both sides fold together)
-  setTimeout(() => {
+  schedule(() => {
     setDelays({
       'roof-front': '0s',   'roof-back': '0s',
       'wall-front': '0.4s', 'wall-back': '0.4s',
@@ -105,56 +195,29 @@ onMounted(() => {
   }, 2800)
 
   // 3→4: tilt to top-down 2D
-  setTimeout(() => {
+  schedule(() => {
     house.classList.add('tilt-2d')
   }, 5200)
 
   if (props.mobile) {
     // Mobile: after tilt settles (5200ms + 1.2s = 6400ms), fly diamond to header
-    // Uses Web Animations API for flicker-free, exact start→end interpolation
-    setTimeout(() => {
-      const el = animEl.value
-      const door = el?.closest('.auth-door') as HTMLElement | null
-      if (!el || !door) return
-
-      const doorRect = door.getBoundingClientRect()
-      const animRect = el.getBoundingClientRect()
-
-      // Target: center of 32px logo area in future 56px header bar
-      const targetX = doorRect.left + 32
-      const targetY = doorRect.top + 28
-      const currentX = animRect.left + animRect.width / 2
-      const currentY = animRect.top + animRect.height / 2
-      const dx = targetX - currentX
-      const dy = targetY - currentY
-      const s = 0.28
-
-      // Disable CSS transition — WAAPI controls the animation
-      el.style.transition = 'none'
-
-      // Start transform matches the current CSS: translate(0, centerY) scale(1)
-      // End transform: flyY must be dy + centerY because the CSS translate Y starts
-      // at centerY, so the net visual displacement = (dy + centerY) - centerY = dy
-      const fly = el.animate([
-        { transform: `translate(0px, ${centerY.value}px) scale(1)` },
-        { transform: `translate(${dx}px, ${dy + centerY.value}px) scale(${s})` },
-      ], {
-        duration: 1100,
-        easing: 'cubic-bezier(0.25, 0.1, 0.25, 1)',
-        fill: 'forwards',
-      })
-
-      fly.onfinish = () => emit('done')
+    // Hide skip button before flying
+    schedule(() => {
+      showSkip.value = false
+      flyToHeader()
     }, 6500)
   } else {
     // Desktop: shrink + reposition diamond (single GPU transform, 1.1s)
-    setTimeout(() => { shrunk.value = true }, 6400)
+    schedule(() => {
+      showSkip.value = false
+      shrunk.value = true
+    }, 6400)
 
     // "Stead" slides in from diamond edge mid-shrink
-    setTimeout(() => { showBrand.value = true }, 6900)
+    schedule(() => { showBrand.value = true }, 6900)
 
     // Emit done after animation settles
-    setTimeout(() => { emit('done') }, 8400)
+    schedule(() => { emit('done') }, 8400)
   }
 })
 </script>
@@ -242,6 +305,21 @@ onMounted(() => {
 
     <!-- Brand text: slides in from the diamond's right edge -->
     <span :class="['hero-brand', { 'hero-brand--visible': showBrand }]">Stead</span>
+
+    <!-- Mobile skip button: lets users jump past the folding animation -->
+    <Transition name="skip-fade">
+      <button
+        v-if="showSkip && mobile"
+        class="skip-btn"
+        @click="skipAnimation"
+      >
+        Skip
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="13 17 18 12 13 7" />
+          <polyline points="6 17 11 12 6 7" />
+        </svg>
+      </button>
+    </Transition>
   </div>
 </template>
 
@@ -417,4 +495,57 @@ onMounted(() => {
 .hero-house.phase-2d .tri-left   { transform: translateZ(-0.5px) rotateY(-180deg); }
 .hero-house.phase-2d .wall-right { transform: translateZ(4px) rotateY(-180deg); }
 .hero-house.phase-2d .tri-right  { transform: translateZ(-0.5px) rotateY(180deg); }
+
+/* ═══ Mobile skip button ═══ */
+.skip-btn {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: rgba(255, 255, 255, 0.7);
+  font-family: var(--font-sans, inherit);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  white-space: nowrap;
+  z-index: 20;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.skip-btn:active {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.28);
+  transform: translateX(-50%) scale(0.96);
+}
+
+.skip-btn svg {
+  opacity: 0.7;
+}
+
+/* Skip button enter/leave transitions */
+.skip-fade-enter-active {
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.skip-fade-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.skip-fade-enter-from {
+  opacity: 0;
+  transform: translateX(-50%) translateY(8px);
+}
+.skip-fade-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-4px);
+}
 </style>

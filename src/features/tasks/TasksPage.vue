@@ -28,6 +28,7 @@ import type { Task } from '@/models/task.model'
 import SVisibilityPicker from '@/components/ui/SVisibilityPicker.vue'
 import SMemberPicker from '@/components/ui/SMemberPicker.vue'
 import { entitySharesDataService } from '@/services/data/entity-shares.data'
+import { useMobileExpand } from '@/composables/useMobileExpand'
 import type { TaskStatus, TaskPriority, TaskType, Visibility } from '@/models/enums'
 
 const tasksStore = useTasksStore()
@@ -59,7 +60,7 @@ const formContact = ref('')
 const formVisibility = ref<Visibility>('private')
 const formSharedWith = ref<string[]>([])
 
-const expandedTaskId = ref<string | null>(null)
+const { mobileExpandedId, handleRowClick } = useMobileExpand()
 const newSubtaskTitle = ref('')
 
 const confirmDeleteOpen = ref(false)
@@ -175,12 +176,9 @@ function subtaskProgress(taskId: string): string {
 }
 
 function toggleExpand(taskId: string) {
-  if (expandedTaskId.value === taskId) {
-    expandedTaskId.value = null
-  } else {
-    expandedTaskId.value = taskId
-    tasksStore.fetchSubtasks(taskId)
-  }
+  const wasSame = mobileExpandedId.value === taskId
+  mobileExpandedId.value = wasSame ? null : taskId
+  if (!wasSame) tasksStore.fetchSubtasks(taskId)
 }
 
 async function quickStatus(taskId: string, status: TaskStatus) {
@@ -382,7 +380,7 @@ onMounted(async () => {
             <span class="task-table__th task-table__th--right">Actions</span>
           </div>
           <div v-for="task in group.tasks" :key="task.id" class="task-row-wrapper" role="listitem">
-            <div class="task-row" @click="toggleExpand(task.id)">
+            <div class="task-row" :class="{ 'task-row--m-expanded': mobileExpandedId === task.id }" @click="toggleExpand(task.id)">
               <div class="task-row__title-col">
                 <span class="task-row__title">{{ task.title }}</span>
                 <SBadge v-if="task.task_type === 'maintenance'" variant="default" size="sm">maintenance</SBadge>
@@ -406,9 +404,21 @@ onMounted(async () => {
                 <SButton v-if="task.status !== 'done'" variant="subtle" size="sm" @click="quickStatus(task.id, 'done')">Complete</SButton>
                 <SButton v-if="task.status !== 'skipped' && task.status !== 'done'" variant="subtle" size="sm" @click="quickStatus(task.id, 'skipped')">Skip</SButton>
               </div>
+              <span class="task-row__chevron material-symbols-rounded">expand_more</span>
             </div>
 
-            <div v-if="expandedTaskId === task.id" class="task-expanded" @click.stop>
+            <div class="m-detail" :class="{ 'm-detail--open': mobileExpandedId === task.id }">
+              <div class="m-detail__inner">
+                <div v-if="mobileExpandedId === task.id" class="task-expanded" @click.stop>
+              <div class="task-expanded__meta">
+                <SBadge :variant="priorityVariant(task.priority)" size="sm">{{ task.priority }}</SBadge>
+                <SBadge :variant="statusVariant(task.status)" size="sm">{{ task.status.replace('_', ' ') }}</SBadge>
+                <span v-if="task.due_date" class="task-expanded__due-chip">{{ formatRelativeDate(task.due_date) }}</span>
+                <span v-if="getMemberName(task.assignee)" class="task-expanded__assignee-chip">
+                  <SAvatar :name="getMemberName(task.assignee)!" size="sm" />
+                  {{ getMemberName(task.assignee) }}
+                </span>
+              </div>
               <div v-if="task.description" class="task-expanded__desc">{{ task.description }}</div>
               <div v-if="task.task_type === 'maintenance'" class="task-expanded__maintenance">
                 <span v-if="task.vendor" class="task-expanded__detail"><strong>Vendor:</strong> {{ task.vendor }}</span>
@@ -429,9 +439,16 @@ onMounted(async () => {
                   <SButton variant="subtle" size="sm" @click="handleAddSubtask(task.id)">Add</SButton>
                 </div>
               </div>
+              <div class="task-expanded__quick-actions">
+                <SButton v-if="task.status === 'not_started'" variant="subtle" size="sm" @click="quickStatus(task.id, 'in_progress')">Start</SButton>
+                <SButton v-if="task.status !== 'done'" variant="subtle" size="sm" @click="quickStatus(task.id, 'done')">Complete</SButton>
+                <SButton v-if="task.status !== 'skipped' && task.status !== 'done'" variant="subtle" size="sm" @click="quickStatus(task.id, 'skipped')">Skip</SButton>
+              </div>
               <div class="task-expanded__footer">
                 <SButton variant="subtle" size="sm" @click="openEditDrawer(task)">Edit</SButton>
                 <SButton variant="danger" size="sm" @click="confirmDelete(task.id)">Delete</SButton>
+              </div>
+                </div>
               </div>
             </div>
           </div>
@@ -552,6 +569,11 @@ onMounted(async () => {
 .task-table__th--center { text-align: center; }
 .task-table__th--right { text-align: right; }
 
+.task-row-wrapper {
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.task-row-wrapper:last-child { border-bottom: none; }
+
 .task-row {
   display: grid;
   grid-template-columns: 1fr 80px 100px 90px 70px 180px;
@@ -561,11 +583,15 @@ onMounted(async () => {
   padding: 0 var(--space-l);
   cursor: pointer;
   transition: background-color var(--duration-fast) var(--easing-standard);
-  border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .task-row:hover {
   background: var(--color-bg-tertiary);
+}
+
+.task-row:active {
+  transform: scale(0.98);
+  transition: transform var(--duration-fast) var(--easing-standard);
 }
 
 .task-row__title-col {
@@ -679,32 +705,123 @@ onMounted(async () => {
   border-top: 1px solid var(--color-border-subtle);
 }
 
+.task-expanded__quick-actions {
+  display: none;
+}
+
+/* ── Chevron — hidden on desktop ── */
+.task-row__chevron { display: none; }
+
+/* ── m-detail expand/collapse animation (works on both desktop & mobile) ── */
+.m-detail {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--duration-normal) var(--easing-out);
+}
+.m-detail--open { grid-template-rows: 1fr; }
+.m-detail__inner { overflow: hidden; }
+
+/* ── Expanded meta — hidden on desktop ── */
+.task-expanded__meta {
+  display: none;
+}
+
 /* ── Responsive ── */
 .task-row__chips {
   display: contents;
 }
 
 @media (max-width: 640px) {
-  .stats-row { flex-direction: column; }
-  .stat-cell { border-right: none; border-bottom: 1px solid var(--color-border-subtle); }
-  .stat-cell:last-child { border-bottom: none; }
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .stat-cell {
+    border-right: none;
+    border-bottom: 1px solid var(--color-border-subtle);
+    padding: var(--space-s) var(--space-m);
+  }
+  .stat-cell:nth-child(odd) {
+    border-right: 1px solid var(--color-border-subtle);
+  }
+  .stat-cell:nth-child(3),
+  .stat-cell:nth-child(4) {
+    border-bottom: none;
+  }
+  .task-table__header { display: none; }
   .task-row {
-    grid-template-columns: 1fr auto;
-    grid-template-rows: auto auto;
-    gap: var(--space-2xs) var(--space-m);
-    padding: var(--space-s) var(--space-l);
+    grid-template-columns: 1fr 20px;
+    grid-template-rows: auto;
+    padding: var(--space-s) var(--space-m);
+    column-gap: var(--space-s);
   }
   .task-row__title-col { grid-column: 1; grid-row: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-  .task-row__actions { grid-column: 2; grid-row: 1 / -1; align-self: center; min-width: 4.5rem; justify-self: end; }
-  .task-row__chips {
+  .task-row__chevron { grid-column: 2; grid-row: 1; }
+  .task-row__actions { display: none; }
+  /* Hide chips on mobile collapsed — shown in expanded panel */
+  .task-row__chips { display: none !important; }
+  .task-row__due { font: var(--text-caption); color: var(--color-fg-tertiary); }
+  .task-row__status { display: none; }
+  .task-expanded { padding: var(--space-s) var(--space-m) var(--space-m); background: var(--color-bg-secondary); }
+
+  /* Chevron indicator */
+  .task-row__chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-fg-disabled);
+    font-size: 18px;
+    transition: transform var(--duration-fast) var(--easing-out);
+  }
+
+  .task-row--m-expanded .task-row__chevron {
+    transform: rotate(180deg);
+  }
+
+  /* Expanded meta badges on mobile */
+  .task-expanded__meta {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2xs);
-    grid-column: 1;
-    grid-row: 2;
     align-items: center;
+    padding-bottom: var(--space-s);
+    margin-bottom: var(--space-s);
+    border-bottom: 1px solid var(--color-border-subtle);
   }
-  .task-row__due { font: var(--text-caption); color: var(--color-fg-tertiary); }
-  .task-expanded { padding-left: var(--space-m); }
+  .task-expanded__due-chip {
+    font: var(--text-label-sm);
+    color: var(--color-fg-secondary);
+    background: var(--color-bg-tertiary);
+    padding: 2px var(--space-s);
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+  }
+  .task-expanded__assignee-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    font: var(--text-label-sm);
+    color: var(--color-fg-secondary);
+    background: var(--color-bg-tertiary);
+    padding: 2px var(--space-s) 2px 2px;
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+  }
+  .task-expanded__quick-actions {
+    display: flex;
+    gap: var(--space-2xs);
+    padding-bottom: var(--space-xs);
+  }
+  .task-expanded__quick-actions :deep(.sbutton) {
+    font: var(--text-caption) !important;
+    font-weight: var(--font-weight-medium) !important;
+    padding: var(--space-2xs) var(--space-s) !important;
+    min-height: 0 !important;
+    height: auto !important;
+    border-radius: var(--radius-s) !important;
+    border: 1px solid var(--color-border-default) !important;
+    background-color: var(--color-bg-tertiary) !important;
+    color: var(--color-fg-secondary) !important;
+  }
 }
 </style>

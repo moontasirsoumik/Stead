@@ -16,6 +16,7 @@ import ConfirmDialog from '@/components/feedback/ConfirmDialog.vue'
 import FormDrawer from '@/components/forms/FormDrawer.vue'
 import FormField from '@/components/forms/FormField.vue'
 import FormSection from '@/components/forms/FormSection.vue'
+import { useMobileExpand } from '@/composables/useMobileExpand'
 import { useDocumentsStore } from '@/stores/documents.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { useAppStore } from '@/stores/app.store'
@@ -26,6 +27,8 @@ import type { DocType } from '@/models/enums'
 const documentsStore = useDocumentsStore()
 const authStore = useAuthStore()
 const appStore = useAppStore()
+
+const { mobileExpandedId, handleRowClick } = useMobileExpand()
 
 const search = ref('')
 const typeFilter = ref('')
@@ -247,28 +250,47 @@ onMounted(async () => {
         <span class="doc-table__th doc-table__th--right">Ref #</span>
         <span class="doc-table__th doc-table__th--right">Actions</span>
       </div>
-      <div v-for="doc in filteredItems" :key="doc.id" class="doc-row" role="listitem" @click="openEditDrawer(doc)">
-        <div class="doc-row__name-col">
-          <span class="doc-row__title">{{ doc.title }}</span>
-          <span v-if="doc.issuer" class="doc-row__issuer">{{ doc.issuer }}</span>
-        </div>
-        <div class="doc-row__chips">
-          <div class="doc-row__type">
-            <SBadge :variant="docTypeVariant(doc.doc_type)" size="sm">{{ doc.doc_type }}</SBadge>
+      <div v-for="doc in filteredItems" :key="doc.id" class="doc-entry">
+        <div class="doc-row" :class="{ 'doc-row--m-expanded': mobileExpandedId === doc.id }" role="listitem" @click="handleRowClick(doc.id, () => openEditDrawer(doc))">
+          <div class="doc-row__name-col">
+            <span class="doc-row__title">{{ doc.title }}</span>
+            <span v-if="doc.issuer" class="doc-row__issuer">{{ doc.issuer }}</span>
           </div>
-          <div class="doc-row__status">
-            <SBadge v-if="expiryStatus(doc) === 'expired'" variant="error" size="sm">Expired</SBadge>
-            <SBadge v-else-if="expiryStatus(doc) === 'expiring'" variant="warning" size="sm">Expiring</SBadge>
-            <SBadge v-else-if="expiryStatus(doc) === 'ok'" variant="success" size="sm">Valid</SBadge>
+          <div class="doc-row__chips">
+            <div class="doc-row__type">
+              <SBadge :variant="docTypeVariant(doc.doc_type)" size="sm">{{ doc.doc_type }}</SBadge>
+            </div>
+            <div class="doc-row__status">
+              <SBadge v-if="expiryStatus(doc) === 'expired'" variant="error" size="sm">Expired</SBadge>
+              <SBadge v-else-if="expiryStatus(doc) === 'expiring'" variant="warning" size="sm">Expiring</SBadge>
+              <SBadge v-else-if="expiryStatus(doc) === 'ok'" variant="success" size="sm">Valid</SBadge>
+            </div>
+            <div v-if="doc.issue_date" class="doc-row__date doc-row__date--issue">{{ formatDate(doc.issue_date) }}</div>
+            <div v-if="doc.expiry_date" class="doc-row__date doc-row__date--expiry">{{ formatDate(doc.expiry_date) }}</div>
+            <div class="doc-row__ref">{{ doc.reference_number ? '#' + doc.reference_number : '' }}</div>
           </div>
-          <div class="doc-row__date">{{ doc.issue_date ? formatDate(doc.issue_date) : '—' }}</div>
-          <div class="doc-row__date">{{ doc.expiry_date ? formatDate(doc.expiry_date) : '—' }}</div>
-          <div class="doc-row__ref">{{ doc.reference_number ? '#' + doc.reference_number : '' }}</div>
+          <div class="doc-row__actions" @click.stop>
+            <SIconButton label="Delete" size="sm" @click="confirmDelete(doc.id)">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 4H12M5 4V2.5H9V4M5.5 6V10.5M8.5 6V10.5M3.5 4L4 11.5H10L10.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </SIconButton>
+          </div>
+          <span class="doc-row__chevron material-symbols-rounded">expand_more</span>
         </div>
-        <div class="doc-row__actions" @click.stop>
-          <SIconButton label="Delete" size="sm" @click="confirmDelete(doc.id)">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 4H12M5 4V2.5H9V4M5.5 6V10.5M8.5 6V10.5M3.5 4L4 11.5H10L10.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-          </SIconButton>
+        <div class="m-detail" :class="{ 'm-detail--open': mobileExpandedId === doc.id }">
+          <div class="m-detail__inner">
+            <div class="m-detail__body">
+              <SBadge :variant="docTypeVariant(doc.doc_type)" size="sm">{{ doc.doc_type }}</SBadge>
+              <SBadge v-if="expiryStatus(doc) === 'expired'" variant="error" size="sm">Expired</SBadge>
+              <SBadge v-else-if="expiryStatus(doc) === 'expiring'" variant="warning" size="sm">Expiring</SBadge>
+              <SBadge v-else-if="expiryStatus(doc) === 'ok'" variant="success" size="sm">Valid</SBadge>
+              <span v-if="doc.issue_date" class="m-detail__chip">Issued {{ formatDate(doc.issue_date) }}</span>
+              <span v-if="doc.expiry_date" class="m-detail__chip">Expires {{ formatDate(doc.expiry_date) }}</span>
+              <span v-if="doc.reference_number" class="m-detail__chip m-detail__chip--mono">{{ doc.reference_number }}</span>
+              <button class="m-detail__edit" @click.stop="openEditDrawer(doc)">
+                <span class="material-symbols-rounded">edit</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -389,12 +411,9 @@ onMounted(async () => {
   min-height: var(--height-row-min);
   padding: 0 var(--space-l);
   gap: var(--space-m);
-  border-bottom: 1px solid var(--color-border-subtle);
   cursor: pointer;
   transition: background-color var(--duration-fast) var(--easing-standard);
 }
-
-.doc-row:last-child { border-bottom: none; }
 .doc-row:hover { background: var(--color-bg-tertiary); }
 
 .doc-row__name-col {
@@ -449,26 +468,88 @@ onMounted(async () => {
   display: contents;
 }
 
+.doc-entry {
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.doc-entry:last-child { border-bottom: none; }
+.doc-row__chevron { display: none; }
+.m-detail { display: none; }
+
 @media (max-width: 640px) {
+  .alerts-section { gap: var(--space-2xs); margin-bottom: var(--space-m); }
+  .alert-card { padding: var(--space-xs) var(--space-m); border-radius: var(--radius-m); gap: var(--space-s); }
+  .alert-card__icon { display: none; }
+  .alert-card__text { font: var(--text-caption); font-weight: var(--font-weight-medium); }
+  .alert-card__date { display: block; margin-left: 0; margin-top: 1px; }
+
   .doc-table__header { display: none; }
   .doc-row {
-    grid-template-columns: 1fr 36px;
-    grid-template-rows: auto auto;
-    padding: var(--space-s) var(--space-l);
-    row-gap: var(--space-2xs);
-    column-gap: var(--space-m);
+    grid-template-columns: 1fr 20px;
+    grid-template-rows: auto;
+    padding: var(--space-s) var(--space-m);
+    column-gap: var(--space-s);
   }
   .doc-row__name-col { grid-column: 1; grid-row: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-  .doc-row__actions { grid-column: 2; grid-row: 1 / -1; align-self: center; justify-self: center; }
-  .doc-row__chips {
+  .doc-row__chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-column: 2;
+    grid-row: 1;
+    color: var(--color-fg-disabled);
+    font-size: 18px;
+    transition: transform var(--duration-fast) var(--easing-out);
+  }
+  .doc-row--m-expanded .doc-row__chevron { transform: rotate(180deg); }
+  .doc-row__chips { display: none; }
+  .doc-row__actions { display: none; }
+  .doc-row__ref { display: none; }
+
+  .m-detail {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--duration-normal) var(--easing-out);
+  }
+  .m-detail--open { grid-template-rows: 1fr; }
+  .m-detail__inner { overflow: hidden; }
+  .m-detail__body {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2xs);
-    grid-column: 1;
-    grid-row: 2;
     align-items: center;
+    gap: var(--space-2xs);
+    padding: var(--space-xs) var(--space-m);
+    border-top: 1px solid var(--color-border-subtle);
+    background: var(--color-bg-secondary);
   }
-  .doc-row__date { font: var(--text-caption); color: var(--color-fg-tertiary); }
-  .doc-row__ref { font: var(--text-caption); color: var(--color-fg-tertiary); }
+  .m-detail__chip {
+    font: var(--text-label-sm);
+    color: var(--color-fg-secondary);
+    background: var(--color-bg-tertiary);
+    padding: 2px var(--space-s);
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+  }
+  .m-detail__edit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    margin-left: auto;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--color-border-default);
+    background: var(--color-bg-elevated);
+    color: var(--color-fg-tertiary);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color var(--duration-fast) var(--easing-standard),
+                color var(--duration-fast) var(--easing-standard);
+  }
+  .m-detail__edit:active { background: var(--color-bg-tertiary); color: var(--color-fg-primary); }
+  .m-detail__edit .material-symbols-rounded { font-size: 15px; }
+  .m-detail__chip--mono {
+    font-family: var(--font-mono);
+    color: var(--color-fg-tertiary);
+  }
 }
 </style>

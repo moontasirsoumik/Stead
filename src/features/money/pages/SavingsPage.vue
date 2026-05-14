@@ -15,6 +15,7 @@ import FormDrawer from '@/components/forms/FormDrawer.vue'
 import FormField from '@/components/forms/FormField.vue'
 import FormSection from '@/components/forms/FormSection.vue'
 import MonthSummary from '@/features/money/components/MonthSummary.vue'
+import { useMobileExpand } from '@/composables/useMobileExpand'
 import { useSavingsStore } from '@/stores/savings.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { useAppStore } from '@/stores/app.store'
@@ -27,6 +28,7 @@ const savingsStore = useSavingsStore()
 const authStore = useAuthStore()
 const appStore = useAppStore()
 const householdStore = useHouseholdStore()
+const { mobileExpandedId, handleRowClick } = useMobileExpand()
 const goalDrawerOpen = ref(false)
 const contribDrawerOpen = ref(false)
 const editingGoalId = ref<string | null>(null)
@@ -257,7 +259,7 @@ onMounted(async () => {
         class="goal-block page-enter"
         :style="{ '--stagger': 3 + idx }"
       >
-        <div class="goal-row" @click="openEditGoal(goal)">
+        <div class="goal-row" :class="{ 'goal-row--m-expanded': mobileExpandedId === goal.id }" @click="handleRowClick(goal.id, () => openEditGoal(goal))">
           <div class="goal-row__name">{{ goal.name }}</div>
           <div class="goal-row__priority">
             <SBadge :variant="priorityVariant(goal.priority)" size="sm">{{ goal.priority }}</SBadge>
@@ -275,6 +277,24 @@ onMounted(async () => {
           <div class="goal-row__chips">
             <div class="goal-row__target">{{ formatCents(goal.target_amount) }}</div>
             <div class="goal-row__deadline">{{ goal.deadline ? formatDate(goal.deadline) : '—' }}</div>
+          </div>
+          <span class="goal-row__chevron material-symbols-rounded">expand_more</span>
+        </div>
+        <div class="m-detail" :class="{ 'm-detail--open': mobileExpandedId === goal.id }">
+          <div class="m-detail__inner">
+            <div class="m-detail__body">
+              <div class="m-detail__bar-row">
+                <div class="goal-bar"><div class="goal-bar__fill" :style="{ width: savingsStore.goalProgress(goal.id) + '%' }" /></div>
+                <span class="m-detail__pct">{{ Math.round(savingsStore.goalProgress(goal.id)) }}%</span>
+              </div>
+              <SBadge :variant="priorityVariant(goal.priority)" size="sm">{{ goal.priority }}</SBadge>
+              <SBadge :variant="statusVariant(goal.status)" size="sm">{{ goal.status }}</SBadge>
+              <span v-if="goal.target_amount" class="m-detail__chip">Target {{ formatCents(goal.target_amount) }}</span>
+              <span v-if="goal.deadline" class="m-detail__chip">{{ formatDate(goal.deadline) }}</span>
+              <button class="m-detail__edit" @click.stop="openEditGoal(goal)">
+                <span class="material-symbols-rounded">edit</span>
+              </button>
+            </div>
           </div>
         </div>
         <div class="goal-actions">
@@ -425,6 +445,7 @@ onMounted(async () => {
 }
 
 .goal-row:hover { background: var(--color-bg-tertiary); }
+.goal-row:active { transform: scale(0.98); transition: transform var(--duration-fast) var(--easing-standard); }
 
 .goal-row__name {
   font: var(--text-body-2);
@@ -561,32 +582,92 @@ onMounted(async () => {
   display: none;
 }
 
-@media (max-width: 768px) {
+.goal-row__chevron { display: none; }
+.m-detail { display: none; }
+
+@media (max-width: 640px) {
   :deep(.pageheader__actions) { display: none; }
   .money-mobile-actions { display: flex; margin-bottom: var(--space-m); }
   .goals-table__header { display: none; }
+
   .goal-row {
-    grid-template-columns: 1fr 5.5rem;
-    grid-template-rows: auto auto auto auto;
-    padding: var(--space-s) var(--space-l);
-    row-gap: var(--space-2xs);
-    column-gap: var(--space-m);
+    grid-template-columns: 1fr 5.5rem 20px;
+    grid-template-rows: auto;
+    padding: var(--space-s) var(--space-m);
+    column-gap: var(--space-s);
   }
   .goal-row__name { grid-column: 1; grid-row: 1; }
-  .goal-row__saved { grid-column: 2; grid-row: 1 / -1; align-self: center; text-align: right; }
-  .goal-row__priority { grid-column: 1; grid-row: 2; justify-self: start; }
-  .goal-row__status { grid-column: 1; grid-row: 2; justify-self: start; margin-left: 4rem; }
-  .goal-row__progress { grid-column: 1; grid-row: 3; }
-  .goal-row__chips {
+  .goal-row__saved { grid-column: 2; grid-row: 1; align-self: center; text-align: right; }
+  .goal-row__chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-column: 3;
+    grid-row: 1;
+    color: var(--color-fg-disabled);
+    font-size: 18px;
+    transition: transform var(--duration-fast) var(--easing-out);
+  }
+  .goal-row--m-expanded .goal-row__chevron { transform: rotate(180deg); }
+  .goal-row__priority { display: none; }
+  .goal-row__status { display: none; }
+  .goal-row__progress { display: none; }
+  .goal-row__chips { display: none; }
+
+  .m-detail {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--duration-normal) var(--easing-out);
+  }
+  .m-detail--open { grid-template-rows: 1fr; }
+  .m-detail__inner { overflow: hidden; }
+  .m-detail__body {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2xs);
     align-items: center;
-    grid-column: 1;
-    grid-row: 4;
+    gap: var(--space-2xs);
+    padding: var(--space-xs) var(--space-m);
+    border-top: 1px solid var(--color-border-subtle);
+    background: var(--color-bg-secondary);
   }
-  .goal-row__target { font: var(--text-caption); color: var(--color-fg-tertiary); text-align: left; }
-  .goal-row__target::before { content: 'of '; }
-  .goal-row__deadline { font: var(--text-caption); color: var(--color-fg-tertiary); text-align: left; }
+  .m-detail__bar-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    flex-basis: 100%;
+  }
+  .m-detail__bar-row .goal-bar { flex: 1; }
+  .m-detail__pct {
+    font: var(--text-label-sm);
+    color: var(--color-fg-tertiary);
+    white-space: nowrap;
+  }
+  .m-detail__chip {
+    font: var(--text-label-sm);
+    color: var(--color-fg-secondary);
+    background: var(--color-bg-tertiary);
+    padding: 2px var(--space-s);
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+  }
+  .m-detail__edit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    margin-left: auto;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--color-border-default);
+    background: var(--color-bg-elevated);
+    color: var(--color-fg-tertiary);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color var(--duration-fast) var(--easing-standard),
+                color var(--duration-fast) var(--easing-standard);
+  }
+  .m-detail__edit:active { background: var(--color-bg-tertiary); color: var(--color-fg-primary); }
+  .m-detail__edit .material-symbols-rounded { font-size: 15px; }
+  .goal-actions { padding: var(--space-2xs) var(--space-m); }
 }
 </style>

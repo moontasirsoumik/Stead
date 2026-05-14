@@ -22,10 +22,13 @@ import { formatCents } from '@/utils/format'
 import { EXPENSE_CATEGORIES } from '@/constants/categories'
 import type { Bill } from '@/models/bill.model'
 import type { BillStatus } from '@/models/enums'
+import { useMobileExpand } from '@/composables/useMobileExpand'
 
 const billsStore = useBillsStore()
 const authStore = useAuthStore()
 const householdStore = useHouseholdStore()
+
+const { mobileExpandedId, handleRowClick } = useMobileExpand()
 
 const drawerOpen = ref(false)
 const editingId = ref<string | null>(null)
@@ -213,26 +216,42 @@ onMounted(async () => {
       <div
         v-for="(bill, idx) in billsStore.items"
         :key="bill.id"
-        class="bill-row page-enter"
+        class="bill-entry page-enter"
         :style="{ '--stagger': 3 + idx }"
-        @click="openEdit(bill)"
       >
-        <div class="bill-row__name">
-          <span class="bill-row__title">{{ bill.name }}</span>
-          <span class="bill-row__meta">Day {{ bill.due_day }}</span>
+        <div class="bill-row" :class="{ 'bill-row--m-expanded': mobileExpandedId === bill.id }" @click="handleRowClick(bill.id, () => openEdit(bill))">
+          <div class="bill-row__name">
+            <span class="bill-row__title">{{ bill.name }}</span>
+            <span class="bill-row__meta">Day {{ bill.due_day }}</span>
+          </div>
+          <div class="bill-row__chips">
+            <div class="bill-row__status">
+              <SBadge :variant="statusVariant(bill.status)" size="sm">{{ bill.status }}</SBadge>
+            </div>
+            <div class="bill-row__freq">
+              <SBadge variant="default" size="sm">{{ bill.frequency }}</SBadge>
+            </div>
+            <div class="bill-row__autopay">
+              <SBadge v-if="bill.auto_pay" variant="info" size="sm">Auto-pay</SBadge>
+            </div>
+          </div>
+          <div class="bill-row__amount">{{ formatCents(bill.amount) }}</div>
+          <span class="bill-row__chevron material-symbols-rounded">expand_more</span>
         </div>
-        <div class="bill-row__chips">
-          <div class="bill-row__status">
-            <SBadge :variant="statusVariant(bill.status)" size="sm">{{ bill.status }}</SBadge>
-          </div>
-          <div class="bill-row__freq">
-            <SBadge variant="default" size="sm">{{ bill.frequency }}</SBadge>
-          </div>
-          <div class="bill-row__autopay">
-            <SBadge v-if="bill.auto_pay" variant="info" size="sm">Auto-pay</SBadge>
+        <div class="m-detail" :class="{ 'm-detail--open': mobileExpandedId === bill.id }">
+          <div class="m-detail__inner">
+            <div class="m-detail__body">
+              <SBadge :variant="statusVariant(bill.status)" size="sm">{{ bill.status }}</SBadge>
+              <SBadge variant="default" size="sm">{{ bill.frequency }}</SBadge>
+              <SBadge v-if="bill.auto_pay" variant="info" size="sm">Auto-pay</SBadge>
+              <span v-if="bill.due_day" class="m-detail__chip">Due {{ bill.due_day }}</span>
+              <span v-if="bill.note" class="m-detail__note">{{ bill.note }}</span>
+              <button class="m-detail__edit" @click.stop="openEdit(bill)">
+                <span class="material-symbols-rounded">edit</span>
+              </button>
+            </div>
           </div>
         </div>
-        <div class="bill-row__amount">{{ formatCents(bill.amount) }}</div>
       </div>
     </div>
 
@@ -336,6 +355,11 @@ onMounted(async () => {
 .bills-table__th--center { text-align: center; }
 .bills-table__th--right { text-align: right; }
 
+.bill-entry {
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.bill-entry:last-child { border-bottom: none; }
+
 .bill-row {
   display: grid;
   grid-template-columns: 1fr 100px 100px 100px 110px;
@@ -343,13 +367,11 @@ onMounted(async () => {
   min-height: var(--height-row-min);
   padding: 0 var(--space-l);
   gap: var(--space-m);
-  border-bottom: 1px solid var(--color-border-subtle);
   cursor: pointer;
   transition: background-color var(--duration-fast) var(--easing-standard);
 }
-
-.bill-row:last-child { border-bottom: none; }
 .bill-row:hover { background: var(--color-bg-tertiary); }
+.bill-row:active { transform: scale(0.98); transition: transform var(--duration-fast) var(--easing-standard); }
 
 .bill-row__name {
   display: flex;
@@ -394,6 +416,9 @@ onMounted(async () => {
   display: contents;
 }
 
+.bill-row__chevron { display: none; }
+.m-detail { display: none; }
+
 .money-mobile-actions {
   display: none;
 }
@@ -402,22 +427,78 @@ onMounted(async () => {
   :deep(.pageheader__actions) { display: none; }
   .money-mobile-actions { display: flex; margin-bottom: var(--space-m); }
   .bills-table__header { display: none; }
+
   .bill-row {
-    grid-template-columns: 1fr 5.5rem;
-    grid-template-rows: auto auto;
-    padding: var(--space-s) var(--space-l);
-    row-gap: var(--space-2xs);
-    column-gap: var(--space-m);
+    grid-template-columns: 1fr 5.5rem 20px;
+    grid-template-rows: auto;
+    padding: var(--space-s) var(--space-m);
+    column-gap: var(--space-s);
   }
   .bill-row__name { grid-column: 1; grid-row: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-  .bill-row__amount { grid-column: 2; grid-row: 1 / -1; align-self: center; text-align: right; }
-  .bill-row__chips {
+  .bill-row__amount { grid-column: 2; grid-row: 1; align-self: center; text-align: right; }
+  .bill-row__chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-column: 3;
+    grid-row: 1;
+    color: var(--color-fg-disabled);
+    font-size: 18px;
+    transition: transform var(--duration-fast) var(--easing-out);
+  }
+  .bill-row--m-expanded .bill-row__chevron {
+    transform: rotate(180deg);
+  }
+  .bill-row__chips { display: none; }
+
+  .m-detail {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--duration-normal) var(--easing-out);
+  }
+  .m-detail--open { grid-template-rows: 1fr; }
+  .m-detail__inner { overflow: hidden; }
+  .m-detail__body {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2xs);
-    grid-column: 1;
-    grid-row: 2;
     align-items: center;
+    gap: var(--space-2xs);
+    padding: var(--space-xs) var(--space-m);
+    border-top: 1px solid var(--color-border-subtle);
+    background: var(--color-bg-secondary);
   }
+  .m-detail__chip {
+    font: var(--text-label-sm);
+    color: var(--color-fg-secondary);
+    background: var(--color-bg-tertiary);
+    padding: 2px var(--space-s);
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+  }
+  .m-detail__note {
+    font: var(--text-caption);
+    color: var(--color-fg-tertiary);
+    font-style: italic;
+    flex-basis: 100%;
+    line-height: 1.4;
+  }
+  .m-detail__edit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    margin-left: auto;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--color-border-default);
+    background: var(--color-bg-elevated);
+    color: var(--color-fg-tertiary);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color var(--duration-fast) var(--easing-standard),
+                color var(--duration-fast) var(--easing-standard);
+  }
+  .m-detail__edit:active { background: var(--color-bg-tertiary); color: var(--color-fg-primary); }
+  .m-detail__edit .material-symbols-rounded { font-size: 15px; }
 }
 </style>

@@ -16,6 +16,7 @@ import FormDrawer from '@/components/forms/FormDrawer.vue'
 import FormField from '@/components/forms/FormField.vue'
 import FormSection from '@/components/forms/FormSection.vue'
 import ConfirmDialog from '@/components/feedback/ConfirmDialog.vue'
+import { useMobileExpand } from '@/composables/useMobileExpand'
 import { useWishlistStore } from '@/stores/wishlist.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { useAppStore } from '@/stores/app.store'
@@ -31,6 +32,7 @@ const wishlistStore = useWishlistStore()
 const authStore = useAuthStore()
 const appStore = useAppStore()
 const householdStore = useHouseholdStore()
+const { mobileExpandedId, handleRowClick } = useMobileExpand()
 
 const search = ref('')
 const statusFilter = ref('')
@@ -273,26 +275,36 @@ onMounted(async () => {
           <span class="wish-table__th wish-table__th--center">Status</span>
           <span class="wish-table__th wish-table__th--right">Price</span>
         </div>
-        <div
-          v-for="item in filteredItems"
-          :key="item.id"
-          class="wish-row"
-          :class="{ 'wish-row--dimmed': isItemDimmed(item) }"
-          @click="openEditDrawer(item)"
-        >
-          <div class="wish-row__name">
-            <span class="wish-row__title">{{ item.name }}</span>
-            <span v-if="item.category" class="wish-row__cat">{{ item.category }}</span>
+        <div v-for="item in filteredItems" :key="item.id" class="wish-entry">
+          <div class="wish-row" :class="[{ 'wish-row--m-expanded': mobileExpandedId === item.id }, { 'wish-row--dimmed': isItemDimmed(item) }]" @click="handleRowClick(item.id, () => openEditDrawer(item))">
+            <div class="wish-row__name">
+              <span class="wish-row__title">{{ item.name }}</span>
+              <span v-if="item.category" class="wish-row__cat">{{ item.category }}</span>
+            </div>
+            <div class="wish-row__chips">
+              <div class="wish-row__priority">
+                <SBadge :variant="priorityVariant(item.priority)" size="sm">{{ item.priority }}</SBadge>
+              </div>
+              <div class="wish-row__status">
+                <SBadge :variant="statusVariant(item.status)" size="sm">{{ item.status }}</SBadge>
+              </div>
+            </div>
+            <div class="wish-row__price">{{ formatCents(item.price ?? 0) }}</div>
+            <span class="wish-row__chevron material-symbols-rounded">expand_more</span>
           </div>
-          <div class="wish-row__chips">
-            <div class="wish-row__priority">
+        <div class="m-detail" :class="{ 'm-detail--open': mobileExpandedId === item.id }">
+          <div class="m-detail__inner">
+            <div class="m-detail__body">
               <SBadge :variant="priorityVariant(item.priority)" size="sm">{{ item.priority }}</SBadge>
-            </div>
-            <div class="wish-row__status">
               <SBadge :variant="statusVariant(item.status)" size="sm">{{ item.status }}</SBadge>
+              <span v-if="item.category" class="m-detail__chip">{{ item.category }}</span>
+              <a v-if="item.url" :href="item.url" target="_blank" rel="noopener" class="m-detail__link" @click.stop>View ↗</a>
+              <button class="m-detail__edit" @click.stop="openEditDrawer(item)">
+                <span class="material-symbols-rounded">edit</span>
+              </button>
             </div>
           </div>
-          <div class="wish-row__price">{{ formatCents(item.price ?? 0) }}</div>
+        </div>
         </div>
       </div>
     </template>
@@ -385,6 +397,11 @@ onMounted(async () => {
 .wish-table__th--center { text-align: center; }
 .wish-table__th--right { text-align: right; }
 
+.wish-entry {
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.wish-entry:last-child { border-bottom: none; }
+
 .wish-row {
   display: grid;
   grid-template-columns: 1fr 90px 90px 110px;
@@ -392,12 +409,12 @@ onMounted(async () => {
   min-height: var(--height-row-min);
   padding: 0 var(--space-l);
   gap: var(--space-m);
-  border-bottom: 1px solid var(--color-border-subtle);
   cursor: pointer;
   transition: background-color var(--duration-fast) var(--easing-standard);
 }
 
-.wish-row:last-child { border-bottom: none; }
+.wish-row__chevron { display: none; }
+.m-detail { display: none; }
 .wish-row:hover { background: var(--color-bg-tertiary); }
 .wish-row--dimmed { opacity: 0.5; }
 
@@ -445,21 +462,76 @@ onMounted(async () => {
 @media (max-width: 640px) {
   .wish-table__header { display: none; }
   .wish-row {
-    grid-template-columns: 1fr 5.5rem;
-    grid-template-rows: auto auto;
-    padding: var(--space-s) var(--space-l);
-    row-gap: var(--space-2xs);
-    column-gap: var(--space-m);
+    grid-template-columns: 1fr 5.5rem 20px;
+    grid-template-rows: auto;
+    padding: var(--space-s) var(--space-m);
+    column-gap: var(--space-s);
   }
   .wish-row__name { grid-column: 1; grid-row: 1; min-width: 0; }
-  .wish-row__price { grid-column: 2; grid-row: 1 / -1; align-self: center; text-align: right; }
-  .wish-row__chips {
+  .wish-row__price { grid-column: 2; grid-row: 1; align-self: center; text-align: right; }
+  .wish-row__chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-column: 3;
+    grid-row: 1;
+    color: var(--color-fg-disabled);
+    font-size: 18px;
+    transition: transform var(--duration-fast) var(--easing-out);
+  }
+  .wish-row--m-expanded .wish-row__chevron { transform: rotate(180deg); }
+  .wish-row__chips { display: none; }
+
+  .m-detail {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--duration-normal) var(--easing-out);
+  }
+  .m-detail--open { grid-template-rows: 1fr; }
+  .m-detail__inner { overflow: hidden; }
+  .m-detail__body {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2xs);
-    grid-column: 1;
-    grid-row: 2;
     align-items: center;
+    gap: var(--space-2xs);
+    padding: var(--space-xs) var(--space-m);
+    border-top: 1px solid var(--color-border-subtle);
+    background: var(--color-bg-secondary);
+  }
+  .m-detail__chip {
+    font: var(--text-label-sm);
+    color: var(--color-fg-secondary);
+    background: var(--color-bg-tertiary);
+    padding: 2px var(--space-s);
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+  }
+  .m-detail__edit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    margin-left: auto;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--color-border-default);
+    background: var(--color-bg-elevated);
+    color: var(--color-fg-tertiary);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color var(--duration-fast) var(--easing-standard),
+                color var(--duration-fast) var(--easing-standard);
+  }
+  .m-detail__edit:active { background: var(--color-bg-tertiary); color: var(--color-fg-primary); }
+  .m-detail__edit .material-symbols-rounded { font-size: 15px; }
+  .m-detail__link {
+    font: var(--text-label-sm);
+    color: var(--color-fg-brand);
+    background: var(--color-bg-tertiary);
+    padding: 2px var(--space-s);
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+    text-decoration: none;
   }
 }
 </style>

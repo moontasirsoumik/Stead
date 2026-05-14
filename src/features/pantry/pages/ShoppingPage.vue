@@ -17,6 +17,7 @@ import FormField from '@/components/forms/FormField.vue'
 import FormSection from '@/components/forms/FormSection.vue'
 import ConfirmDialog from '@/components/feedback/ConfirmDialog.vue'
 import PantryTabs from '@/features/pantry/components/PantryTabs.vue'
+import { useMobileExpand } from '@/composables/useMobileExpand'
 import { useShoppingStore } from '@/stores/shopping.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { useHouseholdStore } from '@/stores/household.store'
@@ -26,6 +27,7 @@ import type { GroceryStatus, TaskPriority } from '@/models/enums'
 const shoppingStore = useShoppingStore()
 const authStore = useAuthStore()
 const householdStore = useHouseholdStore()
+const { mobileExpandedId, handleRowClick } = useMobileExpand()
 
 const search = ref('')
 const categoryFilter = ref('')
@@ -317,34 +319,48 @@ onMounted(async () => {
             <span class="shop-table__th shop-table__th--center">Assignee</span>
             <span class="shop-table__th shop-table__th--right">Actions</span>
           </div>
-          <div
-            v-for="item in filteredItems"
-            :key="item.id"
-            class="shop-row"
-            @click="openEditDrawer(item)"
-          >
-            <div class="shop-row__name">
-              <span class="shop-row__name-text">{{ item.name }}</span>
-              <span v-if="item.category" class="shop-row__category-tag">{{ item.category }}</span>
+          <div v-for="item in filteredItems" :key="item.id" class="shop-entry">
+            <div
+              class="shop-row"
+              :class="{ 'shop-row--m-expanded': mobileExpandedId === item.id }"
+              @click="handleRowClick(item.id, () => openEditDrawer(item))"
+            >
+              <div class="shop-row__name">
+                <span class="shop-row__name-text">{{ item.name }}</span>
+                <span v-if="item.category" class="shop-row__category-tag">{{ item.category }}</span>
+              </div>
+              <div class="shop-row__chips">
+                <div class="shop-row__priority">
+                  <SBadge v-if="item.priority !== 'medium'" :variant="priorityVariant(item.priority)" size="sm">{{ item.priority }}</SBadge>
+                </div>
+                <div class="shop-row__qty">
+                  <span v-if="item.quantity > 1 || item.unit">{{ item.quantity }}<template v-if="item.unit"> {{ item.unit }}</template></span>
+                </div>
+                <div class="shop-row__assignee">
+                  <SAvatar v-if="getMemberName(item.assigned_to)" :name="getMemberName(item.assigned_to)!" size="sm" />
+                </div>
+              </div>
+              <div class="shop-row__actions" @click.stop>
+                <button class="shop-row__action-btn shop-row__action-btn--done" :aria-label="'Mark ' + item.name + ' done'" @click="handleMarkDone(item.id)">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+                <button class="shop-row__action-btn shop-row__action-btn--delete" :aria-label="'Remove ' + item.name" @click="confirmDelete(item.id)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                </button>
+              </div>
+              <span class="shop-row__chevron material-symbols-rounded">expand_more</span>
             </div>
-            <div class="shop-row__chips">
-              <div class="shop-row__priority">
-                <SBadge v-if="item.priority !== 'medium'" :variant="priorityVariant(item.priority)" size="sm">{{ item.priority }}</SBadge>
+            <div class="m-detail" :class="{ 'm-detail--open': mobileExpandedId === item.id }">
+              <div class="m-detail__inner">
+                <div class="m-detail__body">
+                  <SBadge v-if="item.priority !== 'medium'" :variant="priorityVariant(item.priority)" size="sm">{{ item.priority }}</SBadge>
+                  <span class="m-detail__chip">Qty: {{ item.quantity }}<template v-if="item.unit"> {{ item.unit }}</template></span>
+                  <span v-if="getMemberName(item.assigned_to)" class="m-detail__chip">{{ getMemberName(item.assigned_to) }}</span>
+                  <button class="m-detail__edit" @click.stop="openEditDrawer(item)">
+                    <span class="material-symbols-rounded">edit</span>
+                  </button>
+                </div>
               </div>
-              <div class="shop-row__qty">
-                <span v-if="item.quantity > 1 || item.unit">{{ item.quantity }}<template v-if="item.unit"> {{ item.unit }}</template></span>
-              </div>
-              <div class="shop-row__assignee">
-                <SAvatar v-if="getMemberName(item.assigned_to)" :name="getMemberName(item.assigned_to)!" size="sm" />
-              </div>
-            </div>
-            <div class="shop-row__actions" @click.stop>
-              <button class="shop-row__action-btn shop-row__action-btn--done" :aria-label="'Mark ' + item.name + ' done'" @click="handleMarkDone(item.id)">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              </button>
-              <button class="shop-row__action-btn shop-row__action-btn--delete" :aria-label="'Remove ' + item.name" @click="confirmDelete(item.id)">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-              </button>
             </div>
           </div>
         </div>
@@ -368,36 +384,51 @@ onMounted(async () => {
                 <span class="shop-table__th shop-table__th--center">Bought by</span>
                 <span class="shop-table__th shop-table__th--right">Actions</span>
               </div>
-              <div
-                v-for="item in group"
-                :key="item.id"
-                class="shop-row shop-row--archived"
-              >
-                <div class="shop-row__name">
-                  <span class="shop-row__name-text">{{ item.name }}</span>
-                  <span v-if="item.category" class="shop-row__category-tag">{{ item.category }}</span>
+              <div v-for="item in group" :key="item.id" class="shop-entry">
+                <div
+                  class="shop-row shop-row--archived"
+                  :class="{ 'shop-row--m-expanded': mobileExpandedId === item.id }"
+                  @click="handleRowClick(item.id, () => openEditDrawer(item))"
+                >
+                  <div class="shop-row__name">
+                    <span class="shop-row__name-text">{{ item.name }}</span>
+                    <span v-if="item.category" class="shop-row__category-tag">{{ item.category }}</span>
+                  </div>
+                  <div class="shop-row__chips">
+                    <div class="shop-row__qty">
+                      <span v-if="item.quantity > 1 || item.unit">{{ item.quantity }}<template v-if="item.unit"> {{ item.unit }}</template></span>
+                      <span v-else class="shop-row__qty-dash">—</span>
+                    </div>
+                    <div class="shop-row__assignee shop-row__assignee--archive">
+                      <SAvatar v-if="getMemberName(item.assigned_to)" :name="getMemberName(item.assigned_to)!" size="sm" />
+                      <span v-else class="shop-row__unassigned">—</span>
+                    </div>
+                    <div class="shop-row__done-by">
+                      <SAvatar v-if="getDoneByName(item.done_by)" :name="getDoneByName(item.done_by)!" size="sm" />
+                      <span v-else class="shop-row__unassigned">—</span>
+                    </div>
+                  </div>
+                  <div class="shop-row__archive-actions" @click.stop>
+                    <button class="shop-row__action-btn shop-row__action-btn--undo" title="Move back to list" @click="handleUnmarkDone(item.id)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+                    </button>
+                    <button class="shop-row__action-btn shop-row__action-btn--delete" :aria-label="'Delete ' + item.name" @click="confirmDelete(item.id)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                    </button>
+                  </div>
+                  <span class="shop-row__chevron material-symbols-rounded">expand_more</span>
                 </div>
-                <div class="shop-row__chips">
-                  <div class="shop-row__qty">
-                    <span v-if="item.quantity > 1 || item.unit">{{ item.quantity }}<template v-if="item.unit"> {{ item.unit }}</template></span>
-                    <span v-else class="shop-row__qty-dash">—</span>
+                <div class="m-detail" :class="{ 'm-detail--open': mobileExpandedId === item.id }">
+                  <div class="m-detail__inner">
+                    <div class="m-detail__body">
+                      <span class="m-detail__chip">Qty: {{ item.quantity }}<template v-if="item.unit"> {{ item.unit }}</template></span>
+                      <span v-if="getMemberName(item.assigned_to)" class="m-detail__chip">{{ getMemberName(item.assigned_to) }}</span>
+                      <span v-if="getDoneByName(item.done_by)" class="m-detail__chip">Bought by {{ getDoneByName(item.done_by) }}</span>
+                      <button class="m-detail__edit" @click.stop="openEditDrawer(item)">
+                        <span class="material-symbols-rounded">edit</span>
+                      </button>
+                    </div>
                   </div>
-                  <div class="shop-row__assignee shop-row__assignee--archive">
-                    <SAvatar v-if="getMemberName(item.assigned_to)" :name="getMemberName(item.assigned_to)!" size="sm" />
-                    <span v-else class="shop-row__unassigned">—</span>
-                  </div>
-                  <div class="shop-row__done-by">
-                    <SAvatar v-if="getDoneByName(item.done_by)" :name="getDoneByName(item.done_by)!" size="sm" />
-                    <span v-else class="shop-row__unassigned">—</span>
-                  </div>
-                </div>
-                <div class="shop-row__archive-actions" @click.stop>
-                  <button class="shop-row__action-btn shop-row__action-btn--undo" title="Move back to list" @click="handleUnmarkDone(item.id)">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
-                  </button>
-                  <button class="shop-row__action-btn shop-row__action-btn--delete" :aria-label="'Delete ' + item.name" @click="confirmDelete(item.id)">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-                  </button>
                 </div>
               </div>
             </div>
@@ -504,6 +535,11 @@ onMounted(async () => {
 }
 
 /* ── Active shopping row ── */
+.shop-entry {
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.shop-entry:last-child { border-bottom: none; }
+
 .shop-row {
   display: grid;
   grid-template-columns: 1fr 80px 60px 72px 80px;
@@ -511,7 +547,6 @@ onMounted(async () => {
   min-height: var(--height-row-min);
   padding: 0 var(--space-l);
   gap: var(--space-m);
-  border-bottom: 1px solid var(--color-border-subtle);
   cursor: pointer;
   transition: background-color var(--duration-fast) var(--easing-standard);
 }
@@ -523,9 +558,12 @@ onMounted(async () => {
   opacity: 0.8;
 }
 
-.shop-row:last-child { border-bottom: none; }
 .shop-row:hover { background: var(--color-bg-tertiary); }
+.shop-row:active { transform: scale(0.98); transition: transform var(--duration-fast) var(--easing-standard); }
 .archive-group .shop-row:hover { opacity: 1; }
+
+.shop-row__chevron { display: none; }
+.m-detail { display: none; }
 
 .shop-row__name {
   display: flex;
@@ -677,25 +715,71 @@ onMounted(async () => {
   :deep(.pageheader__actions) { display: none; }
   .pantry-mobile-actions { display: flex; margin-bottom: var(--space-m); }
   .shop-table__header { display: none; }
+
   .shop-row,
   .archive-group .shop-row {
-    grid-template-columns: 1fr 3.5rem;
-    grid-template-rows: auto auto;
-    padding: var(--space-s) var(--space-l);
-    row-gap: var(--space-2xs);
-    column-gap: var(--space-m);
+    grid-template-columns: 1fr 3.5rem 20px;
+    grid-template-rows: auto;
+    padding: var(--space-s) var(--space-m);
+    column-gap: var(--space-s);
   }
   .shop-row__name { grid-column: 1; grid-row: 1; }
   .shop-row__actions,
-  .shop-row__archive-actions { grid-column: 2; grid-row: 1 / -1; align-self: center; justify-self: end; }
-  .shop-row__chips {
+  .shop-row__archive-actions { grid-column: 2; grid-row: 1; align-self: center; justify-self: end; }
+  .shop-row__chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-column: 3;
+    grid-row: 1;
+    color: var(--color-fg-disabled);
+    font-size: 18px;
+    transition: transform var(--duration-fast) var(--easing-out);
+  }
+  .shop-row--m-expanded .shop-row__chevron { transform: rotate(180deg); }
+  .shop-row__chips { display: none; }
+
+  .m-detail {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--duration-normal) var(--easing-out);
+  }
+  .m-detail--open { grid-template-rows: 1fr; }
+  .m-detail__inner { overflow: hidden; }
+  .m-detail__body {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2xs);
-    grid-column: 1;
-    grid-row: 2;
     align-items: center;
+    gap: var(--space-2xs);
+    padding: var(--space-xs) var(--space-m);
+    border-top: 1px solid var(--color-border-subtle);
+    background: var(--color-bg-secondary);
   }
-  .shop-row__qty { text-align: left; }
+  .m-detail__chip {
+    font: var(--text-label-sm);
+    color: var(--color-fg-secondary);
+    background: var(--color-bg-tertiary);
+    padding: 2px var(--space-s);
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+  }
+  .m-detail__edit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    margin-left: auto;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--color-border-default);
+    background: var(--color-bg-elevated);
+    color: var(--color-fg-tertiary);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color var(--duration-fast) var(--easing-standard),
+                color var(--duration-fast) var(--easing-standard);
+  }
+  .m-detail__edit:active { background: var(--color-bg-tertiary); color: var(--color-fg-primary); }
+  .m-detail__edit .material-symbols-rounded { font-size: 15px; }
 }
 </style>

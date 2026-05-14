@@ -18,11 +18,13 @@ import { useAppStore } from '@/stores/app.store'
 import { formatCents } from '@/utils/format'
 import { EXPENSE_CATEGORIES } from '@/constants/categories'
 import type { Budget } from '@/models/budget.model'
+import { useMobileExpand } from '@/composables/useMobileExpand'
 
 const budgetsStore = useBudgetsStore()
 const expensesStore = useExpensesStore()
 const authStore = useAuthStore()
 const appStore = useAppStore()
+const { mobileExpandedId, handleRowClick } = useMobileExpand()
 const drawerOpen = ref(false)
 const editingId = ref<string | null>(null)
 const saving = ref(false)
@@ -164,28 +166,45 @@ onMounted(async () => {
       <div
         v-for="(card, idx) in budgetCards"
         :key="card.budget.id"
-        class="budget-row page-enter"
+        class="budget-entry page-enter"
         :style="{ '--stagger': 2 + idx }"
-        @click="openEdit(card)"
       >
-        <div class="budget-row__category">
-          {{ card.budget.category.charAt(0).toUpperCase() + card.budget.category.slice(1) }}
+        <div class="budget-row" :class="{ 'budget-row--m-expanded': mobileExpandedId === card.budget.id }" @click="handleRowClick(card.budget.id, () => openEdit(card))">
+          <div class="budget-row__category">
+            {{ card.budget.category.charAt(0).toUpperCase() + card.budget.category.slice(1) }}
+          </div>
+          <div class="budget-row__progress">
+            <div class="budget-bar">
+              <div
+                class="budget-bar__fill"
+                :class="`budget-bar__fill--${card.variant}`"
+                :style="{ width: `${Math.min(card.percent, 100)}%` }"
+              />
+            </div>
+          </div>
+          <div class="budget-row__spent">{{ formatCents(card.spent) }}</div>
+          <div class="budget-row__budget">{{ formatCents(card.budget.budget_amount) }}</div>
+          <div :class="['budget-row__remaining', card.remaining < 0 ? 'budget-row__remaining--over' : '']">
+            {{ card.remaining >= 0 ? formatCents(card.remaining) + ' left' : formatCents(Math.abs(card.remaining)) + ' over' }}
+          </div>
+          <div class="budget-row__percent">{{ Math.round(card.percent) }}%</div>
+          <span class="budget-row__chevron material-symbols-rounded">expand_more</span>
         </div>
-        <div class="budget-row__progress">
-          <div class="budget-bar">
-            <div
-              class="budget-bar__fill"
-              :class="`budget-bar__fill--${card.variant}`"
-              :style="{ width: `${Math.min(card.percent, 100)}%` }"
-            />
+        <div class="m-detail" :class="{ 'm-detail--open': mobileExpandedId === card.budget.id }">
+          <div class="m-detail__inner">
+            <div class="m-detail__body">
+              <div class="m-detail__bar-row">
+                <div class="budget-bar"><div class="budget-bar__fill" :class="`budget-bar__fill--${card.variant}`" :style="{ width: `${Math.min(card.percent, 100)}%` }" /></div>
+                <span class="m-detail__pct">{{ Math.round(card.percent) }}%</span>
+              </div>
+              <span class="m-detail__chip">Spent {{ formatCents(card.spent) }}</span>
+              <span class="m-detail__chip">of {{ formatCents(card.budget.budget_amount) }}</span>
+              <button class="m-detail__edit" @click.stop="openEdit(card)">
+                <span class="material-symbols-rounded">edit</span>
+              </button>
+            </div>
           </div>
         </div>
-        <div class="budget-row__spent">{{ formatCents(card.spent) }}</div>
-        <div class="budget-row__budget">{{ formatCents(card.budget.budget_amount) }}</div>
-        <div :class="['budget-row__remaining', card.remaining < 0 ? 'budget-row__remaining--over' : '']">
-          {{ card.remaining >= 0 ? formatCents(card.remaining) + ' left' : formatCents(Math.abs(card.remaining)) + ' over' }}
-        </div>
-        <div class="budget-row__percent">{{ Math.round(card.percent) }}%</div>
       </div>
     </div>
     </template>
@@ -260,6 +279,11 @@ onMounted(async () => {
 .budgets-table__th--center { text-align: center; }
 .budgets-table__th--right { text-align: right; }
 
+.budget-entry {
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.budget-entry:last-child { border-bottom: none; }
+
 .budget-row {
   display: grid;
   grid-template-columns: 120px 1fr 100px 100px 110px 50px;
@@ -267,13 +291,14 @@ onMounted(async () => {
   min-height: var(--height-row-min);
   padding: 0 var(--space-l);
   gap: var(--space-m);
-  border-bottom: 1px solid var(--color-border-subtle);
   cursor: pointer;
   transition: background-color var(--duration-fast) var(--easing-standard);
 }
 
-.budget-row:last-child { border-bottom: none; }
+.budget-row__chevron { display: none; }
+.m-detail { display: none; }
 .budget-row:hover { background: var(--color-bg-tertiary); }
+.budget-row:active { transform: scale(0.98); transition: transform var(--duration-fast) var(--easing-standard); }
 
 .budget-row__category {
   font: var(--text-body-2);
@@ -323,8 +348,10 @@ onMounted(async () => {
 }
 
 .budget-row__remaining {
-  font: var(--text-caption);
-  color: var(--color-fg-secondary);
+  font: var(--text-body-2);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-mono);
+  color: var(--color-fg-primary);
   white-space: nowrap;
   text-align: right;
 }
@@ -347,20 +374,84 @@ onMounted(async () => {
   :deep(.pageheader__actions) { display: none; }
   .money-mobile-actions { display: flex; gap: var(--space-s); margin-bottom: var(--space-m); }
   .budgets-table__header { display: none; }
+
   .budget-row {
-    grid-template-columns: 1fr 5.5rem;
-    grid-template-rows: auto auto auto;
-    padding: var(--space-s) var(--space-l);
-    row-gap: var(--space-2xs);
-    column-gap: var(--space-m);
+    grid-template-columns: 1fr 5.5rem 20px;
+    grid-template-rows: auto;
+    padding: var(--space-s) var(--space-m);
+    column-gap: var(--space-s);
   }
   .budget-row__category { grid-column: 1; grid-row: 1; }
-  .budget-row__remaining { grid-column: 2; grid-row: 1 / -1; align-self: center; text-align: right; }
-  .budget-row__progress { grid-column: 1; grid-row: 2; }
-  .budget-row__spent { grid-column: 1; grid-row: 3; font: var(--text-caption); color: var(--color-fg-tertiary); }
-  .budget-row__spent::before { content: 'Spent: '; }
-  .budget-row__budget { grid-column: 2; grid-row: 3; font: var(--text-caption); color: var(--color-fg-tertiary); text-align: right; }
-  .budget-row__budget::before { content: 'of '; }
+  .budget-row__remaining { grid-column: 2; grid-row: 1; align-self: center; text-align: right; }
+  .budget-row__chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-column: 3;
+    grid-row: 1;
+    color: var(--color-fg-disabled);
+    font-size: 18px;
+    transition: transform var(--duration-fast) var(--easing-out);
+  }
+  .budget-row--m-expanded .budget-row__chevron { transform: rotate(180deg); }
+  .budget-row__progress { display: none; }
+  .budget-row__spent { display: none; }
+  .budget-row__budget { display: none; }
   .budget-row__percent { display: none; }
+
+  .m-detail {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--duration-normal) var(--easing-out);
+  }
+  .m-detail--open { grid-template-rows: 1fr; }
+  .m-detail__inner { overflow: hidden; }
+  .m-detail__body {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2xs);
+    padding: var(--space-xs) var(--space-m);
+    border-top: 1px solid var(--color-border-subtle);
+    background: var(--color-bg-secondary);
+  }
+  .m-detail__bar-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    flex-basis: 100%;
+  }
+  .m-detail__bar-row .budget-bar { flex: 1; }
+  .m-detail__pct {
+    font: var(--text-label-sm);
+    color: var(--color-fg-tertiary);
+    white-space: nowrap;
+  }
+  .m-detail__chip {
+    font: var(--text-label-sm);
+    color: var(--color-fg-secondary);
+    background: var(--color-bg-tertiary);
+    padding: 2px var(--space-s);
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+  }
+  .m-detail__edit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    margin-left: auto;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--color-border-default);
+    background: var(--color-bg-elevated);
+    color: var(--color-fg-tertiary);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color var(--duration-fast) var(--easing-standard),
+                color var(--duration-fast) var(--easing-standard);
+  }
+  .m-detail__edit:active { background: var(--color-bg-tertiary); color: var(--color-fg-primary); }
+  .m-detail__edit .material-symbols-rounded { font-size: 15px; }
 }
 </style>

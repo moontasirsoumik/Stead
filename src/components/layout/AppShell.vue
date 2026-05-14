@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
+import { computed, ref, reactive, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useAppStore } from '@/stores/app.store'
 import { useHouseholdStore } from '@/stores/household.store'
 import { useAuthStore } from '@/stores/auth.store'
@@ -53,6 +53,48 @@ function handleScopeToggle() {
 const isMobile = ref(false)
 const isTablet = ref(false)
 
+/* ── Scope pill sliding indicator ── */
+const scopePillRef = ref<HTMLElement>()
+const householdBtnRef = ref<HTMLElement>()
+const personalBtnRef = ref<HTMLElement>()
+const pillStyle = reactive({ left: '2px', width: '28px' })
+
+function measurePill() {
+  const container = scopePillRef.value
+  const activeBtn = appStore.scope === 'household' ? householdBtnRef.value : personalBtnRef.value
+  if (!container || !activeBtn) return
+  const containerRect = container.getBoundingClientRect()
+  const btnRect = activeBtn.getBoundingClientRect()
+  pillStyle.left = (btnRect.left - containerRect.left) + 'px'
+  pillStyle.width = btnRect.width + 'px'
+}
+
+/** Measure pill at FINAL button sizes by suppressing button transitions momentarily */
+function measurePillFinal() {
+  const container = scopePillRef.value
+  if (!container) return
+
+  // Suppress button transitions so they jump to their CSS-class final state
+  const transitionEls = Array.from(
+    container.querySelectorAll<HTMLElement>('.shell__scope-btn, .shell__scope-btn-label-wrap, .shell__scope-btn-label')
+  )
+  transitionEls.forEach(el => (el.style.transitionDuration = '0s'))
+  container.offsetHeight // force reflow → buttons at final sizes
+
+  // Now measure the active button accurately
+  measurePill()
+
+  // Restore button transitions (already at final state, nothing to re-transition)
+  requestAnimationFrame(() => {
+    transitionEls.forEach(el => (el.style.transitionDuration = ''))
+  })
+}
+
+// Re-measure when scope changes — use final-state measurement
+watch(() => appStore.scope, () => {
+  nextTick(measurePillFinal)
+})
+
 function checkBreakpoint() {
   const w = window.innerWidth
   isMobile.value = w <= 768
@@ -62,10 +104,16 @@ function checkBreakpoint() {
 onMounted(() => {
   checkBreakpoint()
   window.addEventListener('resize', checkBreakpoint)
+  // Initial pill measurement after layout stabilizes
+  requestAnimationFrame(() => {
+    requestAnimationFrame(measurePill)
+  })
+  window.addEventListener('resize', measurePill)
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', checkBreakpoint)
+  window.removeEventListener('resize', measurePill)
 })
 
 function openMobile() {
@@ -109,8 +157,14 @@ async function handleSignOut() {
           <span class="shell__brand-label">Stead</span>
         </RouterLink>
         <span class="shell__topbar-divider" />
-        <div class="shell__scope-pill">
+        <div ref="scopePillRef" class="shell__scope-pill">
+          <div
+            class="shell__scope-indicator"
+            :class="'shell__scope-indicator--' + appStore.scope"
+            :style="{ left: pillStyle.left, width: pillStyle.width }"
+          />
           <button
+            ref="householdBtnRef"
             :class="['shell__scope-btn', 'shell__scope-btn--household', { 'shell__scope-btn--active': appStore.scope === 'household' }]"
             @click="appStore.scope !== 'household' && handleScopeToggle()"
           >
@@ -120,6 +174,7 @@ async function handleSignOut() {
             </span>
           </button>
           <button
+            ref="personalBtnRef"
             :class="['shell__scope-btn', 'shell__scope-btn--personal', { 'shell__scope-btn--active': appStore.scope === 'personal' }]"
             @click="appStore.scope !== 'personal' && handleScopeToggle()"
           >
@@ -360,6 +415,7 @@ async function handleSignOut() {
 
 /* ── Scope pill toggle ── */
 .shell__scope-pill {
+  position: relative;
   display: inline-flex;
   align-items: center;
   height: 32px;
@@ -371,7 +427,35 @@ async function handleSignOut() {
   flex-shrink: 0;
 }
 
+/* Sliding pill indicator */
+.shell__scope-indicator {
+  position: absolute;
+  top: 2px;
+  height: 26px;
+  border-radius: var(--radius-circle);
+  border: 1px solid transparent;
+  pointer-events: none;
+  z-index: 0;
+  transition:
+    left var(--duration-slow) var(--easing-expressive),
+    width var(--duration-slow) var(--easing-expressive),
+    background-color var(--duration-slow) var(--easing-expressive),
+    border-color var(--duration-slow) var(--easing-expressive);
+}
+
+.shell__scope-indicator--household {
+  background: var(--color-scope-household-bg);
+  border-color: var(--color-scope-household);
+}
+
+.shell__scope-indicator--personal {
+  background: var(--color-scope-personal-bg);
+  border-color: var(--color-scope-personal);
+}
+
 .shell__scope-btn {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   gap: 0;
@@ -386,8 +470,6 @@ async function handleSignOut() {
   font-weight: var(--font-weight-medium);
   white-space: nowrap;
   transition:
-    background-color var(--duration-slow) var(--easing-expressive),
-    border-color var(--duration-slow) var(--easing-expressive),
     color var(--duration-slow) var(--easing-expressive),
     padding var(--duration-slow) var(--easing-expressive),
     gap var(--duration-slow) var(--easing-expressive);
@@ -399,14 +481,10 @@ async function handleSignOut() {
 }
 
 .shell__scope-btn--household.shell__scope-btn--active {
-  background: var(--color-scope-household-bg);
-  border-color: var(--color-scope-household);
   color: var(--color-scope-household-fg);
 }
 
 .shell__scope-btn--personal.shell__scope-btn--active {
-  background: var(--color-scope-personal-bg);
-  border-color: var(--color-scope-personal);
   color: var(--color-scope-personal-fg);
 }
 
@@ -420,7 +498,7 @@ async function handleSignOut() {
   flex-shrink: 0;
 }
 
-/* Grid-column trick for smooth width animation */
+/* Width expansion via grid-column trick */
 .shell__scope-btn-label-wrap {
   display: grid;
   grid-template-columns: 0fr;
@@ -435,13 +513,22 @@ async function handleSignOut() {
 .shell__scope-btn-label {
   min-width: 0;
   line-height: 1;
-  opacity: 0;
-  transition: opacity var(--duration-normal) var(--easing-standard);
+  /* Clip fully from the right — invisible */
+  clip-path: inset(0 100% 0 0);
+  transform: translateX(-3px) scaleX(0.85);
+  transform-origin: left center;
+  transition:
+    clip-path var(--duration-normal) var(--easing-standard),
+    transform var(--duration-normal) var(--easing-standard);
 }
 
 .shell__scope-btn--active .shell__scope-btn-label {
-  opacity: 1;
-  transition: opacity var(--duration-slow) var(--easing-expressive) 80ms;
+  /* Reveal: clip opens fully, text slides and scales into place */
+  clip-path: inset(0 0 0 0);
+  transform: translateX(0) scaleX(1);
+  transition:
+    clip-path 380ms var(--easing-expressive) 40ms,
+    transform 380ms var(--easing-expressive) 40ms;
 }
 
 /* ── Top bar icon button ── */

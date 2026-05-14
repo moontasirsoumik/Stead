@@ -20,6 +20,7 @@ import { useRemindersStore } from '@/stores/reminders.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { useHouseholdStore } from '@/stores/household.store'
 import { useAppStore } from '@/stores/app.store'
+import { useMobileExpand } from '@/composables/useMobileExpand'
 import { formatRelativeDate } from '@/utils/format'
 import type { Reminder } from '@/models/reminder.model'
 import type { ReminderStatus } from '@/models/enums'
@@ -28,6 +29,7 @@ const remindersStore = useRemindersStore()
 const authStore = useAuthStore()
 const householdStore = useHouseholdStore()
 const appStore = useAppStore()
+const { mobileExpandedId, handleRowClick } = useMobileExpand()
 
 const search = ref('')
 const statusFilter = ref('')
@@ -230,29 +232,52 @@ onMounted(async () => {
         <span class="reminder-table__th reminder-table__th--center">Assigned</span>
         <span class="reminder-table__th reminder-table__th--right">Actions</span>
       </div>
-      <div v-for="reminder in sortedItems" :key="reminder.id" :class="['reminder-row', { 'reminder-row--overdue': isOverdue(reminder) }]" role="listitem" @click="openEditDrawer(reminder)">
-        <div class="reminder-row__title-col">
-          <span class="reminder-row__title">{{ reminder.title }}</span>
+      <div v-for="reminder in sortedItems" :key="reminder.id" class="reminder-entry" :class="{ 'reminder-row--overdue': isOverdue(reminder) }">
+        <div class="reminder-row" :class="[{ 'reminder-row--m-expanded': mobileExpandedId === reminder.id }, { 'reminder-row--overdue': isOverdue(reminder) }]" role="listitem" @click="handleRowClick(reminder.id, () => openEditDrawer(reminder))">
+          <div class="reminder-row__title-col">
+            <span class="reminder-row__title">{{ reminder.title }}</span>
+          </div>
+          <div class="reminder-row__chips">
+            <div class="reminder-row__status">
+              <SBadge :variant="statusVariant(reminder)" size="sm">{{ statusLabel(reminder) }}</SBadge>
+            </div>
+            <div class="reminder-row__type">
+              <SBadge v-if="reminder.type" size="sm">{{ reminder.type }}</SBadge>
+            </div>
+            <div class="reminder-row__due">
+              <span v-if="reminder.due_date">{{ formatRelativeDate(reminder.due_date) }}</span>
+            </div>
+            <div class="reminder-row__assignee">
+              <SAvatar v-if="getMemberName(reminder.assigned_to)" :name="getMemberName(reminder.assigned_to)!" size="sm" />
+            </div>
+          </div>
+          <div class="reminder-row__actions" @click.stop>
+            <SButton v-if="reminder.status === 'active'" variant="subtle" size="sm" @click="remindersStore.markDone(reminder.id)">Done</SButton>
+            <SButton v-if="reminder.status === 'active'" variant="subtle" size="sm" @click="remindersStore.snooze(reminder.id)">Snooze</SButton>
+            <SButton v-if="reminder.status === 'active' || reminder.status === 'snoozed'" variant="subtle" size="sm" class="action-dismiss" @click="remindersStore.dismiss(reminder.id)">Dismiss</SButton>
+            <SButton variant="danger" size="sm" class="action-delete" @click="confirmDelete(reminder.id)">Delete</SButton>
+          </div>
+          <span class="reminder-row__chevron material-symbols-rounded">expand_more</span>
         </div>
-        <div class="reminder-row__chips">
-          <div class="reminder-row__status">
-            <SBadge :variant="statusVariant(reminder)" size="sm">{{ statusLabel(reminder) }}</SBadge>
+        <div class="m-detail" :class="{ 'm-detail--open': mobileExpandedId === reminder.id }">
+          <div class="m-detail__inner">
+            <div class="m-detail__body">
+              <SBadge :variant="statusVariant(reminder)" size="sm">{{ statusLabel(reminder) }}</SBadge>
+              <SBadge v-if="reminder.type" size="sm">{{ reminder.type }}</SBadge>
+              <span v-if="reminder.due_date" class="m-detail__chip">{{ formatRelativeDate(reminder.due_date) }}</span>
+              <span v-if="getMemberName(reminder.assigned_to)" class="m-detail__who">
+                <SAvatar :name="getMemberName(reminder.assigned_to)!" size="sm" />
+                <span>{{ getMemberName(reminder.assigned_to) }}</span>
+              </span>
+              <div class="m-detail__actions" @click.stop>
+                <SButton v-if="reminder.status === 'active'" variant="subtle" size="sm" @click="remindersStore.markDone(reminder.id)">Done</SButton>
+                <SButton v-if="reminder.status === 'active'" variant="subtle" size="sm" @click="remindersStore.snooze(reminder.id)">Snooze</SButton>
+                <button class="m-detail__edit" @click="openEditDrawer(reminder)">
+                  <span class="material-symbols-rounded">edit</span>
+                </button>
+              </div>
+            </div>
           </div>
-          <div class="reminder-row__type">
-            <SBadge v-if="reminder.type" size="sm">{{ reminder.type }}</SBadge>
-          </div>
-          <div class="reminder-row__due">
-            <span v-if="reminder.due_date">{{ formatRelativeDate(reminder.due_date) }}</span>
-          </div>
-          <div class="reminder-row__assignee">
-            <SAvatar v-if="getMemberName(reminder.assigned_to)" :name="getMemberName(reminder.assigned_to)!" size="sm" />
-          </div>
-        </div>
-        <div class="reminder-row__actions" @click.stop>
-          <SButton v-if="reminder.status === 'active'" variant="subtle" size="sm" @click="remindersStore.markDone(reminder.id)">Done</SButton>
-          <SButton v-if="reminder.status === 'active'" variant="subtle" size="sm" @click="remindersStore.snooze(reminder.id)">Snooze</SButton>
-          <SButton v-if="reminder.status === 'active' || reminder.status === 'snoozed'" variant="subtle" size="sm" @click="remindersStore.dismiss(reminder.id)">Dismiss</SButton>
-          <SButton variant="danger" size="sm" @click="confirmDelete(reminder.id)">Delete</SButton>
         </div>
       </div>
     </div>
@@ -332,6 +357,11 @@ onMounted(async () => {
 .reminder-table__th--center { text-align: center; }
 .reminder-table__th--right { text-align: right; }
 
+.reminder-entry {
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.reminder-entry:last-child { border-bottom: none; }
+
 .reminder-row {
   display: grid;
   grid-template-columns: 1fr 80px 100px 90px 80px 260px;
@@ -339,13 +369,12 @@ onMounted(async () => {
   gap: var(--space-m);
   min-height: var(--height-row-min);
   padding: 0 var(--space-l);
-  border-bottom: 1px solid var(--color-border-subtle);
   cursor: pointer;
   transition: background-color var(--duration-fast) var(--easing-standard);
 }
 
-.reminder-row:last-child { border-bottom: none; }
 .reminder-row:hover { background: var(--color-bg-tertiary); }
+.reminder-row:active { transform: scale(0.98); transition: transform var(--duration-fast) var(--easing-standard); }
 
 .reminder-row--overdue {
   border-left: 3px solid var(--color-status-error);
@@ -391,28 +420,93 @@ onMounted(async () => {
   display: contents;
 }
 
+.reminder-row__chevron { display: none; }
+.m-detail { display: none; }
+
 @media (max-width: 640px) {
-  .stats-bar { flex-direction: column; }
-  .stats-bar__cell { border-right: none; border-bottom: 1px solid var(--color-border-subtle); }
-  .stats-bar__cell:last-child { border-bottom: none; }
+  .stats-bar { display: grid; grid-template-columns: 1fr 1fr 1fr; }
+  .stats-bar__cell {
+    border-right: 1px solid var(--color-border-subtle);
+    border-bottom: none;
+    padding: var(--space-s) var(--space-m);
+  }
+  .stats-bar__cell:last-child { border-right: none; }
+
   .reminder-table__header { display: none; }
   .reminder-row {
-    grid-template-columns: 1fr auto;
-    grid-template-rows: auto auto;
+    grid-template-columns: 1fr 20px;
+    grid-template-rows: auto;
     padding: var(--space-s) var(--space-m);
-    row-gap: var(--space-2xs);
-    column-gap: var(--space-m);
+    column-gap: var(--space-s);
   }
   .reminder-row__title-col { grid-column: 1; grid-row: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-  .reminder-row__actions { grid-column: 2; grid-row: 1 / -1; align-self: center; min-width: 4.5rem; justify-self: end; }
-  .reminder-row__chips {
+  .reminder-row__chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-column: 2;
+    grid-row: 1;
+    color: var(--color-fg-disabled);
+    font-size: 18px;
+    transition: transform var(--duration-fast) var(--easing-out);
+  }
+  .reminder-row--m-expanded .reminder-row__chevron { transform: rotate(180deg); }
+  .reminder-row__chips { display: none; }
+  .reminder-row__actions { display: none; }
+
+  .m-detail {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--duration-normal) var(--easing-out);
+  }
+  .m-detail--open { grid-template-rows: 1fr; }
+  .m-detail__inner { overflow: hidden; }
+  .m-detail__body {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2xs);
-    grid-column: 1;
-    grid-row: 2;
     align-items: center;
+    gap: var(--space-2xs);
+    padding: var(--space-xs) var(--space-m);
+    border-top: 1px solid var(--color-border-subtle);
+    background: var(--color-bg-secondary);
   }
-  .reminder-row__due { font: var(--text-caption); color: var(--color-fg-tertiary); }
+  .m-detail__chip {
+    font: var(--text-label-sm);
+    color: var(--color-fg-secondary);
+    background: var(--color-bg-tertiary);
+    padding: 2px var(--space-s);
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+  }
+  .m-detail__who {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font: var(--text-label-sm);
+    color: var(--color-fg-secondary);
+  }
+  .m-detail__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    margin-left: auto;
+  }
+  .m-detail__edit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--color-border-default);
+    background: var(--color-bg-elevated);
+    color: var(--color-fg-tertiary);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color var(--duration-fast) var(--easing-standard),
+                color var(--duration-fast) var(--easing-standard);
+  }
+  .m-detail__edit:active { background: var(--color-bg-tertiary); color: var(--color-fg-primary); }
+  .m-detail__edit .material-symbols-rounded { font-size: 15px; }
 }
 </style>
