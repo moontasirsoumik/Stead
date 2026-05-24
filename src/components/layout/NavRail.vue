@@ -50,6 +50,7 @@ const householdManage = [
 
 const householdPlan = [
   { to: '/boards', icon: 'dashboard_customize', label: 'Boards' },
+  { to: '/trackers', icon: 'monitoring', label: 'Trackers' },
 ] as const
 
 const householdThink = [
@@ -71,6 +72,7 @@ const personalOverview = [
 const personalManage = [
   { to: '/tasks', icon: 'tasks', label: 'Tasks' },
   { to: '/boards', icon: 'dashboard_customize', label: 'Boards' },
+  { to: '/trackers', icon: 'monitoring', label: 'Trackers' },
 ] as const
 
 const personalThink = [
@@ -203,7 +205,7 @@ const extraItems = computed(() =>
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: none;
@@ -219,7 +221,7 @@ const extraItems = computed(() =>
 .rail__group {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
 }
 
 .rail__group-label {
@@ -228,6 +230,7 @@ const extraItems = computed(() =>
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--color-nav-fg);
+  display: none;
   opacity: 0;
   height: 0;
   padding: 0;
@@ -240,6 +243,7 @@ const extraItems = computed(() =>
 }
 
 .rail--expanded .rail__group-label {
+  display: block;
   opacity: 0.4;
   height: auto;
   padding: 8px 12px 2px;
@@ -251,7 +255,7 @@ const extraItems = computed(() =>
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 1px;
+  gap: 2px;
 }
 
 /* ── NavItem overrides for expanded state ── */

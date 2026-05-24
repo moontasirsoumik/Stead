@@ -20,6 +20,7 @@ import type { Board, BoardItem } from '@/models/board.model'
 import type { ExpenseSplit } from '@/models/expense-split.model'
 import type { CalendarEvent } from '@/models/calendar-event.model'
 import type { EntityShare } from '@/models/entity-share.model'
+import type { Tracker, TrackerEntry } from '@/models/tracker.model'
 
 class SteadDatabase extends Dexie {
   members!: Table<Member, string>
@@ -44,6 +45,8 @@ class SteadDatabase extends Dexie {
   board_items!: Table<BoardItem, string>
   calendar_events!: Table<CalendarEvent, string>
   entity_shares!: Table<EntityShare, string>
+  trackers!: Table<Tracker, string>
+  tracker_entries!: Table<TrackerEntry, string>
 
   constructor() {
     super('stead-db')
@@ -103,6 +106,10 @@ class SteadDatabase extends Dexie {
       meals: null,
       boards: 'id, household_id, owner_id, scope, position',
       board_items: 'id, board_id, household_id, group_name, position',
+    })
+    this.version(9).stores({
+      trackers: 'id, household_id, owner_id, scope, position, value_type',
+      tracker_entries: 'id, tracker_id, household_id, entry_date',
     })
   }
 }

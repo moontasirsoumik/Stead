@@ -1,7 +1,7 @@
 # Stead — Implementation Progress Tracker
 
-> **Last updated:** 2026-07-13
-> **Current Phase:** P35 — Complete (Mobile Expand + Chip-Flow Detail Panels)
+> **Last updated:** 2026-05-21
+> **Current Phase:** P36 — Complete (Dynamic Trackers)
 
 ---
 
@@ -49,6 +49,8 @@
 | P33 | Dashboard + Migrations | ✅ Done | 2026-05-09 | 2026-05-09 | Boards dashboard widget added. DB migrations 013+015 applied |
 | P34 | UI Redesign — Emil Kowalski | ✅ Done | 2026-05-09 | 2026-05-09 | Layered shadows, custom motion curves, press/hover interactions — see details below |
 | P35 | Mobile Expand + Chip-Flow Detail | ✅ Done | 2026-07-13 | 2026-07-13 | useMobileExpand composable + compact chip-flow detail panels on 12 pages |
+| P36 | Dynamic Trackers | ✅ Done | 2026-05-21 | 2026-05-21 | General-purpose tracker system with typed entries, analytics (trends, cycles, correlations, anomalies), SVG charts. Migration 017 applied to DB. |
+| P36b | Trackers UI Redesign | ✅ Done | 2026-05-20 | 2026-05-20 | Premium compact design: TrackerCard (accent dot, sparkline, cycle ring), EntryLogTable (month-grouped timeline, hover actions, 20-entry limit), TrackerChart (gradient fill, smooth curves, segmented pills), CyclePanel (full cycle visualization with phase detection, prediction, history bars). |
 
 ---
 

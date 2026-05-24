@@ -148,6 +148,18 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/features/boards/BoardDetailPage.vue'),
       },
 
+      /* Trackers (both scopes) */
+      {
+        path: 'trackers',
+        name: 'trackers',
+        component: () => import('@/features/trackers/TrackersPage.vue'),
+      },
+      {
+        path: 'trackers/:id',
+        name: 'tracker-detail',
+        component: () => import('@/features/trackers/TrackerDetailPage.vue'),
+      },
+
       /* Contacts (household) */
       {
         path: 'contacts',

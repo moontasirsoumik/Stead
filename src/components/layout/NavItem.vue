@@ -111,6 +111,7 @@ const materialIcon = computed(() => {
   width: 20px;
   height: 20px;
   font-size: 20px;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
 }
 
 .navitem__label {
