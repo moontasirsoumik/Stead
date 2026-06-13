@@ -230,23 +230,23 @@ const extraItems = computed(() =>
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--color-nav-fg);
-  display: none;
-  opacity: 0;
-  height: 0;
-  padding: 0;
   white-space: nowrap;
   overflow: hidden;
+  opacity: 0;
+  max-height: 0;
+  padding: 0 12px;
   transition:
     opacity var(--duration-normal) var(--easing-out),
-    height var(--duration-normal) var(--easing-out),
-    padding var(--duration-normal) var(--easing-out);
+    max-height var(--duration-normal) var(--easing-out),
+    padding-top var(--duration-normal) var(--easing-out),
+    padding-bottom var(--duration-normal) var(--easing-out);
 }
 
 .rail--expanded .rail__group-label {
-  display: block;
   opacity: 0.4;
-  height: auto;
-  padding: 8px 12px 2px;
+  max-height: 28px;
+  padding-top: 8px;
+  padding-bottom: 2px;
   text-align: left;
 }
 

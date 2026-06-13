@@ -22,7 +22,7 @@ import { useAppStore } from '@/stores/app.store'
 import { useInvitationStore } from '@/stores/invitation.store'
 import type { Member } from '@/models/member.model'
 import type { MemberRole } from '@/models/enums'
-import type { InvitationStatus } from '@/models/invitation.model'
+import type { Invitation, InvitationStatus } from '@/models/invitation.model'
 import type {
   AccentColor,
   FontSize,
@@ -128,11 +128,17 @@ const inviteRole = ref<MemberRole>('member')
 const inviteExpiry = ref(7)
 const inviteCreating = ref(false)
 const copiedCode = ref<string | null>(null)
+const newInvite = ref<Invitation | null>(null)
+const copiedMessage = ref(false)
 
 const inviteExpiryStr = computed({
   get: () => String(inviteExpiry.value),
   set: (v: string) => { inviteExpiry.value = parseInt(v, 10) },
 })
+
+const pendingInvites = computed(() =>
+  invitationStore.invitations.filter((inv) => inv.status === 'pending'),
+)
 
 onMounted(async () => {
   if (authStore.householdId) {
@@ -297,18 +303,25 @@ async function leaveHousehold() {
 async function createInvite() {
   inviteCreating.value = true
   try {
-    await invitationStore.createInvitation({
+    const created = await invitationStore.createInvitation({
       email: inviteEmail.value.trim() || null,
       role: inviteRole.value,
       expiry_days: inviteExpiry.value,
     })
-    showInviteForm.value = false
-    inviteEmail.value = ''
-    inviteRole.value = 'member'
-    inviteExpiry.value = 7
+    if (created) {
+      newInvite.value = created
+      showInviteForm.value = false
+      inviteEmail.value = ''
+      inviteRole.value = 'member'
+      inviteExpiry.value = 7
+    }
   } finally {
     inviteCreating.value = false
   }
+}
+
+function dismissNewInvite() {
+  newInvite.value = null
 }
 
 async function revokeInvite(id: string) {
@@ -319,6 +332,13 @@ function copyCode(code: string) {
   navigator.clipboard.writeText(code)
   copiedCode.value = code
   setTimeout(() => { copiedCode.value = null }, 2000)
+}
+
+function copyInviteMessage(code: string) {
+  const msg = `You're invited to join my household on Stead!\n\nUse this code when you sign up or on the onboarding screen:\n\n${code}\n\nSign up at https://app.stead.home`
+  navigator.clipboard.writeText(msg)
+  copiedMessage.value = true
+  setTimeout(() => { copiedMessage.value = false }, 2500)
 }
 
 function invitationStatusVariant(status: InvitationStatus): 'brand' | 'success' | 'default' {
@@ -975,13 +995,82 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
         </div>
       </div>
 
+      <!-- Unified Members + Invitations section -->
       <div class="settings-section page-enter" :style="{ '--stagger': 3 }">
         <div class="card-header">
           <SectionHeader title="Members" />
-          <SButton size="sm" @click="openAddDrawer">Add member</SButton>
+          <div class="header-actions">
+            <SButton size="sm" variant="subtle" @click="openAddDrawer">Add placeholder</SButton>
+            <SButton size="sm" @click="showInviteForm = !showInviteForm">
+              {{ showInviteForm ? 'Cancel' : 'Invite someone' }}
+            </SButton>
+          </div>
         </div>
         <div class="card-body">
-          <div v-if="householdStore.members.length > 0" class="members">
+
+          <!-- New invite share panel (shown immediately after creating an invite) -->
+          <Transition name="share-panel">
+            <div v-if="newInvite" class="invite-share-panel">
+              <div class="invite-share-panel__header">
+                <span class="material-symbols-rounded invite-share-panel__icon">mail</span>
+                <div>
+                  <p class="invite-share-panel__title">Invite created!</p>
+                  <p class="invite-share-panel__sub">Share this code — it expires {{ new Date(newInvite.expires_at).toLocaleDateString() }}</p>
+                </div>
+                <button class="invite-share-panel__close" aria-label="Dismiss" @click="dismissNewInvite">
+                  <span class="material-symbols-rounded">close</span>
+                </button>
+              </div>
+              <div class="invite-share-panel__code-row">
+                <span class="invite-share-panel__code">{{ newInvite.invite_code }}</span>
+                <button
+                  class="invite-share-panel__copy-btn"
+                  :class="{ 'invite-share-panel__copy-btn--copied': copiedCode === newInvite.invite_code }"
+                  @click="copyCode(newInvite.invite_code)"
+                >
+                  <span class="material-symbols-rounded">{{ copiedCode === newInvite.invite_code ? 'check' : 'content_copy' }}</span>
+                  {{ copiedCode === newInvite.invite_code ? 'Copied!' : 'Copy code' }}
+                </button>
+                <button
+                  class="invite-share-panel__msg-btn"
+                  :class="{ 'invite-share-panel__msg-btn--copied': copiedMessage }"
+                  @click="copyInviteMessage(newInvite.invite_code)"
+                >
+                  <span class="material-symbols-rounded">{{ copiedMessage ? 'check' : 'chat' }}</span>
+                  {{ copiedMessage ? 'Copied!' : 'Copy message' }}
+                </button>
+              </div>
+              <p class="invite-share-panel__hint">Send this code to the person you want to invite. They'll enter it on the onboarding screen after signing up.</p>
+            </div>
+          </Transition>
+
+          <!-- Invite creation form -->
+          <div v-if="showInviteForm" class="invite-form">
+            <div class="row">
+              <div class="row__label">
+                <span class="row__name">Email</span>
+                <span class="row__hint">Optional — lock the invite to a specific email address</span>
+              </div>
+              <div class="row__control"><SInput v-model="inviteEmail" type="email" placeholder="friend@example.com" /></div>
+            </div>
+            <div class="row">
+              <div class="row__label"><span class="row__name">Role</span></div>
+              <div class="row__control"><SSelect v-model="inviteRole" :options="ROLE_OPTIONS" /></div>
+            </div>
+            <div class="row">
+              <div class="row__label"><span class="row__name">Expires in</span></div>
+              <div class="row__control"><SSelect v-model="inviteExpiryStr" :options="EXPIRY_OPTIONS" /></div>
+            </div>
+            <p v-if="invitationStore.error" class="error-msg">{{ invitationStore.error }}</p>
+            <div class="row row--action">
+              <SButton size="sm" variant="subtle" @click="showInviteForm = false">Cancel</SButton>
+              <SButton size="sm" :loading="inviteCreating" @click="createInvite">Create invite</SButton>
+            </div>
+          </div>
+
+          <!-- Member list -->
+          <div v-if="householdStore.members.length > 0 || pendingInvites.length > 0" class="members">
+            <!-- Active / placeholder members -->
             <div
               v-for="member in householdStore.members"
               :key="member.id"
@@ -1006,76 +1095,40 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
                 </SIconButton>
               </div>
             </div>
-          </div>
 
-          <EmptyState
-            v-else
-            title="No members yet"
-            subtitle="Add people to your household."
-            action-label="Add Member"
-            @action="openAddDrawer"
-          />
-        </div>
-      </div>
-
-      <!-- Invitations section -->
-      <div class="settings-section page-enter" :style="{ '--stagger': 4 }">
-        <div class="card-header">
-          <SectionHeader title="Invitations" />
-          <SButton size="sm" @click="showInviteForm = !showInviteForm">
-            {{ showInviteForm ? 'Cancel' : 'Generate invite' }}
-          </SButton>
-        </div>
-        <div class="card-body">
-          <!-- Inline invite form -->
-          <div v-if="showInviteForm" class="invite-form">
-            <div class="row">
-              <div class="row__label"><span class="row__name">Email</span><span class="row__hint">Optional — leave blank for an open invite</span></div>
-              <div class="row__control"><SInput v-model="inviteEmail" type="email" placeholder="invitee@example.com" /></div>
-            </div>
-            <div class="row">
-              <div class="row__label"><span class="row__name">Role</span></div>
-              <div class="row__control"><SSelect v-model="inviteRole" :options="ROLE_OPTIONS" /></div>
-            </div>
-            <div class="row">
-              <div class="row__label"><span class="row__name">Expires in</span></div>
-              <div class="row__control"><SSelect v-model="inviteExpiryStr" :options="EXPIRY_OPTIONS" /></div>
-            </div>
-            <div class="row row--action">
-              <SButton size="sm" :loading="inviteCreating" @click="createInvite">Create invite</SButton>
-            </div>
-          </div>
-
-          <!-- Invitation list -->
-          <div v-if="invitationStore.invitations.length > 0" class="invitations">
+            <!-- Pending invites shown as pending members -->
             <div
-              v-for="inv in invitationStore.invitations"
+              v-for="inv in pendingInvites"
               :key="inv.id"
-              class="invite-row"
+              class="member member--pending"
             >
-              <div class="invite-row__main">
-                <button class="invite-code" :title="copiedCode === inv.invite_code ? 'Copied!' : 'Click to copy'" @click="copyCode(inv.invite_code)">
-                  <span class="invite-code__text">{{ inv.invite_code }}</span>
-                  <span class="material-symbols-rounded invite-code__icon">{{ copiedCode === inv.invite_code ? 'check' : 'content_copy' }}</span>
-                </button>
-                <span v-if="inv.email" class="invite-email">{{ inv.email }}</span>
+              <div class="pending-avatar">
+                <span class="material-symbols-rounded">schedule</span>
               </div>
-              <div class="invite-row__meta">
-                <SBadge :variant="invitationStatusVariant(inv.status)" size="sm">{{ inv.status }}</SBadge>
+              <div class="member__info">
+                <span class="member__name member__name--pending">{{ inv.email || 'Open invite' }}</span>
+                <SBadge variant="default" size="sm">pending</SBadge>
                 <SBadge :variant="inv.role === 'admin' ? 'brand' : 'default'" size="sm">{{ inv.role }}</SBadge>
-                <span class="invite-expires">{{ new Date(inv.expires_at).toLocaleDateString() }}</span>
               </div>
-              <div class="invite-row__actions">
-                <SButton v-if="inv.status === 'pending'" size="sm" variant="subtle" @click="revokeInvite(inv.id)">Revoke</SButton>
+              <button
+                class="invite-code invite-code--inline"
+                :title="copiedCode === inv.invite_code ? 'Copied!' : 'Click to copy'"
+                @click="copyCode(inv.invite_code)"
+              >
+                <span class="invite-code__text">{{ inv.invite_code }}</span>
+                <span class="material-symbols-rounded invite-code__icon">{{ copiedCode === inv.invite_code ? 'check' : 'content_copy' }}</span>
+              </button>
+              <div class="member__actions member__actions--always">
+                <SButton size="sm" variant="subtle" @click="revokeInvite(inv.id)">Revoke</SButton>
               </div>
             </div>
           </div>
 
           <EmptyState
             v-else-if="!showInviteForm"
-            title="No invitations yet"
-            subtitle="Generate one to invite people to your household."
-            action-label="Generate invite"
+            title="No members yet"
+            subtitle="Invite someone to join your household."
+            action-label="Invite someone"
             @action="showInviteForm = true"
           />
         </div>
@@ -1800,6 +1853,190 @@ const FONT_SIZES: { id: FontSize; label: string }[] = [
 
 .danger-btn {
   color: var(--color-fg-danger, #c4314b) !important;
+}
+
+/* -- Header actions group -- */
+.header-actions {
+  display: flex;
+  gap: var(--space-xs);
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* -- Invite share panel -- */
+.invite-share-panel {
+  background: var(--color-brand-selected, color-mix(in srgb, var(--color-brand-primary) 8%, transparent));
+  border: 1px solid color-mix(in srgb, var(--color-brand-primary) 30%, transparent);
+  border-radius: var(--radius-m);
+  padding: var(--space-m) var(--space-l);
+  margin-bottom: var(--space-m);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+}
+
+.invite-share-panel__header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-s);
+}
+
+.invite-share-panel__icon {
+  font-size: 20px;
+  color: var(--color-brand-primary);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.invite-share-panel__title {
+  font: var(--text-body-2);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-fg-primary);
+}
+
+.invite-share-panel__sub {
+  font: var(--text-caption);
+  color: var(--color-fg-secondary);
+  margin-top: 1px;
+}
+
+.invite-share-panel__close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-fg-tertiary);
+  padding: 2px;
+  border-radius: var(--radius-s);
+  display: flex;
+  transition: color var(--duration-fast) var(--easing-standard);
+}
+
+.invite-share-panel__close:hover { color: var(--color-fg-primary); }
+.invite-share-panel__close .material-symbols-rounded { font-size: 18px; }
+
+.invite-share-panel__code-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  flex-wrap: wrap;
+}
+
+.invite-share-panel__code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 22px;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.15em;
+  color: var(--color-fg-primary);
+  background: var(--color-surface-input);
+  border: 1px solid var(--color-border-input);
+  border-radius: var(--radius-s);
+  padding: var(--space-xs) var(--space-m);
+  flex-shrink: 0;
+}
+
+.invite-share-panel__copy-btn,
+.invite-share-panel__msg-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  padding: var(--space-xs) var(--space-m);
+  border-radius: var(--radius-m);
+  border: 1px solid var(--color-border-default);
+  font: var(--text-label-md);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard);
+}
+
+.invite-share-panel__copy-btn {
+  background: var(--color-brand-primary);
+  border-color: var(--color-brand-primary);
+  color: var(--color-fg-on-brand);
+}
+
+.invite-share-panel__copy-btn:hover {
+  filter: brightness(0.92);
+}
+
+.invite-share-panel__copy-btn--copied {
+  background: var(--color-success, #107c10);
+  border-color: var(--color-success, #107c10);
+}
+
+.invite-share-panel__msg-btn {
+  background: var(--color-surface-container);
+  color: var(--color-fg-secondary);
+}
+
+.invite-share-panel__msg-btn:hover {
+  background: var(--color-surface-container-high);
+  color: var(--color-fg-primary);
+}
+
+.invite-share-panel__msg-btn--copied {
+  color: var(--color-success-fg, #107c10);
+  border-color: var(--color-success, #107c10);
+}
+
+.invite-share-panel__copy-btn .material-symbols-rounded,
+.invite-share-panel__msg-btn .material-symbols-rounded {
+  font-size: 16px;
+}
+
+.invite-share-panel__hint {
+  font: var(--text-caption);
+  color: var(--color-fg-secondary);
+}
+
+/* Share panel transition */
+.share-panel-enter-active {
+  animation: share-panel-in var(--duration-slow) var(--easing-out) both;
+}
+
+.share-panel-leave-active {
+  animation: share-panel-in var(--duration-normal) var(--easing-standard) both reverse;
+}
+
+@keyframes share-panel-in {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* -- Pending member row -- */
+.member--pending {
+  opacity: 0.75;
+}
+
+.pending-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-circle);
+  background: var(--color-surface-container);
+  border: 1.5px dashed var(--color-border-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--color-fg-tertiary);
+}
+
+.pending-avatar .material-symbols-rounded { font-size: 18px; }
+
+.member__name--pending {
+  color: var(--color-fg-secondary);
+  font-style: italic;
+}
+
+.invite-code--inline {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.member__actions--always {
+  opacity: 1 !important;
 }
 
 /* -- Invitation form -- */

@@ -15,6 +15,7 @@ import FormDrawer from '@/components/forms/FormDrawer.vue'
 import FormField from '@/components/forms/FormField.vue'
 import FormSection from '@/components/forms/FormSection.vue'
 import MonthSummary from '@/features/money/components/MonthSummary.vue'
+import MoneyTabs from '@/features/money/components/MoneyTabs.vue'
 import { useMobileExpand } from '@/composables/useMobileExpand'
 import { useSavingsStore } from '@/stores/savings.store'
 import { useAuthStore } from '@/stores/auth.store'
@@ -220,6 +221,8 @@ onMounted(async () => {
         <SButton @click="openAddGoal">Create Goal</SButton>
       </template>
     </PageHeader>
+
+    <MoneyTabs />
 
     <div class="money-mobile-actions">
       <SButton @click="openAddGoal">Create Goal</SButton>

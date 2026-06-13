@@ -12,6 +12,7 @@ import { useExpensesStore } from '@/stores/expenses.store'
 import { useHouseholdStore } from '@/stores/household.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { formatCents } from '@/utils/format'
+import MoneyTabs from '@/features/money/components/MoneyTabs.vue'
 
 const splitsStore = useExpenseSplitsStore()
 const expensesStore = useExpensesStore()
@@ -68,6 +69,8 @@ onMounted(async () => {
       class="page-enter"
       :style="{ '--stagger': 0 }"
     />
+
+    <MoneyTabs />
 
     <div v-if="splitsStore.loading" class="page-enter" :style="{ '--stagger': 2 }">
       <LoadingSkeleton :lines="4" />

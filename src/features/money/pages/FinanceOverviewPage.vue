@@ -13,6 +13,7 @@ import { useBudgetsStore } from '@/stores/budgets.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { useAppStore } from '@/stores/app.store'
 import { formatCents, formatDate } from '@/utils/format'
+import MoneyTabs from '@/features/money/components/MoneyTabs.vue'
 
 type SurfaceTone = 'neutral' | 'positive' | 'negative' | 'warning'
 type BadgeTone = 'default' | 'success' | 'warning' | 'error'
@@ -430,6 +431,8 @@ onMounted(async () => {
 <template>
   <PageContainer>
     <PageHeader title="Finances" subtitle="Household overview" class="page-enter" :style="{ '--stagger': 0 }" />
+
+    <MoneyTabs />
 
     <LoadingSkeleton v-if="loading" :lines="10" class="page-enter" :style="{ '--stagger': 2 }" />
 

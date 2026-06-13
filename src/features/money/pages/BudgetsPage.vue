@@ -19,6 +19,7 @@ import { formatCents } from '@/utils/format'
 import { EXPENSE_CATEGORIES } from '@/constants/categories'
 import type { Budget } from '@/models/budget.model'
 import { useMobileExpand } from '@/composables/useMobileExpand'
+import MoneyTabs from '@/features/money/components/MoneyTabs.vue'
 
 const budgetsStore = useBudgetsStore()
 const expensesStore = useExpensesStore()
@@ -131,6 +132,8 @@ onMounted(async () => {
         <SButton @click="openAdd">Add Budget</SButton>
       </template>
     </PageHeader>
+
+    <MoneyTabs />
 
     <div class="money-mobile-actions">
       <SInput

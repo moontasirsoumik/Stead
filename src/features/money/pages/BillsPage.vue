@@ -15,6 +15,7 @@ import FormDrawer from '@/components/forms/FormDrawer.vue'
 import FormField from '@/components/forms/FormField.vue'
 import FormSection from '@/components/forms/FormSection.vue'
 import MonthSummary from '@/features/money/components/MonthSummary.vue'
+import MoneyTabs from '@/features/money/components/MoneyTabs.vue'
 import { useBillsStore } from '@/stores/bills.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { useHouseholdStore } from '@/stores/household.store'
@@ -182,6 +183,8 @@ onMounted(async () => {
         <SButton @click="openAdd">Add Bill</SButton>
       </template>
     </PageHeader>
+
+    <MoneyTabs />
 
     <div class="money-mobile-actions">
       <SButton @click="openAdd">Add Bill</SButton>

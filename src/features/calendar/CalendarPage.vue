@@ -648,7 +648,7 @@ watch(() => appStore.isPersonal, loadData)
 <template>
   <PageContainer>
     <!-- Header -->
-    <PageHeader title="Calendar" subtitle="Your schedule at a glance">
+    <PageHeader title="Calendar" subtitle="Your schedule at a glance" class="page-enter" :style="{ '--stagger': 0 }">
       <template #actions>
         <div class="cal-nav cal-nav--desktop">
           <button class="cal-nav__btn" aria-label="Previous" @click="navigatePrev">
@@ -668,7 +668,7 @@ watch(() => appStore.isPersonal, loadData)
     </PageHeader>
 
     <!-- View switcher tabs -->
-    <nav ref="tabNavRef" class="cal-view-tabs" aria-label="Calendar views">
+    <nav ref="tabNavRef" class="cal-view-tabs page-enter" :style="{ '--stagger': 1 }" aria-label="Calendar views">
       <div class="cal-view-tabs__pill" :style="pillStyle" />
       <button
         v-for="(view, i) in viewOptions"
@@ -705,7 +705,7 @@ watch(() => appStore.isPersonal, loadData)
     <LoadingSkeleton v-if="calendarStore.loading && !monthItems.length" :lines="8" class="page-enter" :style="{ '--stagger': 0 }" />
 
     <!-- ═══ MONTH VIEW ═══ -->
-    <div v-else-if="activeView === 'month'" class="month page-enter" :style="{ '--stagger': 1 }">
+    <div v-else-if="activeView === 'month'" class="month page-enter" :style="{ '--stagger': 2 }">
       <div class="month__grid">
         <!-- Day-of-week headers -->
         <div v-for="(name, i) in dayNames" :key="'h-' + i" class="month__dow">
@@ -776,7 +776,6 @@ watch(() => appStore.isPersonal, loadData)
             class="page-enter"
             @click="item.source === 'event' && !isSharedFromOther(item) ? openEditDrawer(item) : undefined"
           >
-            <span class="day-item__indicator" :style="{ background: getSourceColor(item.source) }" />
             <div class="day-item__body">
               <span class="day-item__title">{{ item.title }}</span>
               <div class="day-item__meta">
@@ -929,7 +928,6 @@ watch(() => appStore.isPersonal, loadData)
             :class="['ag-item', { 'ag-item--clickable': item.source === 'event' && !isSharedFromOther(item) }]"
             @click="item.source === 'event' && !isSharedFromOther(item) ? openEditDrawer(item) : undefined"
           >
-            <span class="ag-item__accent" :style="{ background: getSourceColor(item.source) }" />
             <div class="ag-item__body">
               <span class="ag-item__title">{{ item.title }}</span>
               <div class="ag-item__meta">
@@ -1294,7 +1292,6 @@ watch(() => appStore.isPersonal, loadData)
   overflow: hidden;
   text-overflow: ellipsis;
   background: var(--chip-bg);
-  border-left: 3px solid var(--chip-color);
 }
 
 /* Mobile: dot indicators */
@@ -1356,7 +1353,7 @@ watch(() => appStore.isPersonal, loadData)
 /* ── Day Item (shared by panel + agenda) ── */
 .day-item {
   display: grid;
-  grid-template-columns: 3px 1fr auto 64px;
+  grid-template-columns: 1fr auto 64px;
   align-items: center;
   gap: var(--space-s);
   padding: var(--space-s) var(--space-l);
@@ -1368,12 +1365,6 @@ watch(() => appStore.isPersonal, loadData)
 .day-item:last-child { border-bottom: none; }
 .day-item--clickable { cursor: pointer; }
 .day-item--clickable:hover { background: var(--color-bg-tertiary); }
-
-.day-item__indicator {
-  width: 3px;
-  align-self: stretch;
-  border-radius: var(--radius-s);
-}
 
 .day-item__body {
   min-width: 0;
@@ -1805,13 +1796,6 @@ watch(() => appStore.isPersonal, loadData)
 .ag-item:last-child { border-bottom: none; }
 .ag-item--clickable { cursor: pointer; }
 .ag-item--clickable:hover { background: var(--color-bg-tertiary); }
-
-.ag-item__accent {
-  width: 3px;
-  align-self: stretch;
-  border-radius: var(--radius-s);
-  flex-shrink: 0;
-}
 
 .ag-item__body {
   flex: 1;
