@@ -733,7 +733,7 @@ watch(() => appStore.isPersonal, loadData)
               v-for="item in cell.items.slice(0, 3)"
               :key="item.id"
               class="month__chip"
-              :style="{ '--chip-color': getSourceColor(item.source), '--chip-bg': getSourceBg(item.source) }"
+              :style="{ '--chip-bg': getSourceBg(item.source) }"
               :title="item.title"
             >{{ item.title }}</span>
           </div>
@@ -847,7 +847,7 @@ watch(() => appStore.isPersonal, loadData)
               v-for="item in (viewDayItems[d] ?? []).filter((i) => i.all_day)"
               :key="item.id"
               class="tg__ad-chip"
-              :style="{ '--chip-color': getSourceColor(item.source), '--chip-bg': getSourceBg(item.source) }"
+              :style="{ '--chip-bg': getSourceBg(item.source) }"
               :title="item.title"
               @click="item.source === 'event' ? openEditDrawer(item) : undefined"
             >{{ item.title }}</span>
@@ -889,7 +889,7 @@ watch(() => appStore.isPersonal, loadData)
                   v-for="item in (viewDayItems[d] ?? []).filter((i) => !i.all_day)"
                   :key="item.id"
                   class="tg__event"
-                  :style="{ top: itemTop(item) + 'px', height: itemHeight(item) + 'px', '--ev-color': getSourceColor(item.source), '--ev-bg': getSourceBg(item.source) }"
+                  :style="{ top: itemTop(item) + 'px', height: itemHeight(item) + 'px', '--ev-bg': getSourceBg(item.source) }"
                   :title="item.title"
                   @click="item.source === 'event' ? openEditDrawer(item) : undefined"
                 >
@@ -1570,7 +1570,6 @@ watch(() => appStore.isPersonal, loadData)
   line-height: 18px;
   padding: 0 5px;
   border-radius: var(--radius-s);
-  border-left: 3px solid var(--chip-color);
   background: var(--chip-bg);
   white-space: nowrap;
   overflow: hidden;
@@ -1688,7 +1687,6 @@ watch(() => appStore.isPersonal, loadData)
   left: 2px;
   right: 3px;
   border-radius: var(--radius-s);
-  border-left: 3px solid var(--ev-color);
   background: var(--ev-bg);
   padding: 2px 6px;
   overflow: hidden;
@@ -1698,6 +1696,13 @@ watch(() => appStore.isPersonal, loadData)
 }
 
 .tg__event:hover { filter: brightness(0.93); }
+
+/* Ensure text is readable on all backgrounds */
+.tg__event,
+.tg__ad-chip {
+  /* Add subtle text shadow for better readability on similar backgrounds */
+  text-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.05);
+}
 
 .tg__ev-title {
   display: block;
