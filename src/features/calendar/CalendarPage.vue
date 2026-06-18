@@ -37,6 +37,14 @@ const billsStore = useBillsStore()
 
 // ── View modes ──
 type CalendarView = 'month' | 'week' | '3day' | 'day' | 'agenda'
+type DayView = 'week' | '3day' | 'day'
+const previousView = ref<CalendarView>('month')
+const morphScale = ref(1)
+const dayViewCols: Record<DayView, number> = { week: 7, '3day': 3, day: 1 }
+const dayViews: readonly CalendarView[] = ['week', '3day', 'day']
+function isDayView(view: CalendarView): view is DayView {
+  return dayViews.includes(view)
+}
 const activeView = ref<CalendarView>('month')
 const viewOptions: { key: CalendarView; label: string; icon: string }[] = [
   { key: 'month', label: 'Month', icon: 'calendar_month' },
@@ -393,13 +401,39 @@ function updatePill(animate: boolean) {
 }
 
 function switchView(view: CalendarView) {
+  const old = activeView.value
   activeView.value = view
+  previousView.value = old
+  if (isDayView(old) && isDayView(view)) {
+    morphScale.value = dayViewCols[view] / dayViewCols[old]
+  } else {
+    morphScale.value = 1
+  }
   selectedDate.value = null
   nextTick(() => {
     updatePill(true)
     if (view !== 'month' && view !== 'agenda') scrollToCurrentTime()
   })
 }
+
+// Enhanced view switching with smoother transitions
+function switchViewSmooth(view: CalendarView) {
+  const old = activeView.value
+  // Add a small delay to ensure DOM is ready for transition
+  setTimeout(() => {
+    activeView.value = view
+    previousView.value = old
+    if (isDayView(old) && isDayView(view)) {
+      morphScale.value = dayViewCols[view] / dayViewCols[old]
+    } else {
+      morphScale.value = 1
+    }
+    selectedDate.value = null
+    updatePill(true)
+    if (view !== 'month' && view !== 'agenda') scrollToCurrentTime()
+  }, 10)
+}
+
 
 // ── Time grid scroll ──
 const scrollRef = ref<HTMLElement | null>(null)
@@ -819,88 +853,91 @@ watch(() => appStore.isPersonal, loadData)
 
     <!-- ═══ WEEK / 3-DAY / DAY VIEW ═══ -->
     <div
-      v-if="(activeView === 'week' || activeView === '3day' || activeView === 'day') && !calendarStore.loading"
-      class="tg page-enter"
+      v-if="isDayView(activeView) && !calendarStore.loading"
+      class="tg"
+      :class="{ 'page-enter': isDayView(activeView) }"
       :style="{ '--stagger': 1 }"
     >
-      <!-- Column headers -->
-      <div class="tg__header">
-        <div class="tg__gutter-cap" />
-        <div class="tg__day-heads" :style="{ 'grid-template-columns': `repeat(${viewDays.length}, 1fr)` }">
-          <div
-            v-for="d in viewDays"
-            :key="'th-' + d"
-            :class="['tg__dh', { 'tg__dh--today': d === todayStr }]"
-          >
-            <span class="tg__dh-dow">{{ new Date(d + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short' }) }}</span>
-            <span :class="['tg__dh-num', { 'tg__dh-num--today': d === todayStr }]">{{ new Date(d + 'T00:00:00').getDate() }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- All-day row -->
-      <div class="tg__allday">
-        <div class="tg__gutter-cap tg__gutter-cap--allday">all-day</div>
-        <div class="tg__allday-cols" :style="{ 'grid-template-columns': `repeat(${viewDays.length}, 1fr)` }">
-          <div v-for="d in viewDays" :key="'ad-' + d" class="tg__allday-col">
-            <span
-              v-for="item in (viewDayItems[d] ?? []).filter((i) => i.all_day)"
-              :key="item.id"
-              class="tg__ad-chip"
-              :style="{ '--chip-color': getSourceColor(item.source), '--chip-bg': getSourceBg(item.source) }"
-              :title="item.title"
-              @click="item.source === 'event' ? openEditDrawer(item) : undefined"
-            >{{ item.title }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Scrollable time body -->
-      <div ref="scrollRef" class="tg__body">
-        <div class="tg__canvas" :style="{ height: 24 * HOUR_HEIGHT + 'px' }">
-          <!-- Hour gutter -->
-          <div class="tg__gutter">
-            <div v-for="h in hourSlots" :key="'lbl-' + h" class="tg__hour-lbl" :style="{ top: h * HOUR_HEIGHT + 'px' }">
-              <span v-if="h > 0">{{ formatHour(h) }}</span>
+        <!-- Column headers -->
+        <div class="tg__header">
+          <div class="tg__gutter-cap" />
+          <div class="tg__day-heads">
+            <div
+              v-for="d in viewDays"
+              :key="'th-' + d"
+              :class="['tg__dh', { 'tg__dh--today': d === todayStr }]"
+              :style="{ width: `${100 / viewDays.length}%` }"
+            >
+              <span class="tg__dh-dow">{{ new Date(d + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short' }) }}</span>
+              <span :class="['tg__dh-num', { 'tg__dh-num--today': d === todayStr }]">{{ new Date(d + 'T00:00:00').getDate() }}</span>
             </div>
           </div>
+        </div>
 
-          <!-- Tracks area -->
-          <div class="tg__tracks">
-            <!-- Hour gridlines (full-width) -->
-            <div v-for="h in hourSlots" :key="'hl-' + h" class="tg__hline" :style="{ top: h * HOUR_HEIGHT + 'px' }" />
-            <!-- Half-hour gridlines -->
-            <div v-for="h in hourSlots" :key="'hh-' + h" class="tg__hline tg__hline--half" :style="{ top: (h * HOUR_HEIGHT + HOUR_HEIGHT / 2) + 'px' }" />
+        <!-- All-day row -->
+        <div class="tg__allday">
+          <div class="tg__gutter-cap tg__gutter-cap--allday">all-day</div>
+          <div class="tg__allday-cols">
+            <div v-for="d in viewDays" :key="'ad-' + d" class="tg__allday-col" :style="{ width: `${100 / viewDays.length}%` }">
+              <span
+                v-for="item in (viewDayItems[d] ?? []).filter((i) => i.all_day)"
+                :key="item.id"
+                class="tg__ad-chip"
+                :style="{ '--chip-bg': getSourceBg(item.source) }"
+                :title="item.title"
+                @click="item.source === 'event' ? openEditDrawer(item) : undefined"
+              >{{ item.title }}</span>
+            </div>
+          </div>
+        </div>
 
-            <!-- Column grid (CSS grid-based) -->
-            <div class="tg__cols" :style="{ 'grid-template-columns': `repeat(${viewDays.length}, 1fr)` }">
-              <div
-                v-for="d in viewDays"
-                :key="'col-' + d"
-                :class="['tg__col', { 'tg__col--today': d === todayStr }]"
-              >
-                <!-- Now indicator (inside today column) -->
-                <div v-if="d === todayStr" class="tg__now" :style="{ top: currentTimePct() + 'px' }">
-                  <span class="tg__now-dot" />
-                </div>
+        <!-- Scrollable time body -->
+        <div ref="scrollRef" class="tg__body">
+          <div class="tg__canvas" :style="{ height: 24 * HOUR_HEIGHT + 'px' }">
+            <!-- Hour gutter -->
+            <div class="tg__gutter">
+              <div v-for="h in hourSlots" :key="'lbl-' + h" class="tg__hour-lbl" :style="{ top: h * HOUR_HEIGHT + 'px' }">
+                <span v-if="h > 0">{{ formatHour(h) }}</span>
+              </div>
+            </div>
 
-                <!-- Timed events -->
+            <!-- Tracks area -->
+            <div class="tg__tracks">
+              <!-- Hour gridlines (full-width) -->
+              <div v-for="h in hourSlots" :key="'hl-' + h" class="tg__hline" :style="{ top: h * HOUR_HEIGHT + 'px' }" />
+              <!-- Half-hour gridlines -->
+              <div v-for="h in hourSlots" :key="'hh-' + h" class="tg__hline tg__hline--half" :style="{ top: (h * HOUR_HEIGHT + HOUR_HEIGHT / 2) + 'px' }" />
+
+              <!-- Column grid (CSS flex-based) -->
+              <div class="tg__cols">
                 <div
-                  v-for="item in (viewDayItems[d] ?? []).filter((i) => !i.all_day)"
-                  :key="item.id"
-                  class="tg__event"
-                  :style="{ top: itemTop(item) + 'px', height: itemHeight(item) + 'px', '--ev-color': getSourceColor(item.source), '--ev-bg': getSourceBg(item.source) }"
-                  :title="item.title"
-                  @click="item.source === 'event' ? openEditDrawer(item) : undefined"
+                  v-for="d in viewDays"
+                  :key="'col-' + d"
+                  :class="['tg__col', { 'tg__col--today': d === todayStr }]"
+                  :style="{ width: `${100 / viewDays.length}%` }"
                 >
-                  <span class="tg__ev-title">{{ item.title }}</span>
-                  <span v-if="item.time" class="tg__ev-time">{{ formatTime(item.time) }}</span>
+                  <!-- Now indicator (inside today column) -->
+                  <div v-if="d === todayStr" class="tg__now" :style="{ top: currentTimePct() + 'px' }">
+                    <span class="tg__now-dot" />
+                  </div>
+
+                  <!-- Timed events -->
+                  <div
+                    v-for="item in (viewDayItems[d] ?? []).filter((i) => !i.all_day)"
+                    :key="item.id"
+                    class="tg__event"
+                    :style="{ top: itemTop(item) + 'px', height: itemHeight(item) + 'px', '--ev-bg': getSourceBg(item.source) }"
+                    :title="item.title"
+                    @click="item.source === 'event' ? openEditDrawer(item) : undefined"
+                  >
+                    <span class="tg__ev-title">{{ item.title }}</span>
+                    <span v-if="item.time" class="tg__ev-time">{{ formatTime(item.time) }}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
     </div>
 
     <!-- ═══ AGENDA VIEW ═══ -->
@@ -1487,7 +1524,7 @@ watch(() => appStore.isPersonal, loadData)
 }
 
 .tg__day-heads {
-  display: grid;
+  display: flex;
   flex: 1;
   min-width: 0;
 }
@@ -1501,6 +1538,8 @@ watch(() => appStore.isPersonal, loadData)
   gap: 2px;
   border-right: 1px solid var(--color-border-subtle);
   min-width: 0;
+  flex: 1;
+  transition: width var(--duration-slow) var(--easing-smooth);
 }
 
 .tg__dh:last-child { border-right: none; }
@@ -1547,7 +1586,7 @@ watch(() => appStore.isPersonal, loadData)
 }
 
 .tg__allday-cols {
-  display: grid;
+  display: flex;
   flex: 1;
   min-width: 0;
 }
@@ -1560,6 +1599,8 @@ watch(() => appStore.isPersonal, loadData)
   border-right: 1px solid var(--color-border-subtle);
   min-width: 0;
   overflow: hidden;
+  flex: 1;
+  transition: width var(--duration-slow) var(--easing-smooth);
 }
 
 .tg__allday-col:last-child { border-right: none; }
@@ -1570,7 +1611,6 @@ watch(() => appStore.isPersonal, loadData)
   line-height: 18px;
   padding: 0 5px;
   border-radius: var(--radius-s);
-  border-left: 3px solid var(--chip-color);
   background: var(--chip-bg);
   white-space: nowrap;
   overflow: hidden;
@@ -1645,13 +1685,41 @@ watch(() => appStore.isPersonal, loadData)
 .tg__cols {
   position: absolute;
   inset: 0;
-  display: grid;
+  display: flex;
+  /* Ensure smooth transitions when changing column counts */
+  transition: all var(--duration-slow) var(--easing-smooth);
 }
 
 .tg__col {
   position: relative;
   border-right: 1px solid var(--color-border-subtle);
   min-width: 0;
+  /* Ensure columns transition smoothly */
+  transition: width var(--duration-slow) var(--easing-smooth);
+  flex: 1;
+}
+
+/* Enhanced transitions for day view switching */
+.tg__day-heads,
+.tg__allday-cols,
+.tg__cols {
+  transition: grid-template-columns var(--duration-slow) var(--easing-smooth);
+}
+
+.tg__dh,
+.tg__allday-col,
+.tg__col {
+  transition: width var(--duration-slow) var(--easing-smooth),
+              border-color var(--duration-fast) var(--easing-standard);
+}
+
+/* Fix for CSS grid transitions with different column counts */
+.tg__day-heads,
+.tg__allday-cols,
+.tg__cols {
+  /* Force hardware acceleration for smoother animations */
+  transform: translateZ(0);
+  will-change: grid-template-columns;
 }
 
 .tg__col:last-child { border-right: none; }
@@ -1688,13 +1756,23 @@ watch(() => appStore.isPersonal, loadData)
   left: 2px;
   right: 3px;
   border-radius: var(--radius-s);
-  border-left: 3px solid var(--ev-color);
   background: var(--ev-bg);
   padding: 2px 6px;
   overflow: hidden;
   cursor: pointer;
   z-index: 2;
   transition: filter var(--duration-fast) var(--easing-standard);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  justify-content: center;
+}
+
+/* Ensure text is readable on all backgrounds */
+.tg__event,
+.tg__ad-chip {
+  /* Add subtle text shadow for better readability on similar backgrounds */
+  text-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.05);
 }
 
 .tg__event:hover { filter: brightness(0.93); }
@@ -1702,19 +1780,19 @@ watch(() => appStore.isPersonal, loadData)
 .tg__ev-title {
   display: block;
   font-size: 11px;
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-fg-primary);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-fg-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.4;
+  line-height: 1.3;
 }
 
 .tg__ev-time {
   display: block;
   font-size: 10px;
-  color: var(--color-fg-secondary);
-  line-height: 1.3;
+  color: var(--color-fg-tertiary);
+  line-height: 1.2;
 }
 
 /* ═══ AGENDA VIEW ═══ */
@@ -1993,4 +2071,59 @@ watch(() => appStore.isPersonal, loadData)
   /* Legend */
   .cal-legend { flex-wrap: wrap; gap: var(--space-s) var(--space-m); }
 }
+
+.tg__cols {
+  transition: grid-template-columns var(--duration-slow) var(--easing-smooth);
+}
+
+.tg__col {
+  transition: width var(--duration-slow) var(--easing-smooth);
+}
+
+/* ═══ SMOOTH COLUMN TRANSITIONS (week ↔ 3-day ↔ day) ═══ */
+/* Ensure all flex elements transition smoothly */
+.tg__dh,
+.tg__allday-col,
+.tg__col {
+  transition: width var(--duration-slow) var(--easing-smooth),
+              border-color var(--duration-fast) var(--easing-standard);
+}
+
+/* Fix for smooth transitions */
+.tg__day-heads,
+.tg__allday-cols,
+.tg__cols {
+  /* Force hardware acceleration for smoother animations */
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Ensure text is readable on all backgrounds */
+.tg__event,
+.tg__ad-chip {
+  /* Add subtle text shadow for better readability on similar backgrounds */
+  text-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.05);
+}
+
+/* Override text colors for specific background issues */
+.tg__event:has([style*="--ev-bg: var(--color-brand-container)"]) .tg__ev-title,
+.tg__ad-chip:has([style*="--chip-bg: var(--color-brand-container)"]) {
+  color: var(--color-on-primary-container);
+}
+
+.tg__event:has([style*="--ev-bg: var(--color-warning-bg)"]) .tg__ev-title,
+.tg__ad-chip:has([style*="--chip-bg: var(--color-warning-bg)"]) {
+  color: var(--color-warning-fg);
+}
+
+.tg__event:has([style*="--ev-bg: var(--color-info-bg)"]) .tg__ev-title,
+.tg__ad-chip:has([style*="--chip-bg: var(--color-info-bg)"]) {
+  color: var(--color-info-fg);
+}
+
+.tg__event:has([style*="--ev-bg: var(--color-error-bg)"]) .tg__ev-title,
+.tg__ad-chip:has([style*="--chip-bg: var(--color-error-bg)"]) {
+  color: var(--color-error-fg);
+}
+
 </style>
