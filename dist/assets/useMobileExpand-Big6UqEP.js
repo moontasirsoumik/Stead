@@ -1,0 +1,2 @@
+import{O as f,r as d}from"./vue-l_Jza4jL.js";function s(o=640){const e=d(null);let n=null;typeof window<"u"&&(n=window.matchMedia(`(max-width: ${o}px)`));function u(){return n?.matches??!1}function a(l,t){u()?e.value=e.value===l?null:l:t()}function i(){e.value=null}return f(()=>{e.value=null}),{mobileExpandedId:e,handleRowClick:a,collapse:i}}export{s as u};
+//# sourceMappingURL=useMobileExpand-Big6UqEP.js.map

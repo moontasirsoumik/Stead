@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#4A5578" />
+    <meta name="description" content="Your household, beautifully organized. Tasks, finances, calendars, journals — everything your home needs, in one calm place." />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Stead — Household Management" />
+    <meta property="og:description" content="Tasks, finances, calendars, journals — everything your home needs, in one calm place." />
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Stead — Your household, beautifully organized" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Stead — Household Management" />
+    <meta name="twitter:description" content="Tasks, finances, calendars, journals — everything your home needs, in one calm place." />
+    <meta name="twitter:image" content="/og-image.png" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- Self-hosted fonts: preload critical subsets -->
+    <link rel="preload" href="/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/material-symbols-rounded.woff2" as="font" type="font/woff2" crossorigin />
+    <title>Stead</title>
+    <script>
+      // Resolve theme synchronously before first paint
+      (function() {
+        var pref = localStorage.getItem('stead-theme-preference') || 'system';
+        var isDark = pref === 'dark' || (pref === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (isDark) document.documentElement.dataset.theme = 'dark';
+      })();
+    </script>
+    <script type="module" crossorigin src="/assets/index-0pxNQl0H.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/vue-l_Jza4jL.js">
+    <link rel="modulepreload" crossorigin href="/assets/supabase-mBFwDSP3.js">
+    <link rel="modulepreload" crossorigin href="/assets/dexie-BkRHC-TD.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-7ZTh5Ikw.css">
+  </head>
+  <body>
+    <div id="app"></div>
+  </body>
+</html>

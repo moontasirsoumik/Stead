@@ -15,12 +15,14 @@ import SAvatar from '@/components/ui/SAvatar.vue'
 import FormDrawer from '@/components/forms/FormDrawer.vue'
 import FormField from '@/components/forms/FormField.vue'
 import FormSection from '@/components/forms/FormSection.vue'
+import PersonPicker from '@/components/forms/PersonPicker.vue'
 import MonthSummary from '@/features/money/components/MonthSummary.vue'
 import MoneyTabs from '@/features/money/components/MoneyTabs.vue'
 import { useIncomeStore } from '@/stores/income.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { useAppStore } from '@/stores/app.store'
 import { useHouseholdStore } from '@/stores/household.store'
+import { useToastStore } from '@/stores/toast.store'
 import { formatCents, formatDate } from '@/utils/format'
 import type { Income } from '@/models/income.model'
 import { useMobileExpand } from '@/composables/useMobileExpand'
@@ -29,6 +31,7 @@ const incomeStore = useIncomeStore()
 const authStore = useAuthStore()
 const appStore = useAppStore()
 const householdStore = useHouseholdStore()
+const toastStore = useToastStore()
 const { mobileExpandedId, handleRowClick } = useMobileExpand()
 const drawerOpen = ref(false)
 const editingId = ref<string | null>(null)
@@ -39,7 +42,9 @@ const form = ref({
   amount: '',
   source: '',
   category: '',
+  received_by_type: 'member' as 'member' | 'external',
   received_by: '',
+  received_by_name: '',
   recurring: false,
   note: '',
 })
@@ -54,19 +59,43 @@ const incomeCategoryOptions = [
   { value: 'other', label: 'Other' },
 ]
 
-const memberOptions = computed(() =>
-  householdStore.activeMembers.map((m) => ({
-    value: m.id,
-    label: m.name,
-  })),
-)
+const receivedByPerson = computed({
+  get: () => {
+    if (form.value.received_by_type === 'external') {
+      return {
+        type: 'external' as const,
+        memberId: null,
+        name: form.value.received_by_name,
+      }
+    }
 
-function getMemberName(id: string): string {
-  return householdStore.activeMembers.find((m) => m.id === id)?.name ?? 'Unknown'
+    const member = householdStore.activeMembers.find((item) => item.id === form.value.received_by)
+    return {
+      type: 'member' as const,
+      memberId: form.value.received_by || null,
+      name: member?.name ?? '',
+    }
+  },
+  set: (person) => {
+    form.value.received_by_type = person.type
+    form.value.received_by = person.type === 'member' ? person.memberId ?? '' : ''
+    form.value.received_by_name = person.type === 'external' ? person.name : ''
+  },
+})
+
+function getMemberName(id: string | null): string {
+  if (!id) return ''
+  return householdStore.activeMembers.find((m) => m.id === id)?.name ?? ''
 }
 
-function getMemberColor(id: string): string | undefined {
+function getMemberColor(id: string | null): string | undefined {
+  if (!id) return undefined
   return householdStore.activeMembers.find((m) => m.id === id)?.color
+}
+
+function getReceiverName(income: Income): string {
+  if (income.received_by_type === 'external') return income.received_by_name ?? ''
+  return getMemberName(income.received_by)
 }
 
 const scopedSorted = computed(() =>
@@ -91,7 +120,9 @@ function openAdd() {
     amount: '',
     source: '',
     category: '',
+    received_by_type: 'member',
     received_by: authStore.memberId ?? '',
+    received_by_name: '',
     recurring: false,
     note: '',
   }
@@ -105,7 +136,9 @@ function openEdit(income: Income) {
     amount: String(income.amount / 100),
     source: income.source,
     category: income.category,
-    received_by: income.received_by,
+    received_by_type: income.received_by_type,
+    received_by: income.received_by ?? '',
+    received_by_name: income.received_by_name ?? '',
     recurring: income.recurring,
     note: income.note ?? '',
   }
@@ -122,7 +155,9 @@ async function handleSubmit() {
       amount: cents,
       source: form.value.source,
       category: form.value.category,
-      received_by: form.value.received_by,
+      received_by_type: form.value.received_by_type,
+      received_by: form.value.received_by_type === 'member' ? form.value.received_by : null,
+      received_by_name: form.value.received_by_type === 'external' ? form.value.received_by_name : null,
       recurring: form.value.recurring,
       recurring_rule: null,
       note: form.value.note || null,
@@ -132,10 +167,14 @@ async function handleSubmit() {
     }
     if (editingId.value) {
       await incomeStore.update(editingId.value, payload)
+      toastStore.success('Income updated')
     } else {
       await incomeStore.create(payload)
+      toastStore.success('Income added')
     }
     drawerOpen.value = false
+  } catch (err) {
+    toastStore.error('Income was not saved', err instanceof Error ? err.message : 'Please try again.')
   } finally {
     saving.value = false
   }
@@ -210,7 +249,7 @@ onMounted(async () => {
             </div>
           </div>
           <div class="income-row__payer">
-            <SAvatar :name="getMemberName(item.received_by)" :color="getMemberColor(item.received_by)" size="sm" />
+            <SAvatar :name="getReceiverName(item)" :color="getMemberColor(item.received_by)" size="sm" />
           </div>
           <div class="income-row__amount">{{ formatCents(item.amount) }}</div>
           <span class="income-row__chevron material-symbols-rounded">expand_more</span>
@@ -221,9 +260,9 @@ onMounted(async () => {
               <SBadge v-if="item.category" variant="success" size="sm">{{ item.category }}</SBadge>
               <span class="m-detail__chip">{{ formatDate(item.date) }}</span>
               <SBadge v-if="item.recurring" variant="info" size="sm">Recurring</SBadge>
-              <span v-if="getMemberName(item.received_by)" class="m-detail__who">
-                <SAvatar :name="getMemberName(item.received_by)" :color="getMemberColor(item.received_by)" size="sm" />
-                <span>{{ getMemberName(item.received_by) }}</span>
+              <span v-if="getReceiverName(item)" class="m-detail__who">
+                <SAvatar :name="getReceiverName(item)" :color="getMemberColor(item.received_by)" size="sm" />
+                <span>{{ getReceiverName(item) }}</span>
               </span>
               <button class="m-detail__edit" @click.stop="openEdit(item)">
                 <span class="material-symbols-rounded">edit</span>
@@ -275,11 +314,11 @@ onMounted(async () => {
 
       <FormSection title="Assignment">
         <FormField>
-          <SSelect
-            v-model="form.received_by"
+          <PersonPicker
+            v-model="receivedByPerson"
             label="Received by"
-            :options="memberOptions"
-            placeholder="Select member"
+            :members="householdStore.activeMembers"
+            placeholder="Search or add a receiver"
             required
           />
         </FormField>

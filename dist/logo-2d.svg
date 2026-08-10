@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="47 54 116 92" width="512" height="406">
+  <!-- Stead Logo — 2D Diamond (top-down view of folded origami house) -->
+  <defs>
+    <clipPath id="wall-clip-v">
+      <rect x="0" y="61" width="210" height="74" />
+    </clipPath>
+  </defs>
+
+  <!-- Floor: 100×80 -->
+  <rect x="55" y="58" width="100" height="80" fill="#DDD5C8" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+
+  <!-- Roof front (purple bar peeks at bottom) -->
+  <rect x="55" y="80" width="100" height="58" fill="#9B5DE5" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+
+  <!-- Front wall -->
+  <rect x="55" y="83" width="100" height="55" fill="#2A9D8F" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+
+  <!-- Roof back (gold bar peeks at top) -->
+  <rect x="55" y="58" width="100" height="58" fill="#E9C46A" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+
+  <!-- Back wall -->
+  <rect x="55" y="58" width="100" height="55" fill="#264653" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+
+  <!-- Left wall (clipped to expose roof bars) -->
+  <rect x="55" y="58" width="55" height="80" fill="#E07A5F" stroke="rgba(255,255,255,0.08)" stroke-width="0.5" clip-path="url(#wall-clip-v)"/>
+
+  <!-- Tri left (clipped) -->
+  <polygon points="110,58 55,98 110,138" fill="#F2CC8F" stroke="rgba(255,255,255,0.08)" stroke-width="0.5" clip-path="url(#wall-clip-v)"/>
+
+  <!-- Right wall (clipped to expose roof bars) -->
+  <rect x="100" y="58" width="55" height="80" fill="#3D85C6" stroke="rgba(255,255,255,0.08)" stroke-width="0.5" clip-path="url(#wall-clip-v)"/>
+
+  <!-- Tri right (clipped) -->
+  <polygon points="100,58 155,98 100,138" fill="#81B29A" stroke="rgba(255,255,255,0.08)" stroke-width="0.5" clip-path="url(#wall-clip-v)"/>
+</svg>

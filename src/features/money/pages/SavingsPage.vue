@@ -14,6 +14,7 @@ import SAvatar from '@/components/ui/SAvatar.vue'
 import FormDrawer from '@/components/forms/FormDrawer.vue'
 import FormField from '@/components/forms/FormField.vue'
 import FormSection from '@/components/forms/FormSection.vue'
+import PersonPicker from '@/components/forms/PersonPicker.vue'
 import MonthSummary from '@/features/money/components/MonthSummary.vue'
 import MoneyTabs from '@/features/money/components/MoneyTabs.vue'
 import { useMobileExpand } from '@/composables/useMobileExpand'
@@ -21,14 +22,17 @@ import { useSavingsStore } from '@/stores/savings.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { useAppStore } from '@/stores/app.store'
 import { useHouseholdStore } from '@/stores/household.store'
+import { useToastStore } from '@/stores/toast.store'
 import { formatCents, formatDate } from '@/utils/format'
 import type { SavingsGoal } from '@/models/savings-goal.model'
+import type { GoalContribution } from '@/models/goal-contribution.model'
 import type { GoalStatus, TaskPriority } from '@/models/enums'
 
 const savingsStore = useSavingsStore()
 const authStore = useAuthStore()
 const appStore = useAppStore()
 const householdStore = useHouseholdStore()
+const toastStore = useToastStore()
 const { mobileExpandedId, handleRowClick } = useMobileExpand()
 const goalDrawerOpen = ref(false)
 const contribDrawerOpen = ref(false)
@@ -48,7 +52,9 @@ const goalForm = ref({
 const contribForm = ref({
   amount: '',
   date: new Date().toISOString().slice(0, 10),
+  contributed_by_type: 'member' as 'member' | 'external',
   contributed_by: '',
+  contributed_by_name: '',
   note: '',
 })
 
@@ -58,19 +64,43 @@ const priorityOptions = [
   { value: 'low', label: 'Low' },
 ]
 
-const memberOptions = computed(() =>
-  householdStore.activeMembers.map((m) => ({
-    value: m.id,
-    label: m.name,
-  })),
-)
+const contributedByPerson = computed({
+  get: () => {
+    if (contribForm.value.contributed_by_type === 'external') {
+      return {
+        type: 'external' as const,
+        memberId: null,
+        name: contribForm.value.contributed_by_name,
+      }
+    }
 
-function getMemberName(id: string): string {
-  return householdStore.activeMembers.find((m) => m.id === id)?.name ?? 'Unknown'
+    const member = householdStore.activeMembers.find((item) => item.id === contribForm.value.contributed_by)
+    return {
+      type: 'member' as const,
+      memberId: contribForm.value.contributed_by || null,
+      name: member?.name ?? '',
+    }
+  },
+  set: (person) => {
+    contribForm.value.contributed_by_type = person.type
+    contribForm.value.contributed_by = person.type === 'member' ? person.memberId ?? '' : ''
+    contribForm.value.contributed_by_name = person.type === 'external' ? person.name : ''
+  },
+})
+
+function getMemberName(id: string | null): string {
+  if (!id) return ''
+  return householdStore.activeMembers.find((m) => m.id === id)?.name ?? ''
 }
 
-function getMemberColor(id: string): string | undefined {
+function getMemberColor(id: string | null): string | undefined {
+  if (!id) return undefined
   return householdStore.activeMembers.find((m) => m.id === id)?.color
+}
+
+function getContributorName(contrib: GoalContribution): string {
+  if (contrib.contributed_by_type === 'external') return contrib.contributed_by_name ?? ''
+  return getMemberName(contrib.contributed_by)
 }
 
 function statusVariant(status: GoalStatus): 'default' | 'success' | 'warning' | 'error' {
@@ -131,7 +161,9 @@ function openAddContribution(goalId: string) {
   contribForm.value = {
     amount: '',
     date: new Date().toISOString().slice(0, 10),
+    contributed_by_type: 'member',
     contributed_by: authStore.memberId ?? '',
+    contributed_by_name: '',
     note: '',
   }
   contribDrawerOpen.value = true
@@ -168,10 +200,14 @@ async function handleGoalSubmit() {
     if (editingGoalId.value) {
       const { current_amount: _c, status: _s, ...rest } = payload
       await savingsStore.updateGoal(editingGoalId.value, rest)
+      toastStore.success('Goal updated')
     } else {
       await savingsStore.createGoal(payload)
+      toastStore.success('Goal created')
     }
     goalDrawerOpen.value = false
+  } catch (err) {
+    toastStore.error('Goal was not saved', err instanceof Error ? err.message : 'Please try again.')
   } finally {
     saving.value = false
   }
@@ -187,13 +223,18 @@ async function handleContribSubmit() {
       goal_id: contributingGoalId.value,
       amount: cents,
       date: contribForm.value.date,
-      contributed_by: contribForm.value.contributed_by,
+      contributed_by_type: contribForm.value.contributed_by_type,
+      contributed_by: contribForm.value.contributed_by_type === 'member' ? contribForm.value.contributed_by : null,
+      contributed_by_name: contribForm.value.contributed_by_type === 'external' ? contribForm.value.contributed_by_name : null,
       note: contribForm.value.note || null,
       deleted: false,
       scope: appStore.scope,
       owner_id: appStore.scope === 'personal' ? authStore.memberId : null,
     })
+    toastStore.success('Contribution added')
     contribDrawerOpen.value = false
+  } catch (err) {
+    toastStore.error('Contribution was not saved', err instanceof Error ? err.message : 'Please try again.')
   } finally {
     saving.value = false
   }
@@ -307,10 +348,10 @@ onMounted(async () => {
         <div v-if="expandedGoalId === goal.id" class="goal-contribs">
           <div v-for="contrib in (savingsStore.contributions[goal.id] ?? [])" :key="contrib.id" class="contrib-row">
             <div class="contrib-row__left">
-              <SAvatar :name="getMemberName(contrib.contributed_by)" :color="getMemberColor(contrib.contributed_by)" size="sm" />
+              <SAvatar :name="getContributorName(contrib)" :color="getMemberColor(contrib.contributed_by)" size="sm" />
               <div class="contrib-row__details">
                 <span class="contrib-row__amount">{{ formatCents(contrib.amount) }}</span>
-                <span class="contrib-row__date">{{ formatDate(contrib.date) }}</span>
+                <span class="contrib-row__date">{{ formatDate(contrib.date) }} · {{ getContributorName(contrib) }}</span>
               </div>
             </div>
             <span v-if="contrib.note" class="contrib-row__note">{{ contrib.note }}</span>
@@ -382,11 +423,11 @@ onMounted(async () => {
           <SInput v-model="contribForm.date" label="Date" type="text" placeholder="YYYY-MM-DD" required />
         </FormField>
         <FormField>
-          <SSelect
-            v-model="contribForm.contributed_by"
+          <PersonPicker
+            v-model="contributedByPerson"
             label="Contributed by"
-            :options="memberOptions"
-            placeholder="Select member"
+            :members="householdStore.activeMembers"
+            placeholder="Search or add a contributor"
             required
           />
         </FormField>

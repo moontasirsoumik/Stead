@@ -23,7 +23,12 @@ export const useExpenseSplitsStore = defineStore('expense-splits', () => {
   async function upsertForExpense(
     expenseId: string,
     householdId: string,
-    newSplits: Array<{ member_id: string; amount: number }>,
+    newSplits: Array<{
+      participant_type: 'member' | 'external'
+      member_id: string | null
+      participant_name: string | null
+      amount: number
+    }>,
   ) {
     const fresh = await expenseSplitsDataService.upsertForExpense(expenseId, householdId, newSplits)
     // Merge into local splits
@@ -49,36 +54,37 @@ export const useExpenseSplitsStore = defineStore('expense-splits', () => {
   }
 
   /** Splits where the given member OWES someone else (they didn't pay but have a share) */
-  function owedByMember(memberId: string, paidByMap: Record<string, string>): ExpenseSplit[] {
+  function owedByMember(memberId: string, paidByMap: Record<string, string | null>): ExpenseSplit[] {
     return splits.value.filter(
-      (s) => s.member_id === memberId && paidByMap[s.expense_id] !== memberId && !s.settled,
+      (s) => !!paidByMap[s.expense_id] && s.member_id === memberId && paidByMap[s.expense_id] !== memberId && !s.settled,
     )
   }
 
   /** Splits on expenses paid by this member (others owe them) */
-  function owedToMember(memberId: string, paidByMap: Record<string, string>): ExpenseSplit[] {
+  function owedToMember(memberId: string, paidByMap: Record<string, string | null>): ExpenseSplit[] {
     return splits.value.filter(
       (s) => paidByMap[s.expense_id] === memberId && s.member_id !== memberId && !s.settled,
     )
   }
 
   /** Total cents the member owes to others */
-  function totalOwedByMember(memberId: string, paidByMap: Record<string, string>): number {
+  function totalOwedByMember(memberId: string, paidByMap: Record<string, string | null>): number {
     return owedByMember(memberId, paidByMap).reduce((sum, s) => sum + s.amount, 0)
   }
 
   /** Total cents others owe the member */
-  function totalOwedToMember(memberId: string, paidByMap: Record<string, string>): number {
+  function totalOwedToMember(memberId: string, paidByMap: Record<string, string | null>): number {
     return owedToMember(memberId, paidByMap).reduce((sum, s) => sum + s.amount, 0)
   }
 
   /** Per-member breakdown of what they owe this member */
   function perMemberOwedTo(
     memberId: string,
-    paidByMap: Record<string, string>,
+    paidByMap: Record<string, string | null>,
   ): Array<{ member_id: string; amount: number; splits: ExpenseSplit[] }> {
     const byMember: Record<string, ExpenseSplit[]> = {}
     for (const s of owedToMember(memberId, paidByMap)) {
+      if (!s.member_id) continue
       if (!byMember[s.member_id]) byMember[s.member_id] = []
       byMember[s.member_id].push(s)
     }
@@ -92,7 +98,7 @@ export const useExpenseSplitsStore = defineStore('expense-splits', () => {
   /** Per-person breakdown of what this member owes */
   function perMemberOwedBy(
     memberId: string,
-    paidByMap: Record<string, string>,
+    paidByMap: Record<string, string | null>,
   ): Array<{ member_id: string; amount: number; splits: ExpenseSplit[] }> {
     const byPayer: Record<string, ExpenseSplit[]> = {}
     for (const s of owedByMember(memberId, paidByMap)) {

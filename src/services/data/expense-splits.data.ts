@@ -43,10 +43,16 @@ export const expenseSplitsDataService = {
   async upsertForExpense(
     expenseId: string,
     householdId: string,
-    splits: Array<{ member_id: string; amount: number }>,
+    splits: Array<{
+      participant_type: 'member' | 'external'
+      member_id: string | null
+      participant_name: string | null
+      amount: number
+    }>,
   ): Promise<ExpenseSplit[]> {
     // Delete existing splits for this expense first
-    await supabase.from('expense_splits').delete().eq('expense_id', expenseId)
+    const { error: deleteError } = await supabase.from('expense_splits').delete().eq('expense_id', expenseId)
+    if (deleteError) throw deleteError
     await db.expense_splits.where('expense_id').equals(expenseId).delete()
 
     if (!splits.length) return []
@@ -54,7 +60,9 @@ export const expenseSplitsDataService = {
     const rows = splits.map((s) => ({
       expense_id: expenseId,
       household_id: householdId,
-      member_id: s.member_id,
+      member_id: s.participant_type === 'member' ? s.member_id : null,
+      participant_type: s.participant_type,
+      participant_name: s.participant_type === 'external' ? s.participant_name : null,
       amount: s.amount,
       settled: false,
       settled_at: null,
@@ -70,15 +78,17 @@ export const expenseSplitsDataService = {
 
   async settle(splitId: string): Promise<void> {
     const now = new Date().toISOString()
-    await supabase
+    const { error } = await supabase
       .from('expense_splits')
       .update({ settled: true, settled_at: now })
       .eq('id', splitId)
+    if (error) throw error
     await db.expense_splits.update(splitId, { settled: true, settled_at: now })
   },
 
   async deleteByExpense(expenseId: string): Promise<void> {
-    await supabase.from('expense_splits').delete().eq('expense_id', expenseId)
+    const { error } = await supabase.from('expense_splits').delete().eq('expense_id', expenseId)
+    if (error) throw error
     await db.expense_splits.where('expense_id').equals(expenseId).delete()
   },
 }

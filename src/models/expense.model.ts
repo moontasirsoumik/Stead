@@ -7,7 +7,9 @@ export interface Expense extends HouseholdEntity {
   category: string
   subcategory: string | null
   description: string
-  paid_by: string
+  paid_by: string | null
+  paid_by_type: 'member' | 'external'
+  paid_by_name: string | null
   shared: boolean
   tags: string[] | null
   note: string | null

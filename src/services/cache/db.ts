@@ -21,6 +21,7 @@ import type { ExpenseSplit } from '@/models/expense-split.model'
 import type { CalendarEvent } from '@/models/calendar-event.model'
 import type { EntityShare } from '@/models/entity-share.model'
 import type { Tracker, TrackerEntry } from '@/models/tracker.model'
+import type { ManualSettlement } from '@/models/manual-settlement.model'
 
 class SteadDatabase extends Dexie {
   members!: Table<Member, string>
@@ -47,6 +48,7 @@ class SteadDatabase extends Dexie {
   entity_shares!: Table<EntityShare, string>
   trackers!: Table<Tracker, string>
   tracker_entries!: Table<TrackerEntry, string>
+  manual_settlements!: Table<ManualSettlement, string>
 
   constructor() {
     super('stead-db')
@@ -110,6 +112,10 @@ class SteadDatabase extends Dexie {
     this.version(9).stores({
       trackers: 'id, household_id, owner_id, scope, position, value_type',
       tracker_entries: 'id, tracker_id, household_id, entry_date',
+    })
+    this.version(10).stores({
+      expenses: 'id, household_id, date, category, scope, owner_id, paid_by, paid_by_type',
+      manual_settlements: 'id, household_id, owner_id, visibility, status, date, counterparty_member_id',
     })
   }
 }

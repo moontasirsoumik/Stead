@@ -9,6 +9,8 @@ export const billSchema = householdEntitySchema.extend({
   frequency: z.enum(['monthly', 'quarterly', 'annual', 'custom']),
   auto_pay: z.coerce.boolean(),
   paid_by: z.string().uuid().nullable(),
+  paid_by_type: z.enum(['member', 'external']).default('member'),
+  paid_by_name: z.string().nullable().default(null),
   status: z.enum(['upcoming', 'paid', 'overdue', 'skipped']),
   last_paid_date: z.string().nullable(),
   note: z.string().nullable(),
