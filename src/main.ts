@@ -4,6 +4,7 @@ import router from './router'
 import { setupAuthGuard } from './router/guards'
 import { useAuthStore } from './stores/auth.store'
 import { useAppStore } from './stores/app.store'
+import { useToastStore } from './stores/toast.store'
 import { APP_VERSION } from './version'
 import { db } from './services/cache/db'
 import App from './App.vue'
@@ -25,12 +26,14 @@ function bootstrap() {
   const app = createApp(App)
   const pinia = createPinia()
   const appStore = useAppStore(pinia)
+  const toastStore = useToastStore(pinia)
 
   app.use(pinia)
   app.use(router)
 
   app.config.errorHandler = (err, instance, info) => {
     console.error('Uncaught error:', err, info)
+    toastStore.error('Something went wrong', err instanceof Error ? err.message : 'Unexpected app error')
   }
 
   // Initialize auth before first navigation

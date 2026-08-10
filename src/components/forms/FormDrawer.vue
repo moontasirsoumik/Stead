@@ -61,10 +61,15 @@ function handleOverlayMouseUp(e: MouseEvent) {
           </div>
 
           <div class="drawer__footer">
-            <SButton variant="secondary" @click="$emit('close')">Cancel</SButton>
-            <SButton :loading="loading" @click="$emit('submit')">
-              {{ submitLabel }}
-            </SButton>
+            <div class="drawer__footer-start">
+              <slot name="footer-start" />
+            </div>
+            <div class="drawer__footer-actions">
+              <SButton variant="secondary" @click="$emit('close')">Cancel</SButton>
+              <SButton :loading="loading" @click="$emit('submit')">
+                {{ submitLabel }}
+              </SButton>
+            </div>
           </div>
         </aside>
       </div>
@@ -127,11 +132,23 @@ function handleOverlayMouseUp(e: MouseEvent) {
 
 .drawer__footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   gap: var(--space-s);
   padding: var(--space-l) var(--space-xl);
   border-top: 1px solid var(--color-border-subtle);
   flex-shrink: 0;
+}
+
+.drawer__footer-start,
+.drawer__footer-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+}
+
+.drawer__footer-start {
+  min-width: 0;
 }
 
 .drawer-enter-active {

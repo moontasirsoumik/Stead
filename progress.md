@@ -1,7 +1,7 @@
 # Stead — Implementation Progress Tracker
 
-> **Last updated:** 2026-05-21
-> **Current Phase:** P36 — Complete (Dynamic Trackers)
+> **Last updated:** 2026-08-10
+> **Current Phase:** P37 - Complete (Expense Splits, Manual Settlements, Toasts)
 
 ---
 
@@ -51,6 +51,7 @@
 | P35 | Mobile Expand + Chip-Flow Detail | ✅ Done | 2026-07-13 | 2026-07-13 | useMobileExpand composable + compact chip-flow detail panels on 12 pages |
 | P36 | Dynamic Trackers | ✅ Done | 2026-05-21 | 2026-05-21 | General-purpose tracker system with typed entries, analytics (trends, cycles, correlations, anomalies), SVG charts. Migration 017 applied to DB. |
 | P36b | Trackers UI Redesign | ✅ Done | 2026-05-20 | 2026-05-20 | Premium compact design: TrackerCard (accent dot, sparkline, cycle ring), EntryLogTable (month-grouped timeline, hover actions, 20-entry limit), TrackerChart (gradient fill, smooth curves, segmented pills), CyclePanel (full cycle visualization with phase detection, prediction, history bars). |
+| P37 | Expense Splits, Manual Settlements, Toasts | ✅ Done | 2026-08-10 | 2026-08-10 | Exact split validation, external payers, manual settlements, expense remove action, global toasts. |
 
 ---
 
@@ -609,3 +610,28 @@ Added tap-to-expand/collapse on all mobile table rows with a compact chip-flow d
 10. ContactsPage — category badge + phone/email link chips
 11. DocumentsPage — type/status badges, issue/expiry dates, reference number mono chip
 12. WishlistPage — priority/status badges, category chip, "View item ↗" link
+---
+
+## Phase 37 - Expense Splits, Manual Settlements, Toasts
+
+Implemented fixes and extensions for the money module.
+
+### Done
+- Expenses: split validation now requires exact cent-balanced splits before save.
+- Expenses: even splits distribute remainder cents correctly.
+- Expenses: payer can be either a household member or an outside-household person.
+- Expenses: payer type dropdown removed; paid-by is now a single search/add person picker.
+- Expenses: person picker duplicate rows removed; browser autocomplete disabled; menu spacing/sections improved.
+- Expenses: custom splits now use selected participants instead of requiring zero rows for non-attendees.
+- Expenses: custom splits can include outside-household sharers, with leftover automatically assigned to the payer.
+- Expenses: even splits now use the same participant picker and can include outside-household sharers.
+- Settlements: outside sharers now appear in the current payer's "Owed to you" list.
+- Expenses: edit drawer includes a remove action that deletes split rows and soft-deletes the expense.
+- Settlements: split expenses paid by a household member continue to flow into "You owe" / "Owed to you".
+- Settlements: external-paid expenses do not create broken internal creditor rows.
+- Settlements: added manual settlement CRUD for member/external counterparties.
+- Settlements: household scope shows public manual settlements; personal scope shows the current member's private and public manual settlements.
+- Feedback: added global toast store and viewport; money create/update/delete/settle flows now show success/failure/validation notifications.
+- Database: added migration for external expense payers and `manual_settlements` with RLS.
+- Database: added migration for external participants in `expense_splits`.
+- Verification: `bun run type-check` and `bun run build` pass.

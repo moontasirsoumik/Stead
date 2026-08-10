@@ -9,6 +9,8 @@ export interface Bill extends HouseholdEntity {
   frequency: BillFrequency
   auto_pay: boolean
   paid_by: string | null
+  paid_by_type: 'member' | 'external'
+  paid_by_name: string | null
   status: BillStatus
   last_paid_date: string | null
   note: string | null

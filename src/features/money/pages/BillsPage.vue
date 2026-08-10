@@ -14,11 +14,13 @@ import SBadge from '@/components/ui/SBadge.vue'
 import FormDrawer from '@/components/forms/FormDrawer.vue'
 import FormField from '@/components/forms/FormField.vue'
 import FormSection from '@/components/forms/FormSection.vue'
+import PersonPicker from '@/components/forms/PersonPicker.vue'
 import MonthSummary from '@/features/money/components/MonthSummary.vue'
 import MoneyTabs from '@/features/money/components/MoneyTabs.vue'
 import { useBillsStore } from '@/stores/bills.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { useHouseholdStore } from '@/stores/household.store'
+import { useToastStore } from '@/stores/toast.store'
 import { formatCents } from '@/utils/format'
 import { EXPENSE_CATEGORIES } from '@/constants/categories'
 import type { Bill } from '@/models/bill.model'
@@ -28,6 +30,7 @@ import { useMobileExpand } from '@/composables/useMobileExpand'
 const billsStore = useBillsStore()
 const authStore = useAuthStore()
 const householdStore = useHouseholdStore()
+const toastStore = useToastStore()
 
 const { mobileExpandedId, handleRowClick } = useMobileExpand()
 
@@ -42,7 +45,9 @@ const form = ref({
   due_day: '',
   frequency: 'monthly' as string,
   auto_pay: false,
+  paid_by_type: 'member' as 'member' | 'external',
   paid_by: '',
+  paid_by_name: '',
   note: '',
 })
 
@@ -58,13 +63,6 @@ const frequencyOptions = [
   { value: 'custom', label: 'Custom' },
 ]
 
-const memberOptions = computed(() =>
-  householdStore.activeMembers.map((m) => ({
-    value: m.id,
-    label: m.name,
-  })),
-)
-
 function statusVariant(status: BillStatus): 'default' | 'success' | 'error' | 'warning' {
   const map: Record<BillStatus, 'default' | 'success' | 'error' | 'warning'> = {
     upcoming: 'default',
@@ -73,6 +71,40 @@ function statusVariant(status: BillStatus): 'default' | 'success' | 'error' | 'w
     skipped: 'warning',
   }
   return map[status]
+}
+
+const paidByPerson = computed({
+  get: () => {
+    if (form.value.paid_by_type === 'external') {
+      return {
+        type: 'external' as const,
+        memberId: null,
+        name: form.value.paid_by_name,
+      }
+    }
+
+    const member = householdStore.activeMembers.find((item) => item.id === form.value.paid_by)
+    return {
+      type: 'member' as const,
+      memberId: form.value.paid_by || null,
+      name: member?.name ?? '',
+    }
+  },
+  set: (person) => {
+    form.value.paid_by_type = person.type
+    form.value.paid_by = person.type === 'member' ? person.memberId ?? '' : ''
+    form.value.paid_by_name = person.type === 'external' ? person.name : ''
+  },
+})
+
+function getMemberName(id: string | null): string {
+  if (!id) return ''
+  return householdStore.activeMembers.find((member) => member.id === id)?.name ?? ''
+}
+
+function getBillPayerName(bill: Bill): string {
+  if (bill.paid_by_type === 'external') return bill.paid_by_name ?? ''
+  return getMemberName(bill.paid_by)
 }
 
 const summaryStats = computed(() => [
@@ -99,7 +131,9 @@ function openAdd() {
     due_day: '',
     frequency: 'monthly',
     auto_pay: false,
+    paid_by_type: 'member',
     paid_by: authStore.memberId ?? '',
+    paid_by_name: '',
     note: '',
   }
   drawerOpen.value = true
@@ -114,7 +148,9 @@ function openEdit(bill: Bill) {
     due_day: String(bill.due_day),
     frequency: bill.frequency,
     auto_pay: bill.auto_pay,
+    paid_by_type: bill.paid_by_type,
     paid_by: bill.paid_by ?? '',
+    paid_by_name: bill.paid_by_name ?? '',
     note: bill.note ?? '',
   }
   drawerOpen.value = true
@@ -132,7 +168,9 @@ async function handleSubmit() {
       due_day: parseInt(form.value.due_day, 10),
       frequency: form.value.frequency as Bill['frequency'],
       auto_pay: form.value.auto_pay,
-      paid_by: form.value.paid_by || null,
+      paid_by_type: form.value.paid_by_type,
+      paid_by: form.value.paid_by_type === 'member' ? form.value.paid_by || null : null,
+      paid_by_name: form.value.paid_by_type === 'external' ? form.value.paid_by_name : null,
       status: 'upcoming' as BillStatus,
       last_paid_date: null,
       note: form.value.note || null,
@@ -141,24 +179,38 @@ async function handleSubmit() {
     if (editingId.value) {
       const { status: _s, last_paid_date: _l, ...rest } = payload
       await billsStore.update(editingId.value, rest)
+      toastStore.success('Bill updated')
     } else {
       await billsStore.create(payload)
+      toastStore.success('Bill added')
     }
     drawerOpen.value = false
+  } catch (err) {
+    toastStore.error('Bill was not saved', err instanceof Error ? err.message : 'Please try again.')
   } finally {
     saving.value = false
   }
 }
 
 async function markPaid(bill: Bill) {
-  await billsStore.update(bill.id, {
-    status: 'paid',
-    last_paid_date: new Date().toISOString().slice(0, 10),
-  })
+  try {
+    await billsStore.update(bill.id, {
+      status: 'paid',
+      last_paid_date: new Date().toISOString().slice(0, 10),
+    })
+    toastStore.success('Bill marked paid')
+  } catch (err) {
+    toastStore.error('Bill was not updated', err instanceof Error ? err.message : 'Please try again.')
+  }
 }
 
 async function skipBill(bill: Bill) {
-  await billsStore.update(bill.id, { status: 'skipped' })
+  try {
+    await billsStore.update(bill.id, { status: 'skipped' })
+    toastStore.success('Bill skipped')
+  } catch (err) {
+    toastStore.error('Bill was not updated', err instanceof Error ? err.message : 'Please try again.')
+  }
 }
 
 onMounted(async () => {
@@ -225,7 +277,9 @@ onMounted(async () => {
         <div class="bill-row" :class="{ 'bill-row--m-expanded': mobileExpandedId === bill.id }" @click="handleRowClick(bill.id, () => openEdit(bill))">
           <div class="bill-row__name">
             <span class="bill-row__title">{{ bill.name }}</span>
-            <span class="bill-row__meta">Day {{ bill.due_day }}</span>
+            <span class="bill-row__meta">
+              Day {{ bill.due_day }}<template v-if="getBillPayerName(bill)"> · {{ getBillPayerName(bill) }}</template>
+            </span>
           </div>
           <div class="bill-row__chips">
             <div class="bill-row__status">
@@ -248,6 +302,7 @@ onMounted(async () => {
               <SBadge variant="default" size="sm">{{ bill.frequency }}</SBadge>
               <SBadge v-if="bill.auto_pay" variant="info" size="sm">Auto-pay</SBadge>
               <span v-if="bill.due_day" class="m-detail__chip">Due {{ bill.due_day }}</span>
+              <span v-if="getBillPayerName(bill)" class="m-detail__chip">{{ getBillPayerName(bill) }}</span>
               <span v-if="bill.note" class="m-detail__note">{{ bill.note }}</span>
               <button class="m-detail__edit" @click.stop="openEdit(bill)">
                 <span class="material-symbols-rounded">edit</span>
@@ -307,11 +362,11 @@ onMounted(async () => {
 
       <FormSection title="Assignment">
         <FormField>
-          <SSelect
-            v-model="form.paid_by"
+          <PersonPicker
+            v-model="paidByPerson"
             label="Paid by"
-            :options="memberOptions"
-            placeholder="Select member"
+            :members="householdStore.activeMembers"
+            placeholder="Search or add a payer"
           />
         </FormField>
         <FormField row>

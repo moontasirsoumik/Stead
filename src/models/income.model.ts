@@ -6,7 +6,9 @@ export interface Income extends HouseholdEntity {
   amount: number
   source: string
   category: string
-  received_by: string
+  received_by: string | null
+  received_by_type: 'member' | 'external'
+  received_by_name: string | null
   recurring: boolean
   recurring_rule: string | null
   note: string | null

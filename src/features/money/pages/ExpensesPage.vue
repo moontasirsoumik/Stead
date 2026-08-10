@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onBeforeUnmount, onMounted, watch } from 'vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
@@ -13,6 +13,7 @@ import STextarea from '@/components/ui/STextarea.vue'
 import SToggle from '@/components/ui/SToggle.vue'
 import SBadge from '@/components/ui/SBadge.vue'
 import SAvatar from '@/components/ui/SAvatar.vue'
+import ConfirmDialog from '@/components/feedback/ConfirmDialog.vue'
 import FormDrawer from '@/components/forms/FormDrawer.vue'
 import FormField from '@/components/forms/FormField.vue'
 import FormSection from '@/components/forms/FormSection.vue'
@@ -23,22 +24,47 @@ import { useExpenseSplitsStore } from '@/stores/expense-splits.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { useAppStore } from '@/stores/app.store'
 import { useHouseholdStore } from '@/stores/household.store'
+import { useToastStore } from '@/stores/toast.store'
 import { formatCents, formatDate } from '@/utils/format'
 import { EXPENSE_CATEGORIES } from '@/constants/categories'
 import { useMobileExpand } from '@/composables/useMobileExpand'
 import type { Expense } from '@/models/expense.model'
+import type { Member } from '@/models/member.model'
+import type { ExpenseSplit } from '@/models/expense-split.model'
+
+type PersonKind = 'member' | 'external'
+
+interface SplitPerson {
+  key: string
+  type: PersonKind
+  member_id: string | null
+  name: string
+  color?: string
+  amount: string
+}
 
 const expensesStore = useExpensesStore()
 const splitsStore = useExpenseSplitsStore()
 const authStore = useAuthStore()
 const appStore = useAppStore()
 const householdStore = useHouseholdStore()
+const toastStore = useToastStore()
 const { mobileExpandedId, handleRowClick } = useMobileExpand()
 const search = ref('')
 const categoryFilter = ref('')
 const drawerOpen = ref(false)
 const editingId = ref<string | null>(null)
 const saving = ref(false)
+const deleting = ref(false)
+const confirmDeleteOpen = ref(false)
+const payerSearch = ref('')
+const payerPickerOpen = ref(false)
+const payerPickerRef = ref<HTMLElement | null>(null)
+const splitSearch = ref('')
+const splitPickerOpen = ref(false)
+const splitPickerRef = ref<HTMLElement | null>(null)
+const splitParticipants = ref<SplitPerson[]>([])
+let externalPersonCounter = 0
 
 const form = ref({
   date: new Date().toISOString().slice(0, 10),
@@ -46,22 +72,33 @@ const form = ref({
   category: '',
   subcategory: '',
   description: '',
+  paid_by_type: 'member' as 'member' | 'external',
   paid_by: '',
+  paid_by_name: '',
   split: false,
   split_mode: 'even' as 'even' | 'custom',
   tags: '',
   note: '',
 })
 
-// Per-member custom split amounts (string for input binding)
-const splitAmounts = ref<Record<string, string>>({})
+function splitCents(totalCents: number, count: number): number[] {
+  if (!count) return []
+  const baseCents = Math.floor(totalCents / count)
+  let remainder = totalCents - baseCents * count
+  return Array.from({ length: count }, () => {
+    const extra = remainder > 0 ? 1 : 0
+    remainder -= extra
+    return baseCents + extra
+  })
+}
 
 function recalcEvenSplits() {
-  const members = householdStore.activeMembers
-  if (!members.length) return
-  const total = parseFloat(form.value.amount || '0')
-  const perPerson = (total / members.length).toFixed(2)
-  splitAmounts.value = Object.fromEntries(members.map((m) => [m.id, perPerson]))
+  // Even split rows are computed from the current household members.
+}
+
+function expenseCents(): number {
+  const totalCents = Math.round((parseFloat(form.value.amount || '0') || 0) * 100)
+  return Number.isFinite(totalCents) ? totalCents : 0
 }
 
 // Reactively update even splits when amount or mode changes
@@ -86,32 +123,326 @@ watch(
   },
 )
 
-const splitTotal = computed(() =>
-  Object.values(splitAmounts.value).reduce((s, v) => s + (parseFloat(v) || 0), 0),
+const selectedPayer = computed(() => {
+  if (form.value.paid_by_type === 'member') {
+    const member = householdStore.activeMembers.find((m) => m.id === form.value.paid_by)
+    if (!member) return null
+    return {
+      key: `member:${member.id}`,
+      type: 'member' as PersonKind,
+      member_id: member.id,
+      name: member.name,
+      color: member.color,
+    }
+  }
+
+  const name = form.value.paid_by_name.trim()
+  if (!name) return null
+  return {
+    key: `external:payer:${name.toLowerCase()}`,
+    type: 'external' as PersonKind,
+    member_id: null,
+    name,
+    color: undefined,
+  }
+})
+
+const payerKey = computed(() => selectedPayer.value?.key ?? '')
+const normalizedPayerName = computed(() =>
+  normalizePersonName(selectedPayer.value?.name || payerSearch.value),
 )
-const splitRemaining = computed(() =>
-  parseFloat(form.value.amount || '0') - splitTotal.value,
+
+const selectedParticipantKeys = computed(() =>
+  new Set(
+    splitParticipants.value
+      .filter((person) => person.key !== payerKey.value && !isSameAsPayerName(person.name))
+      .map((person) => person.key),
+  ),
 )
-const splitBalanced = computed(() => Math.abs(splitRemaining.value) <= 0.01)
+
+function normalizePersonName(name: string | null | undefined): string {
+  return (name ?? '').trim().replace(/\s+/g, ' ').toLowerCase()
+}
+
+function isSameAsPayerName(name: string): boolean {
+  const normalized = normalizePersonName(name)
+  return !!normalized && normalized === normalizedPayerName.value
+}
+
+function uniqueMembers(members: Member[]): Member[] {
+  const seen = new Set<string>()
+  const unique: Member[] = []
+  for (const member of members) {
+    const normalizedName = normalizePersonName(member.name)
+    const key = member.id || normalizedName
+    const nameKey = `name:${normalizedName}`
+    if (seen.has(key) || seen.has(nameKey)) continue
+    seen.add(key)
+    if (normalizedName) seen.add(nameKey)
+    unique.push(member)
+  }
+  return unique
+}
+
+const uniqueActiveMembers = computed(() => uniqueMembers(householdStore.activeMembers))
+
+const payerOptions = computed(() => {
+  const query = normalizePersonName(payerSearch.value)
+  return uniqueActiveMembers.value.filter((member) =>
+    `member:${member.id}` !== payerKey.value
+    && (!query || normalizePersonName(member.name).includes(query)),
+  )
+})
+
+const payerExactMatch = computed(() => {
+  const query = normalizePersonName(payerSearch.value)
+  if (!query) return null
+  return uniqueActiveMembers.value.find((member) => normalizePersonName(member.name) === query) ?? null
+})
+
+const splitMemberOptions = computed(() => {
+  const query = normalizePersonName(splitSearch.value)
+  return uniqueActiveMembers.value.filter((member) => {
+    const key = `member:${member.id}`
+    const normalizedName = normalizePersonName(member.name)
+    return key !== payerKey.value
+      && normalizedName !== normalizedPayerName.value
+      && !isSameAsPayerName(member.name)
+      && !selectedParticipantKeys.value.has(key)
+      && !splitParticipants.value.some((person) => normalizePersonName(person.name) === normalizedName)
+      && (!query || normalizedName.includes(query))
+  })
+})
+
+const splitExactMemberMatch = computed(() => {
+  const query = normalizePersonName(splitSearch.value)
+  if (!query) return null
+  if (query === normalizedPayerName.value) return null
+  return uniqueActiveMembers.value.find((member) => normalizePersonName(member.name) === query) ?? null
+})
+
+const splitExactExternalMatch = computed(() => {
+  const query = normalizePersonName(splitSearch.value)
+  if (!query) return false
+  return splitParticipants.value.some(
+    (person) => person.type === 'external' && normalizePersonName(person.name) === query,
+  )
+})
+
+const nonPayerSplitParticipants = computed(() =>
+  splitParticipants.value.filter((person) => person.key !== payerKey.value && !isSameAsPayerName(person.name)),
+)
+
+const splitPeople = computed<SplitPerson[]>(() => {
+  if (!selectedPayer.value) return [...nonPayerSplitParticipants.value]
+  return [{ ...selectedPayer.value, amount: '' }, ...nonPayerSplitParticipants.value]
+})
+
+const evenSplitRows = computed<SplitPerson[]>(() => {
+  const cents = splitCents(expenseCents(), splitPeople.value.length)
+  return splitPeople.value.map((person, index) => ({
+    ...person,
+    amount: (cents[index] / 100).toFixed(2),
+  }))
+})
+
+const selectedSplitCents = computed(() =>
+  nonPayerSplitParticipants.value.reduce((sum, person) => sum + Math.round((parseFloat(person.amount) || 0) * 100), 0),
+)
+
+const payerRemainderCents = computed(() =>
+  form.value.split_mode === 'custom' ? expenseCents() - selectedSplitCents.value : 0,
+)
+
+const splitDisplayRows = computed<SplitPerson[]>(() => {
+  if (!form.value.split) return []
+  if (form.value.split_mode === 'even') return evenSplitRows.value
+
+  const rows: SplitPerson[] = []
+  if (selectedPayer.value) {
+    rows.push({
+      ...selectedPayer.value,
+      amount: (payerRemainderCents.value / 100).toFixed(2),
+    })
+  }
+  rows.push(...nonPayerSplitParticipants.value)
+  return rows
+})
+
+const splitBalanced = computed(() => {
+  if (!form.value.split) return true
+  if (form.value.split_mode === 'even') return true
+  return payerRemainderCents.value >= 0
+})
+
+const splitRemainingLabel = computed(() =>
+  formatCents(Math.abs(payerRemainderCents.value)),
+)
 
 const categoryOptions = EXPENSE_CATEGORIES.map((c) => ({
   value: c,
   label: c.charAt(0).toUpperCase() + c.slice(1),
 }))
 
-const memberOptions = computed(() =>
-  householdStore.activeMembers.map((m) => ({
-    value: m.id,
-    label: m.name,
-  })),
-)
-
 function getMemberName(id: string): string {
   return householdStore.activeMembers.find((m) => m.id === id)?.name ?? 'Unknown'
 }
 
-function getMemberColor(id: string): string | undefined {
+function getMemberColor(id: string | null): string | undefined {
+  if (!id) return undefined
   return householdStore.activeMembers.find((m) => m.id === id)?.color
+}
+
+function getPayerName(expense: Expense): string {
+  if (expense.paid_by_type === 'external') return expense.paid_by_name ?? 'External payer'
+  return expense.paid_by ? getMemberName(expense.paid_by) : 'Unknown'
+}
+
+function syncPayerSearch() {
+  payerSearch.value = selectedPayer.value?.name ?? ''
+}
+
+function selectPayerMember(member: Member) {
+  const normalized = member.name.trim().toLowerCase()
+  form.value.paid_by_type = 'member'
+  form.value.paid_by = member.id
+  form.value.paid_by_name = ''
+  payerSearch.value = member.name
+  payerPickerOpen.value = false
+  splitParticipants.value = splitParticipants.value.filter(
+    (person) => person.key !== `member:${member.id}` && person.name.trim().toLowerCase() !== normalized,
+  )
+}
+
+function selectExternalPayer(name = payerSearch.value) {
+  const trimmed = name.trim()
+  if (!trimmed) return
+  const normalized = trimmed.toLowerCase()
+  form.value.paid_by_type = 'external'
+  form.value.paid_by = ''
+  form.value.paid_by_name = trimmed
+  payerSearch.value = trimmed
+  payerPickerOpen.value = false
+  splitParticipants.value = splitParticipants.value.filter(
+    (person) => person.name.trim().toLowerCase() !== normalized,
+  )
+}
+
+function commitPayerSearch() {
+  const trimmed = payerSearch.value.trim()
+  if (!trimmed || normalizePersonName(selectedPayer.value?.name) === normalizePersonName(trimmed)) return
+
+  const member = uniqueActiveMembers.value.find((m) => normalizePersonName(m.name) === normalizePersonName(trimmed))
+  if (member) {
+    selectPayerMember(member)
+  } else {
+    selectExternalPayer(trimmed)
+  }
+}
+
+function addSplitMember(member: Member) {
+  const key = `member:${member.id}`
+  const normalizedName = normalizePersonName(member.name)
+  const alreadySelected = splitParticipants.value.some((person) =>
+    person.key === key || normalizePersonName(person.name) === normalizedName,
+  )
+  if (key === payerKey.value || isSameAsPayerName(member.name) || alreadySelected) {
+    splitSearch.value = ''
+    return
+  }
+  splitParticipants.value.push({
+    key,
+    type: 'member',
+    member_id: member.id,
+    name: member.name,
+    color: member.color,
+    amount: '',
+  })
+  splitSearch.value = ''
+}
+
+function addExternalSplitPerson(name = splitSearch.value) {
+  const trimmed = name.trim()
+  if (!trimmed) return
+  if (isSameAsPayerName(trimmed)) {
+    splitSearch.value = ''
+    return
+  }
+  const exactMember = uniqueActiveMembers.value.find((m) => normalizePersonName(m.name) === normalizePersonName(trimmed))
+  if (exactMember) {
+    addSplitMember(exactMember)
+    return
+  }
+  if (splitParticipants.value.some((person) => normalizePersonName(person.name) === normalizePersonName(trimmed))) {
+    splitSearch.value = ''
+    return
+  }
+  const key = `external:${trimmed.toLowerCase()}:${externalPersonCounter++}`
+  splitParticipants.value.push({
+    key,
+    type: 'external',
+    member_id: null,
+    name: trimmed,
+    amount: '',
+  })
+  splitSearch.value = ''
+}
+
+function removeSplitPerson(key: string) {
+  splitParticipants.value = splitParticipants.value.filter((person) => person.key !== key)
+}
+
+function isAutoPayerRow(person: SplitPerson) {
+  return form.value.split_mode === 'custom'
+    && person.key === payerKey.value
+    && !selectedParticipantKeys.value.has(person.key)
+}
+
+function isPayerRow(person: SplitPerson) {
+  return person.key === payerKey.value
+}
+
+function personAmountLabel(person: SplitPerson) {
+  const amount = Math.round((parseFloat(person.amount) || 0) * 100)
+  if (amount < 0) return `-${formatCents(Math.abs(amount))}`
+  return formatCents(amount)
+}
+
+function personFromSplit(split: ExpenseSplit): SplitPerson | null {
+  if (split.participant_type === 'external') {
+    const name = split.participant_name?.trim()
+    if (!name) return null
+    return {
+      key: `external:${name.toLowerCase()}:${externalPersonCounter++}`,
+      type: 'external',
+      member_id: null,
+      name,
+      amount: String(split.amount / 100),
+    }
+  }
+
+  if (!split.member_id) return null
+  const member = householdStore.activeMembers.find((m) => m.id === split.member_id)
+  return {
+    key: `member:${split.member_id}`,
+    type: 'member',
+    member_id: split.member_id,
+    name: member?.name ?? 'Unknown',
+    color: member?.color,
+    amount: String(split.amount / 100),
+  }
+}
+
+function handlePersonPickerPointerDown(event: PointerEvent) {
+  const target = event.target
+  if (!(target instanceof Node)) return
+  if (payerPickerRef.value && !payerPickerRef.value.contains(target)) {
+    commitPayerSearch()
+    payerPickerOpen.value = false
+  }
+  if (splitPickerRef.value && !splitPickerRef.value.contains(target)) {
+    splitPickerOpen.value = false
+  }
 }
 
 const filteredGroups = computed(() => {
@@ -165,13 +496,16 @@ function openAdd() {
     category: '',
     subcategory: '',
     description: '',
+    paid_by_type: 'member',
     paid_by: authStore.memberId ?? '',
+    paid_by_name: '',
     split: false,
     split_mode: 'even',
     tags: '',
     note: '',
   }
-  splitAmounts.value = {}
+  splitParticipants.value = []
+  syncPayerSearch()
   drawerOpen.value = true
 }
 
@@ -185,18 +519,22 @@ function openEdit(expense: Expense) {
     category: expense.category,
     subcategory: expense.subcategory ?? '',
     description: expense.description,
-    paid_by: expense.paid_by,
+    paid_by_type: expense.paid_by_type,
+    paid_by: expense.paid_by ?? '',
+    paid_by_name: expense.paid_by_name ?? '',
     split: hasSplits,
     split_mode: hasSplits ? 'custom' : 'even',
     tags: expense.tags?.join(', ') ?? '',
     note: expense.note ?? '',
   }
   if (hasSplits) {
-    splitAmounts.value = Object.fromEntries(
-      existingSplits.map((s) => [s.member_id, String(s.amount / 100)])
-    )
+    syncPayerSearch()
+    splitParticipants.value = existingSplits
+      .map(personFromSplit)
+      .filter((person): person is SplitPerson => !!person && person.key !== payerKey.value)
   } else {
-    splitAmounts.value = {}
+    splitParticipants.value = []
+    syncPayerSearch()
   }
   drawerOpen.value = true
 }
@@ -204,10 +542,46 @@ function openEdit(expense: Expense) {
 async function handleSubmit() {
   saving.value = true
   try {
+    commitPayerSearch()
+
     const cents = Math.round(parseFloat(form.value.amount) * 100)
+    if (!Number.isFinite(cents) || cents <= 0) {
+      toastStore.warning('Add an amount', 'Expense amount must be greater than zero.')
+      return
+    }
+
+    if (!selectedPayer.value) {
+      toastStore.warning('Choose a payer', 'Pick a household member or add an outside person.')
+      return
+    }
+
     const tags = form.value.tags
       ? form.value.tags.split(',').map((t) => t.trim()).filter(Boolean)
       : null
+
+    const splitPayload = form.value.split
+      ? splitDisplayRows.value
+        .map((person) => ({
+          participant_type: person.type,
+          member_id: person.type === 'member' ? person.member_id : null,
+          participant_name: person.type === 'external' ? person.name : null,
+          amount: Math.round((parseFloat(person.amount) || 0) * 100),
+        }))
+        .filter((split) => split.amount > 0)
+      : []
+
+    if (form.value.split) {
+      const splitCents = splitPayload.reduce((sum, split) => sum + split.amount, 0)
+      if (splitCents !== cents) {
+        toastStore.warning('Split is not balanced', `${formatCents(Math.abs(cents - splitCents))} is off the expense total.`)
+        return
+      }
+
+      if (form.value.split_mode === 'custom' && payerRemainderCents.value < 0) {
+        toastStore.warning('Split is over budget', `${splitRemainingLabel.value} is over the expense total.`)
+        return
+      }
+    }
 
     const payload = {
       household_id: authStore.householdId!,
@@ -216,7 +590,9 @@ async function handleSubmit() {
       category: form.value.category,
       subcategory: form.value.subcategory || null,
       description: form.value.description,
-      paid_by: form.value.paid_by,
+      paid_by_type: selectedPayer.value.type,
+      paid_by: selectedPayer.value.type === 'member' ? selectedPayer.value.member_id : null,
+      paid_by_name: selectedPayer.value.type === 'external' ? selectedPayer.value.name : null,
       shared: form.value.split,
       tags,
       note: form.value.note || null,
@@ -229,28 +605,46 @@ async function handleSubmit() {
     if (editingId.value) {
       await expensesStore.update(editingId.value, payload)
       expenseId = editingId.value
+      toastStore.success('Expense updated')
     } else {
       const created = await expensesStore.create(payload)
       expenseId = created.id
+      toastStore.success('Expense added')
     }
 
     // Save splits
     if (form.value.split && authStore.householdId) {
-      const splitPayload = Object.entries(splitAmounts.value)
-        .map(([member_id, val]) => ({ member_id, amount: Math.round(parseFloat(val) * 100) }))
-        .filter((s) => s.amount > 0)
       await splitsStore.upsertForExpense(expenseId, authStore.householdId, splitPayload)
     } else if (editingId.value) {
       await splitsStore.deleteByExpense(editingId.value)
     }
 
     drawerOpen.value = false
+  } catch (err) {
+    toastStore.error('Expense was not saved', err instanceof Error ? err.message : 'Please try again.')
   } finally {
     saving.value = false
   }
 }
 
+async function handleDelete() {
+  if (!editingId.value) return
+  deleting.value = true
+  try {
+    await splitsStore.deleteByExpense(editingId.value)
+    await expensesStore.remove(editingId.value)
+    toastStore.success('Expense removed')
+    confirmDeleteOpen.value = false
+    drawerOpen.value = false
+  } catch (err) {
+    toastStore.error('Expense was not removed', err instanceof Error ? err.message : 'Please try again.')
+  } finally {
+    deleting.value = false
+  }
+}
+
 onMounted(async () => {
+  document.addEventListener('pointerdown', handlePersonPickerPointerDown, true)
   if (authStore.householdId) {
     if (!householdStore.activeMembers.length) {
       await householdStore.loadMembers(authStore.householdId)
@@ -260,6 +654,10 @@ onMounted(async () => {
       splitsStore.fetchByHousehold(authStore.householdId),
     ])
   }
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('pointerdown', handlePersonPickerPointerDown, true)
 })
 </script>
 
@@ -344,7 +742,7 @@ onMounted(async () => {
             </div>
           </div>
           <div class="expense-row__payer">
-            <SAvatar :name="getMemberName(expense.paid_by)" :color="getMemberColor(expense.paid_by)" size="sm" />
+            <SAvatar :name="getPayerName(expense)" :color="getMemberColor(expense.paid_by)" size="sm" />
           </div>
           <div class="expense-row__amount">
             {{ formatCents(expense.amount) }}
@@ -357,9 +755,9 @@ onMounted(async () => {
               <SBadge variant="brand" size="sm">{{ expense.category }}</SBadge>
               <span class="m-detail__chip">{{ formatDate(expense.date) }}</span>
               <span v-if="expense.subcategory" class="m-detail__chip">{{ expense.subcategory }}</span>
-              <span v-if="getMemberName(expense.paid_by)" class="m-detail__who">
-                <SAvatar :name="getMemberName(expense.paid_by)" :color="getMemberColor(expense.paid_by)" size="sm" />
-                <span>{{ getMemberName(expense.paid_by) }}</span>
+              <span v-if="getPayerName(expense)" class="m-detail__who">
+                <SAvatar :name="getPayerName(expense)" :color="getMemberColor(expense.paid_by)" size="sm" />
+                <span>{{ getPayerName(expense) }}</span>
               </span>
               <button class="m-detail__edit" @click.stop="openEdit(expense)">
                 <span class="material-symbols-rounded">edit</span>
@@ -415,13 +813,51 @@ onMounted(async () => {
 
       <FormSection title="Assignment">
         <FormField>
-          <SSelect
-            v-model="form.paid_by"
-            label="Paid by"
-            :options="memberOptions"
-            placeholder="Select member"
-            required
-          />
+          <div ref="payerPickerRef" class="person-picker">
+            <label class="person-picker__label">Paid by <span aria-hidden="true">*</span></label>
+            <div class="person-picker__control">
+              <SAvatar
+                v-if="selectedPayer"
+                :name="selectedPayer.name"
+                :color="selectedPayer.color"
+                size="sm"
+              />
+              <input
+                v-model="payerSearch"
+                class="person-picker__input"
+                type="text"
+                autocomplete="off"
+                placeholder="Search or add a payer"
+                @focus="payerPickerOpen = true"
+                @input="payerPickerOpen = true"
+                @keydown.enter.prevent="commitPayerSearch()"
+                @keydown.esc.prevent="payerPickerOpen = false"
+              />
+            </div>
+            <div v-if="payerPickerOpen" class="person-picker__menu">
+              <div v-if="payerOptions.length" class="person-picker__section">Household</div>
+              <button
+                v-for="member in payerOptions"
+                :key="member.id"
+                class="person-picker__option"
+                type="button"
+                @mousedown.prevent="selectPayerMember(member)"
+              >
+                <SAvatar :name="member.name" :color="member.color" size="sm" />
+                <span>{{ member.name }}</span>
+              </button>
+              <div v-if="payerSearch.trim() && !payerExactMatch" class="person-picker__section">Outside household</div>
+              <button
+                v-if="payerSearch.trim() && !payerExactMatch"
+                class="person-picker__option person-picker__option--add"
+                type="button"
+                @mousedown.prevent="selectExternalPayer()"
+              >
+                <span class="material-symbols-rounded">add</span>
+                <span>Add "{{ payerSearch.trim() }}"</span>
+              </button>
+            </div>
+          </div>
         </FormField>
 
         <FormField>
@@ -440,23 +876,75 @@ onMounted(async () => {
             />
           </FormField>
 
+          <FormField>
+            <div ref="splitPickerRef" class="person-picker">
+              <label class="person-picker__label">Sharing with</label>
+              <div class="person-picker__control">
+                <span class="material-symbols-rounded person-picker__lead">group_add</span>
+                <input
+                  v-model="splitSearch"
+                  class="person-picker__input"
+                  type="text"
+                  autocomplete="off"
+                  placeholder="Search or add a person"
+                  @focus="splitPickerOpen = true"
+                  @input="splitPickerOpen = true"
+                  @keydown.enter.prevent="addExternalSplitPerson()"
+                  @keydown.esc.prevent="splitPickerOpen = false"
+                />
+              </div>
+              <div v-if="splitPickerOpen" class="person-picker__menu">
+                <div class="person-picker__menu-head">
+                  <span>Add everyone who shared this expense</span>
+                  <button type="button" @mousedown.prevent="splitPickerOpen = false">Done</button>
+                </div>
+                <div v-if="splitMemberOptions.length" class="person-picker__section">Household</div>
+                <button
+                  v-for="member in splitMemberOptions"
+                  :key="member.id"
+                  class="person-picker__option"
+                  type="button"
+                  @mousedown.prevent="addSplitMember(member)"
+                >
+                  <span class="material-symbols-rounded person-picker__check">add_circle</span>
+                  <SAvatar :name="member.name" :color="member.color" size="sm" />
+                  <span>{{ member.name }}</span>
+                </button>
+                <div v-if="splitSearch.trim() && !splitExactMemberMatch && !splitExactExternalMatch && !isSameAsPayerName(splitSearch)" class="person-picker__section">Outside household</div>
+                <button
+                  v-if="splitSearch.trim() && !splitExactMemberMatch && !splitExactExternalMatch && !isSameAsPayerName(splitSearch)"
+                  class="person-picker__option person-picker__option--add"
+                  type="button"
+                  @mousedown.prevent="addExternalSplitPerson()"
+                >
+                  <span class="material-symbols-rounded">add</span>
+                  <span>Add "{{ splitSearch.trim() }}"</span>
+                </button>
+                <div v-if="!splitMemberOptions.length && (!splitSearch.trim() || splitExactMemberMatch || splitExactExternalMatch)" class="person-picker__empty">
+                  No more matches
+                </div>
+              </div>
+            </div>
+          </FormField>
+
           <div class="split-breakdown">
             <div
-              v-for="member in householdStore.activeMembers"
-              :key="member.id"
+              v-for="person in splitDisplayRows"
+              :key="person.key"
               class="split-row"
             >
               <div class="split-row__member">
-                <SAvatar :name="member.name" :color="member.color" size="sm" />
-                <span class="split-row__name">{{ member.name }}</span>
+                <SAvatar :name="person.name" :color="person.color" size="sm" />
+                <span class="split-row__name">{{ person.name }}</span>
+                <SBadge v-if="isPayerRow(person)" variant="default" size="sm">Payer</SBadge>
               </div>
               <div class="split-row__amount">
-                <span v-if="form.split_mode === 'even'" class="split-row__value">
-                  ${{ splitAmounts[member.id] ?? '0.00' }}
+                <span v-if="form.split_mode === 'even' || isAutoPayerRow(person)" class="split-row__value">
+                  {{ personAmountLabel(person) }}
                 </span>
                 <input
                   v-else
-                  v-model="splitAmounts[member.id]"
+                  v-model="person.amount"
                   type="number"
                   step="0.01"
                   inputmode="decimal"
@@ -464,14 +952,25 @@ onMounted(async () => {
                   class="split-row__editor"
                 />
               </div>
+              <button
+                v-if="!isPayerRow(person)"
+                class="split-row__remove"
+                type="button"
+                aria-label="Remove from split"
+                @click="removeSplitPerson(person.key)"
+              >
+                <span class="material-symbols-rounded">close</span>
+              </button>
             </div>
 
             <div class="split-status" :class="splitBalanced ? 'split-status--ok' : 'split-status--error'">
               <span v-if="splitBalanced" class="material-symbols-rounded split-status__icon">check_circle</span>
               <span v-else class="material-symbols-rounded split-status__icon">error</span>
-              <span v-if="splitBalanced">Balanced</span>
-              <span v-else-if="splitRemaining > 0">${{ splitRemaining.toFixed(2) }} unallocated</span>
-              <span v-else>${{ Math.abs(splitRemaining).toFixed(2) }} over budget</span>
+              <span v-if="form.split_mode === 'custom' && splitBalanced && selectedPayer">
+                {{ splitRemainingLabel }} assigned to {{ selectedPayer.name }}
+              </span>
+              <span v-else-if="splitBalanced">Balanced</span>
+              <span v-else>{{ splitRemainingLabel }} over budget</span>
             </div>
           </div>
         </template>
@@ -485,7 +984,23 @@ onMounted(async () => {
           <STextarea v-model="form.note" label="Note" placeholder="Additional details…" :rows="3" />
         </FormField>
       </FormSection>
+
+      <template v-if="editingId" #footer-start>
+        <SButton variant="danger" :loading="deleting" @click="confirmDeleteOpen = true">
+          Remove
+        </SButton>
+      </template>
     </FormDrawer>
+
+    <ConfirmDialog
+      :open="confirmDeleteOpen"
+      title="Remove Expense"
+      message="This expense and its split rows will be removed."
+      confirm-label="Remove"
+      variant="danger"
+      @confirm="handleDelete"
+      @cancel="confirmDeleteOpen = false"
+    />
   </PageContainer>
 </template>
 
@@ -593,6 +1108,155 @@ onMounted(async () => {
   display: none;
 }
 
+.person-picker {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.person-picker__label {
+  font: var(--text-label-md);
+  color: var(--color-fg-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.person-picker__label span {
+  color: var(--color-error);
+  margin-left: var(--space-2xs);
+}
+
+.person-picker__control {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  min-height: var(--height-input);
+  padding: 0 var(--space-m);
+  background: var(--color-surface-input);
+  border: 1px solid var(--color-border-input);
+  border-radius: var(--radius-m);
+  transition:
+    border-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard);
+}
+
+.person-picker__control:focus-within {
+  border-color: var(--color-brand-primary);
+  box-shadow: 0 0 0 3px rgba(74, 85, 120, 0.12);
+}
+
+.person-picker__lead {
+  color: var(--color-fg-tertiary);
+  font-size: 20px;
+}
+
+.person-picker__input {
+  flex: 1;
+  min-width: 0;
+  height: calc(var(--height-input) - 2px);
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--color-fg-primary);
+  font: var(--text-body-1);
+}
+
+.person-picker__input::placeholder {
+  color: var(--color-fg-tertiary);
+}
+
+.person-picker__menu {
+  position: absolute;
+  top: calc(100% + var(--space-2xs));
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: var(--space-s);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-m);
+  background: var(--color-surface-dialog);
+  box-shadow: var(--shadow-dialog);
+}
+
+.person-picker__menu-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-s);
+  padding: var(--space-xs) var(--space-s) var(--space-s);
+  border-bottom: 1px solid var(--color-border-subtle);
+  margin-bottom: var(--space-xs);
+}
+
+.person-picker__menu-head span {
+  font: var(--text-caption);
+  color: var(--color-fg-secondary);
+}
+
+.person-picker__menu-head button {
+  height: 26px;
+  padding: 0 var(--space-s);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-s);
+  background: var(--color-surface-container-low);
+  color: var(--color-fg-primary);
+  font: var(--text-label-sm);
+  cursor: pointer;
+}
+
+.person-picker__section {
+  padding: var(--space-xs) var(--space-s) var(--space-2xs);
+  font: var(--text-caption);
+  color: var(--color-fg-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+}
+
+.person-picker__option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  width: 100%;
+  min-height: 42px;
+  padding: var(--space-s);
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--color-fg-primary);
+  font: var(--text-body-2);
+  text-align: left;
+  cursor: pointer;
+}
+
+.person-picker__option:hover {
+  background: var(--color-surface-container-low);
+}
+
+.person-picker__option--add {
+  color: var(--color-brand-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.person-picker__option .material-symbols-rounded {
+  font-size: 18px;
+}
+
+.person-picker__check {
+  color: var(--color-brand-primary);
+}
+
+.person-picker__empty {
+  padding: var(--space-m) var(--space-s);
+  color: var(--color-fg-tertiary);
+  font: var(--text-body-2);
+  text-align: center;
+}
+
 @media (max-width: 640px) {
   :deep(.pageheader__actions) { display: none; }
   .money-mobile-actions { display: flex; margin-bottom: var(--space-m); }
@@ -693,9 +1357,9 @@ onMounted(async () => {
 }
 
 .split-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 132px auto;
   align-items: center;
-  justify-content: space-between;
   min-height: var(--height-row-min);
   padding: 0 var(--space-l);
   gap: var(--space-m);
@@ -721,8 +1385,29 @@ onMounted(async () => {
 }
 
 .split-row__amount {
-  flex-shrink: 0;
   width: 132px;
+}
+
+.split-row__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--color-fg-tertiary);
+  cursor: pointer;
+}
+
+.split-row__remove:hover {
+  background: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+.split-row__remove .material-symbols-rounded {
+  font-size: 17px;
 }
 
 .split-row__value {
