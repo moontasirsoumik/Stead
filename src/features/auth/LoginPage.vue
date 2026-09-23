@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import SInput from '@/components/ui/SInput.vue'
@@ -12,6 +12,8 @@ const { signIn, error: authError, loading } = useAuth()
 const email = ref('')
 const password = ref('')
 const rememberMe = ref(false)
+const signupPending = computed(() => route.query.checkEmail === '1')
+const emailConfirmed = computed(() => route.query.confirmed === '1')
 
 async function handleSubmit() {
   const success = await signIn(email.value, password.value, rememberMe.value)
@@ -30,6 +32,14 @@ async function handleSubmit() {
     </div>
 
     <form class="auth-form" @submit.prevent="handleSubmit">
+      <p v-if="signupPending" class="auth-notice" role="status">
+        Check your inbox and verify your email before signing in.
+      </p>
+
+      <p v-else-if="emailConfirmed" class="auth-notice auth-notice--success" role="status">
+        Your email is verified. You can now sign in.
+      </p>
+
       <div class="input-group">
         <SInput
           v-model="email"
@@ -101,6 +111,19 @@ async function handleSubmit() {
   display: flex;
   flex-direction: column;
   gap: var(--space-m);
+}
+
+.auth-notice {
+  font: var(--text-body-2);
+  color: var(--color-info);
+  background: var(--color-info-bg);
+  padding: var(--space-xs) var(--space-m);
+  border-radius: var(--radius-s);
+}
+
+.auth-notice--success {
+  color: var(--color-success-fg);
+  background: var(--color-success-bg);
 }
 
 .input-icon {

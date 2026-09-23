@@ -121,11 +121,12 @@ export const useAuthStore = defineStore('auth', () => {
     loading.value = true
 
     try {
-      const { error: authError } = await supabase.auth.signUp({
+      const { data, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: { full_name: fullName },
+          emailRedirectTo: `${window.location.origin}/login?confirmed=1`,
         },
       })
 
@@ -134,7 +135,6 @@ export const useAuthStore = defineStore('auth', () => {
         return false
       }
 
-      const { data } = await supabase.auth.getSession()
       session.value = data.session
       user.value = data.session?.user ?? null
       return true
