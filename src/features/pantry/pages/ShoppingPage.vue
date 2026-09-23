@@ -19,14 +19,18 @@ import ConfirmDialog from '@/components/feedback/ConfirmDialog.vue'
 import PantryTabs from '@/features/pantry/components/PantryTabs.vue'
 import { useMobileExpand } from '@/composables/useMobileExpand'
 import { useShoppingStore } from '@/stores/shopping.store'
+import { useInventoryStore } from '@/stores/inventory.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { useHouseholdStore } from '@/stores/household.store'
+import { useToastStore } from '@/stores/toast.store'
 import type { GroceryItem } from '@/models/grocery.model'
 import type { GroceryStatus, TaskPriority } from '@/models/enums'
 
 const shoppingStore = useShoppingStore()
+const inventoryStore = useInventoryStore()
 const authStore = useAuthStore()
 const householdStore = useHouseholdStore()
+const toastStore = useToastStore()
 const { mobileExpandedId, handleRowClick } = useMobileExpand()
 
 const search = ref('')
@@ -51,6 +55,8 @@ const quickAddName = ref('')
 const confirmClearOpen = ref(false)
 const confirmDeleteOpen = ref(false)
 const deletingItemId = ref<string | null>(null)
+const completingItemIds = ref(new Set<string>())
+const departingItemIds = ref(new Set<string>())
 
 const priorityFormOptions = [
   { value: 'high', label: 'High' },
@@ -94,6 +100,10 @@ const filteredItems = computed(() => {
   }
   return result
 })
+
+const hasVisibleActiveItems = computed(
+  () => filteredItems.value.length > 0 || departingItemIds.value.size > 0,
+)
 
 function getDateLabel(iso: string | null | undefined): string {
   if (!iso) return 'Earlier'
@@ -228,8 +238,32 @@ async function handleDelete() {
   deletingItemId.value = null
 }
 
+function isCompleting(id: string): boolean {
+  return completingItemIds.value.has(id)
+}
+
 async function handleMarkDone(id: string) {
-  await shoppingStore.markDone(id, authStore.memberId ?? null)
+  const item = shoppingStore.items.find((candidate) => candidate.id === id)
+  const householdId = authStore.householdId
+  if (!item || !householdId || isCompleting(id)) return
+
+  completingItemIds.value.add(id)
+  try {
+    await inventoryStore.recordPurchase(item, householdId)
+    departingItemIds.value.add(id)
+    await shoppingStore.markDone(id, authStore.memberId ?? null)
+    toastStore.success(`${item.name} added to inventory`, 'Marked as bought.')
+    const departureDelay = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 180
+    window.setTimeout(() => departingItemIds.value.delete(id), departureDelay)
+  } catch (error) {
+    departingItemIds.value.delete(id)
+    toastStore.error(
+      'Could not complete item',
+      error instanceof Error ? error.message : 'Please try again.',
+    )
+  } finally {
+    completingItemIds.value.delete(id)
+  }
 }
 
 async function handleUnmarkDone(id: string) {
@@ -244,7 +278,10 @@ async function handleClearBought() {
 
 onMounted(async () => {
   if (authStore.householdId) {
-    await shoppingStore.fetchItems(authStore.householdId)
+    await Promise.all([
+      shoppingStore.fetchItems(authStore.householdId),
+      inventoryStore.fetchItems(authStore.householdId),
+    ])
     if (!householdStore.members.length) {
       await householdStore.loadMembers(authStore.householdId)
     }
@@ -306,7 +343,7 @@ onMounted(async () => {
     <template v-else>
       <!-- ── Active list ── -->
       <div v-if="!showArchive">
-        <div v-if="!filteredItems.length" class="empty-section page-enter" :style="{ '--stagger': 3 }">
+        <div v-if="!hasVisibleActiveItems" class="empty-section page-enter" :style="{ '--stagger': 3 }">
           <EmptyState v-if="!shoppingStore.items.filter(i => i.status !== 'bought').length" title="Shopping list is empty" subtitle="Add items you need to pick up." icon="empty" action-label="Add item" @action="openCreateDrawer" />
           <EmptyState v-else title="No matches" subtitle="Try adjusting your filters." icon="search" />
         </div>
@@ -319,12 +356,13 @@ onMounted(async () => {
             <span class="shop-table__th shop-table__th--center">Assignee</span>
             <span class="shop-table__th shop-table__th--right">Actions</span>
           </div>
-          <div v-for="item in filteredItems" :key="item.id" class="shop-entry">
-            <div
-              class="shop-row"
-              :class="{ 'shop-row--m-expanded': mobileExpandedId === item.id }"
-              @click="handleRowClick(item.id, () => openEditDrawer(item))"
-            >
+          <TransitionGroup name="shopping-item">
+            <div v-for="item in filteredItems" :key="item.id" class="shop-entry">
+              <div
+                class="shop-row"
+                :class="{ 'shop-row--m-expanded': mobileExpandedId === item.id }"
+                @click="handleRowClick(item.id, () => openEditDrawer(item))"
+              >
               <div class="shop-row__name">
                 <span class="shop-row__name-text">{{ item.name }}</span>
                 <span v-if="item.category" class="shop-row__category-tag">{{ item.category }}</span>
@@ -341,28 +379,36 @@ onMounted(async () => {
                 </div>
               </div>
               <div class="shop-row__actions" @click.stop>
-                <button class="shop-row__action-btn shop-row__action-btn--done" :aria-label="'Mark ' + item.name + ' done'" @click="handleMarkDone(item.id)">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <button
+                  class="shop-row__action-btn shop-row__action-btn--done"
+                  :class="{ 'shop-row__action-btn--pending': isCompleting(item.id) }"
+                  :aria-label="isCompleting(item.id) ? `Adding ${item.name} to inventory` : `Mark ${item.name} bought and add to inventory`"
+                  :disabled="isCompleting(item.id)"
+                  @click="handleMarkDone(item.id)"
+                >
+                  <span v-if="isCompleting(item.id)" class="material-symbols-rounded" aria-hidden="true">progress_activity</span>
+                  <svg v-else width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                 </button>
                 <button class="shop-row__action-btn shop-row__action-btn--delete" :aria-label="'Remove ' + item.name" @click="confirmDelete(item.id)">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
                 </button>
               </div>
               <span class="shop-row__chevron material-symbols-rounded">expand_more</span>
-            </div>
-            <div class="m-detail" :class="{ 'm-detail--open': mobileExpandedId === item.id }">
-              <div class="m-detail__inner">
-                <div class="m-detail__body">
-                  <SBadge v-if="item.priority !== 'medium'" :variant="priorityVariant(item.priority)" size="sm">{{ item.priority }}</SBadge>
-                  <span class="m-detail__chip">Qty: {{ item.quantity }}<template v-if="item.unit"> {{ item.unit }}</template></span>
-                  <span v-if="getMemberName(item.assigned_to)" class="m-detail__chip">{{ getMemberName(item.assigned_to) }}</span>
-                  <button class="m-detail__edit" @click.stop="openEditDrawer(item)">
-                    <span class="material-symbols-rounded">edit</span>
-                  </button>
+              </div>
+              <div class="m-detail" :class="{ 'm-detail--open': mobileExpandedId === item.id }">
+                <div class="m-detail__inner">
+                  <div class="m-detail__body">
+                    <SBadge v-if="item.priority !== 'medium'" :variant="priorityVariant(item.priority)" size="sm">{{ item.priority }}</SBadge>
+                    <span class="m-detail__chip">Qty: {{ item.quantity }}<template v-if="item.unit"> {{ item.unit }}</template></span>
+                    <span v-if="getMemberName(item.assigned_to)" class="m-detail__chip">{{ getMemberName(item.assigned_to) }}</span>
+                    <button class="m-detail__edit" @click.stop="openEditDrawer(item)">
+                      <span class="material-symbols-rounded">edit</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </TransitionGroup>
         </div>
 
       </div>
@@ -540,6 +586,19 @@ onMounted(async () => {
 }
 .shop-entry:last-child { border-bottom: none; }
 
+.shopping-item-move,
+.shopping-item-leave-active {
+  pointer-events: none;
+  transition:
+    opacity var(--duration-normal) var(--easing-out),
+    transform var(--duration-normal) var(--easing-out);
+}
+
+.shopping-item-leave-to {
+  opacity: 0;
+  transform: translateX(8px);
+}
+
 .shop-row {
   display: grid;
   grid-template-columns: 1fr 80px 60px 72px 80px;
@@ -645,6 +704,30 @@ onMounted(async () => {
   background: color-mix(in srgb, var(--color-success) 12%, transparent);
   border-color: color-mix(in srgb, var(--color-success) 28%, transparent);
   color: var(--color-success);
+}
+
+.shop-row__action-btn:disabled {
+  cursor: wait;
+}
+
+.shop-row__action-btn--pending {
+  color: var(--color-success);
+  background: color-mix(in srgb, var(--color-success) 10%, transparent);
+}
+
+.shop-row__action-btn--pending .material-symbols-rounded {
+  font-size: 16px;
+  animation: shopping-progress-spin 700ms linear infinite;
+}
+
+@keyframes shopping-progress-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shop-row__action-btn--pending .material-symbols-rounded {
+    animation: none;
+  }
 }
 
 .shop-row__action-btn--delete:hover {
