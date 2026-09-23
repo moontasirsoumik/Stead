@@ -20,7 +20,7 @@ async function handleSubmit() {
   if (!agreedToTerms.value) return
   const success = await signUp(email.value, password.value, name.value)
   if (success) {
-    router.push('/onboarding')
+    router.push({ name: 'login', query: { checkEmail: '1' } })
   }
 }
 </script>
