@@ -1,0 +1,2 @@
+import{I as a}from"./vue-l_Jza4jL.js";import{u as d}from"./index-_xioOHyz.js";function m(){const s=d(),{user:e,session:o,householdId:t,memberId:r,loading:n,error:u,isAuthenticated:i,hasHousehold:h}=a(s);return{user:e,session:o,householdId:t,memberId:r,loading:n,error:u,isAuthenticated:i,hasHousehold:h,signIn:s.signIn,signUp:s.signUp,signOut:s.signOut,createHousehold:s.createHousehold}}export{m as u};
+//# sourceMappingURL=useAuth-CEBb5b2_.js.map

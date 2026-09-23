@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { inventoryDataService } from '@/services/data/inventory.data'
 import type { InventoryItem } from '@/models/inventory.model'
+import type { GroceryItem } from '@/models/grocery.model'
 
 export const useInventoryStore = defineStore('inventory', () => {
   const items = ref<InventoryItem[]>([])
@@ -61,6 +62,41 @@ export const useInventoryStore = defineStore('inventory', () => {
     }
   }
 
+  async function recordPurchase(
+    purchase: Pick<GroceryItem, 'name' | 'category'>,
+    householdId: string,
+    checkedOn = new Date().toISOString().slice(0, 10),
+  ) {
+    const normalizedName = purchase.name.trim().toLocaleLowerCase()
+    const existingItem = items.value.find(
+      (item) =>
+        item.household_id === householdId &&
+        !item.deleted &&
+        item.name.trim().toLocaleLowerCase() === normalizedName,
+    )
+
+    if (existingItem) {
+      return update(existingItem.id, {
+        stock_status: 'enough',
+        restock_needed: false,
+        last_checked_date: checkedOn,
+      })
+    }
+
+    return create({
+      name: purchase.name.trim(),
+      category: purchase.category,
+      location: null,
+      stock_status: 'enough',
+      target_level: 'keep_1',
+      restock_needed: false,
+      last_checked_date: checkedOn,
+      note: null,
+      household_id: householdId,
+      deleted: false,
+    })
+  }
+
   const lowStockItems = computed(() =>
     items.value.filter((i) =>
       i.stock_status === 'out' || i.stock_status === 'almost_finished' || i.stock_status === 'low',
@@ -99,6 +135,7 @@ export const useInventoryStore = defineStore('inventory', () => {
     create,
     update,
     remove,
+    recordPurchase,
     lowStockItems,
     restockNeeded,
     groupedByCategory,
